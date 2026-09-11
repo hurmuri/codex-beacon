@@ -12,6 +12,20 @@ Codex Beacon is a native, light-theme WinUI 3 control center for inspecting and 
 
 Version `0.2.0` supports English and Simplified Chinese. It follows the Windows display language by default, and the language can be changed under Settings. The Codex desktop app and CLI are core features; OpenCodex Proxy and Codex Relay are independent optional modules. Installing an extension never changes the active Codex provider automatically.
 
+## About
+
+Codex Beacon is an open-source system manager designed specifically for developers using OpenAI Codex on Windows. As the local AI development toolchain expands, developers frequently coordinate multiple distinct services: the official Codex desktop client (`OpenAI.Codex`), CLI utilities, community proxy bridges like OpenCodex, mobile relay tunnels, specific Node.js versions, and Tailscale virtual private networks.
+
+Before Codex Beacon, monitoring and managing these components required juggling Task Manager, multiple PowerShell windows, npm CLI commands, and configuration files. Codex Beacon solves this by bringing everything together into a cohesive, Windows-native desktop application.
+
+### Key Highlights
+
+- **Windows Native & Modern**: Crafted exclusively with WinUI 3, Windows App SDK 1.8, and Fluent Design System guidelines. Lightweight, clean, high-contrast light theme without web-wrapper overhead.
+- **Privacy & Zero-Credential Philosophy**: Strictly collects runtime metrics, process hierarchies, and network topologies without ever reading, storing, or transmitting sensitive credentials, API keys, tokens, or session payloads.
+- **State-Driven Workflow**: Every action (install, sign in, start, stop, restart, upgrade) is strictly bounded by component status—preventing accidental duplicate instances or broken configurations.
+- **Modular & Non-Intrusive**: Codex desktop and CLI are core; OpenCodex and Codex Relay are purely optional extensions. Missing extensions never degrade core system status.
+- **Bilingual & Instant Switching**: Seamlessly supports English and Simplified Chinese with instant, in-app UI switching without requiring process restarts.
+
 ## Upstream projects
 
 - [Codex CLI · openai/codex](https://github.com/openai/codex)

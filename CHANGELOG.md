@@ -4,6 +4,18 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-09-11
+
+### Added
+
+- Standard open-source "About" sections with project motivation and architectural highlights in English and Chinese READMEs.
+- Strict verification rules in `AGENTS.md` requiring local packaging and live desktop execution before pushing or releasing.
+
+### Fixed
+
+- Unpackaged WinUI 3 launch crash caused by `ApplicationLanguages.PrimaryLanguageOverride` requiring package identity.
+- Missing `resources.pri` in published output by adding automated MSBuild post-publish copy targets.
+
 ## [0.2.0] - 2026-09-11
 
 ### Added
@@ -32,7 +44,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Evidence-based provider route, public egress, remote connection, and inactive endpoint views.
 - iOS AppIcon asset catalog and Windows application icon derived from one master artwork.
 
-[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/hurmuri/codex-beacon/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/hurmuri/codex-beacon/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/hurmuri/codex-beacon/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/hurmuri/codex-beacon/releases/tag/v0.1.0

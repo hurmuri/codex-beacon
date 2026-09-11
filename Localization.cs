@@ -14,15 +14,21 @@ public static class Localization
     public static void Initialize()
     {
         CurrentLanguage = ReadSavedLanguage();
-        ApplicationLanguages.PrimaryLanguageOverride = CurrentLanguage == SystemLanguage ? "" : CurrentLanguage;
-        _loader = new ResourceLoader();
+        try
+        {
+            _loader = new ResourceLoader();
+        }
+        catch { }
     }
 
     public static void ApplyLanguage(string language)
     {
         CurrentLanguage = language is "en-US" or "zh-CN" ? language : SystemLanguage;
-        ApplicationLanguages.PrimaryLanguageOverride = CurrentLanguage == SystemLanguage ? "" : CurrentLanguage;
-        _loader = new ResourceLoader();
+        try
+        {
+            _loader = new ResourceLoader();
+        }
+        catch { }
     }
 
     public static string Get(string key)

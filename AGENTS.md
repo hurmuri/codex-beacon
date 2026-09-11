@@ -21,14 +21,17 @@ Codex Beacon is a Windows-only WinUI 3 application. Keep platform integration in
 - Process termination must use an explicit allowlist and must exclude Codex Beacon, the Codex desktop app, and unrelated Node.js processes.
 - External installers and login flows must use their official channel and remain visible to the user.
 
-## Verification
+## Verification & Release Rules
 
-Run before proposing a change:
+Before pushing to GitHub or publishing a release, complete local packaging and execution checks:
 
-```powershell
-dotnet build .\CodexBeacon.csproj -c Release
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Collect-CodexStatus.ps1 -IncludeLatest
-```
-
-For UI changes, launch the application and verify every navigation page at the default 1320 × 860 window size.
-
+1. Build and package locally:
+   ```powershell
+   dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -o .\publish\portable-win-x64
+   ```
+2. Run diagnostics:
+   ```powershell
+   powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Collect-CodexStatus.ps1 -IncludeLatest
+   ```
+3. Local launch test:
+   Launch `.\publish\portable-win-x64\CodexBeacon.exe` on the local desktop. Confirm the process starts, the window renders without crashing, and no exceptions exist in `%LOCALAPPDATA%\CodexBeacon\crash.log`. Never push or release without a verified local run.
