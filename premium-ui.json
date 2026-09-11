@@ -1,0 +1,14 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["."],
+  "locale": "zh-CN",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Toast"],
+  "ownership": {
+    "Toast": "authored"
+  },
+  "requiredCommands": ["build"],
+  "commands": {
+    "build": "dotnet build CodexBeacon.csproj -c Release"
+  }
+}

@@ -1,0 +1,34 @@
+name: Bug report
+description: Report a reproducible Codex Beacon problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never include tokens, cookies, authorization headers, or unredacted configuration files.
+  - type: input
+    id: version
+    attributes:
+      label: Codex Beacon revision or release
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version, architecture, Node.js/npm/NVM versions, and affected service.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+

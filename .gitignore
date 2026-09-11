@@ -1,0 +1,11 @@
+bin/
+obj/
+publish/
+artifacts/
+.tmp/
+.vs/
+.idea/
+*.user
+*.suo
+status-sample.json
+premium-audit.json
