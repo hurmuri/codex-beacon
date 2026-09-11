@@ -3,43 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Codex Beacon · Windows 原生 OpenAI Codex 智能管控中枢</title>
-  <meta name="description" content="专为 Windows 打造的 OpenAI Codex 原生 WinUI 3 管控中心。双层管线解耦、真实公网出口判定、白名单进程仲裁与便携即用。">
+  <title>Codex Beacon · Windows 上的 OpenAI Codex 原生管控中心</title>
+  <meta name="description" content="Windows 上的 OpenAI Codex 原生 WinUI 3 管控中心。统一管理 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
-      --bg-void: #03060c;
-      --bg-surface: #070c18;
-      --bg-card: rgba(12, 18, 32, 0.72);
-      --bg-card-hover: rgba(18, 28, 48, 0.88);
-      --bg-glass: rgba(10, 16, 28, 0.85);
-      
-      --border-subtle: rgba(255, 255, 255, 0.07);
-      --border-glow: rgba(0, 240, 255, 0.4);
+      --bg: #090d16;
+      --bg-surface: #0e1526;
+      --border: rgba(255, 255, 255, 0.1);
+      --border-focus: rgba(0, 240, 255, 0.4);
       
       --cyan: #00f0ff;
-      --cyan-bright: #38bdf8;
-      --blue: #4d6bfe;
-      --emerald: #10b981;
+      --blue: #3b82f6;
+      --green: #10b981;
       --amber: #f59e0b;
-      --purple: #a855f7;
       
-      --text-main: #f8fafc;
-      --text-dim: #94a3b8;
-      --text-muted: #64748b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
       
-      --font-display: 'Space Grotesk', -apple-system, sans-serif;
-      --font-sans: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', monospace;
-      
-      --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
@@ -50,1098 +41,1264 @@
 
     html {
       scroll-behavior: smooth;
-      background-color: var(--bg-void);
-      color: var(--text-main);
+      background: var(--bg);
+      color: var(--text);
       font-family: var(--font-sans);
-      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     body {
       min-height: 100vh;
       background: 
-        radial-gradient(circle at 50% 0%, #0d1a33 0%, #060a14 50%, var(--bg-void) 100%);
-      position: relative;
-    }
-
-    /* Ambient Matrix Grid */
-    .cyber-grid {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-      background-size: 50px 50px;
-      background-image: 
-        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-      mask-image: radial-gradient(ellipse 85% 65% at 50% 20%, black 20%, transparent 85%);
-      -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 20%, black 20%, transparent 85%);
-    }
-
-    /* Glowing Laser Flares in Background */
-    .laser-glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.35;
-      animation: driftGlow 14s infinite alternate ease-in-out;
-    }
-
-    .glow-cyan {
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, rgba(0, 240, 255, 0.4) 0%, transparent 70%);
-      top: -180px;
-      left: 15%;
-    }
-
-    .glow-blue {
-      width: 750px;
-      height: 750px;
-      background: radial-gradient(circle, rgba(77, 107, 254, 0.35) 0%, transparent 70%);
-      top: 300px;
-      right: 10%;
-      animation-delay: -7s;
-    }
-
-    @keyframes driftGlow {
-      0% { transform: scale(0.95) translate(0, 0); opacity: 0.25; }
-      100% { transform: scale(1.15) translate(30px, -25px); opacity: 0.45; }
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(30, 58, 138, 0.35), transparent 70%),
+        var(--bg);
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1140px;
       margin: 0 auto;
       padding: 0 24px;
-      position: relative;
-      z-index: 10;
     }
 
-    /* FLOATING GLASS HEADER */
-    .header-bar {
-      position: fixed;
-      top: 20px;
-      left: 0;
-      width: 100%;
+    /* TOP NAVBAR */
+    .top-nav {
       display: flex;
-      justify-content: center;
-      z-index: 1000;
-      padding: 0 16px;
-    }
-
-    .header-pill {
-      display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 28px;
-      padding: 8px 18px;
-      background: var(--bg-glass);
-      backdrop-filter: blur(20px) saturate(180%);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 9999px;
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-      transition: border-color 0.3s;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .header-pill:hover {
-      border-color: rgba(0, 240, 255, 0.4);
-    }
-
-    .brand-logo {
+    .brand {
       display: flex;
       align-items: center;
       gap: 10px;
       text-decoration: none;
       color: #fff;
       font-weight: 700;
-      font-size: 0.95rem;
-      font-family: var(--font-display);
+      font-size: 1.05rem;
     }
 
-    .brand-logo img {
+    .brand img {
       width: 24px;
       height: 24px;
       border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
     }
 
-    .nav-menu {
-      display: flex;
-      gap: 20px;
-      list-style: none;
-    }
-
-    .nav-menu a {
-      color: var(--text-dim);
-      text-decoration: none;
-      font-size: 0.84rem;
-      font-weight: 600;
-      transition: color 0.2s;
-    }
-
-    .nav-menu a:hover {
-      color: var(--cyan);
-    }
-
-    .header-actions {
+    .nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .lang-switcher {
-      display: flex;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 9999px;
-      padding: 2px;
+      gap: 16px;
     }
 
     .lang-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-dim);
-      font-size: 0.75rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .lang-btn.active {
-      color: #03060c;
-      background: var(--cyan);
-      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    .lang-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
     }
 
-    .btn-github {
-      display: flex;
+    .btn-gh {
+      display: inline-flex;
       align-items: center;
       gap: 6px;
       background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
       color: #fff;
-      text-decoration: none;
       font-size: 0.82rem;
       font-weight: 600;
       padding: 6px 14px;
-      border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      text-decoration: none;
       transition: all 0.2s;
     }
 
-    .btn-github:hover {
+    .btn-gh:hover {
       background: rgba(255, 255, 255, 0.15);
       border-color: rgba(255, 255, 255, 0.3);
     }
 
     /* HERO */
     .hero {
-      padding-top: 150px;
-      padding-bottom: 60px;
+      padding: 70px 0 40px 0;
       text-align: center;
     }
 
-    .hero-tag {
+    .hero-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 16px;
+      padding: 4px 12px;
       background: rgba(0, 240, 255, 0.08);
-      border: 1px solid rgba(0, 240, 255, 0.3);
+      border: 1px solid rgba(0, 240, 255, 0.25);
       border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
       color: var(--cyan);
+      font-size: 0.78rem;
       font-family: var(--font-mono);
-      margin-bottom: 22px;
-      box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+      font-weight: 600;
+      margin-bottom: 20px;
     }
 
-    .pulse-dot {
-      width: 7px;
-      height: 7px;
+    .pill-dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
-      animation: pulse 2s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(0.8); }
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
     }
 
     .hero-h1 {
-      font-family: var(--font-display);
-      font-size: clamp(2.6rem, 5.2vw, 4.6rem);
-      font-weight: 800;
-      line-height: 1.1;
-      letter-spacing: -0.035em;
-      margin-bottom: 18px;
-      color: #fff;
-    }
-
-    .hero-grad {
-      background: linear-gradient(135deg, #ffffff 30%, #7dd3fc 70%, #4d6bfe 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .hero-p {
-      max-width: 760px;
-      margin: 0 auto 36px auto;
-      font-size: clamp(1.05rem, 1.5vw, 1.2rem);
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-
-    .hero-cta {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
-    }
-
-    .btn-action-glow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, #00f0ff, #4d6bfe);
-      color: #03060c;
-      font-weight: 700;
-      font-size: 0.98rem;
-      padding: 14px 30px;
-      border-radius: 9999px;
-      text-decoration: none;
-      box-shadow: 0 10px 30px rgba(0, 240, 255, 0.4), inset 0 1px 1px #fff;
-      transition: all 0.25s var(--ease-expo);
-    }
-
-    .btn-action-glow:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 40px rgba(0, 240, 255, 0.6);
-    }
-
-    .btn-action-hollow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      color: #fff;
-      font-weight: 600;
-      font-size: 0.98rem;
-      padding: 14px 26px;
-      border-radius: 9999px;
-      text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      transition: all 0.25s var(--ease-expo);
-    }
-
-    .btn-action-hollow:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* TELEMETRY HUD BAR */
-    .telemetry-hud {
-      display: inline-flex;
-      align-items: center;
-      gap: 20px;
-      padding: 10px 24px;
-      background: rgba(12, 18, 32, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--text-dim);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-      flex-wrap: wrap;
-      justify-content: center;
-      margin-bottom: 48px;
-    }
-
-    .hud-unit {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .green-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--emerald);
-      box-shadow: 0 0 8px var(--emerald);
-    }
-
-    /* HARDWARE APP WINDOW MOCKUP */
-    .app-screen-frame {
-      background: rgba(14, 21, 37, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 240, 255, 0.12);
-      backdrop-filter: blur(20px);
-      margin-bottom: 90px;
-      position: relative;
-    }
-
-    .screen-header {
-      padding: 12px 20px;
-      background: #090e1a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .window-dots {
-      display: flex;
-      gap: 6px;
-    }
-
-    .w-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .w-red { background: #ff5f56; }
-    .w-yellow { background: #ffbd2e; }
-    .w-green { background: #27c93f; }
-
-    .screen-body img {
-      width: 100%;
-      height: auto;
-      display: block;
-      transition: transform 0.6s ease;
-    }
-
-    /* BENTO GRID WITH DYNAMIC SPOTLIGHT GLOW (焦点光斑动效) */
-    .bento-section {
-      padding: 20px 0 100px 0;
-    }
-
-    .section-head {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--cyan);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .section-title {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
       font-weight: 800;
       letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 16px;
       color: #fff;
     }
 
-    .bento-container {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 20px;
-    }
-
-    .b-card {
-      position: relative;
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: 20px;
-      padding: 30px;
-      overflow: hidden;
-      backdrop-filter: blur(16px);
-      transition: transform 0.3s var(--ease-expo), box-shadow 0.3s ease;
-    }
-
-    .b-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
-    }
-
-    /* Interactive Cursor Spotlight Mask */
-    .b-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 20px;
-      padding: 1px;
-      background: radial-gradient(
-        350px circle at var(--mouse-x, 0) var(--mouse-y, 0),
-        rgba(0, 240, 255, 0.6),
-        rgba(77, 107, 254, 0.2) 40%,
-        transparent 80%
-      );
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .b-card:hover::after {
-      opacity: 1;
-    }
-
-    .span-8 { grid-column: span 8; }
-    .span-4 { grid-column: span 4; }
-    .span-6 { grid-column: span 6; }
-    .span-12 { grid-column: span 12; }
-
-    @media (max-width: 900px) {
-      .span-8, .span-4, .span-6 {
-        grid-column: span 12;
-      }
-    }
-
-    .b-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      margin-bottom: 18px;
-    }
-
-    .b-title {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 8px;
-    }
-
-    .b-desc {
-      color: var(--text-dim);
-      font-size: 0.88rem;
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 32px auto;
       line-height: 1.55;
-      margin-bottom: 20px;
     }
 
-    /* CARD 1: DUAL PIPELINE VISUAL */
-    .pipeline-route-box {
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 16px;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-    }
-
-    .route-row {
+    .hero-actions {
       display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-
-    .route-row:last-child {
-      margin-bottom: 0;
-    }
-
-    .route-tag {
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-    }
-    .tag-model { background: rgba(0, 240, 255, 0.15); color: var(--cyan); border: 1px solid var(--cyan); }
-    .tag-net { background: rgba(16, 185, 129, 0.15); color: var(--emerald); border: 1px solid var(--emerald); }
-
-    /* CARD 2: RESIDENTIAL RADAR */
-    .radar-list {
-      display: flex;
-      flex-direction: column;
       gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-
-    .radar-unit {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      cursor: pointer;
+      background: #fff;
+      color: #090d16;
+      font-weight: 700;
+      font-size: 0.92rem;
+      padding: 11px 22px;
+      border-radius: 8px;
+      text-decoration: none;
       transition: all 0.2s;
     }
 
-    .radar-unit.active {
-      border-color: var(--emerald);
-      background: rgba(16, 185, 129, 0.08);
+    .btn-primary:hover {
+      background: #e2e8f0;
+      transform: translateY(-1px);
     }
 
-    .badge-res {
-      background: rgba(16, 185, 129, 0.15);
-      border: 1px solid var(--emerald);
-      color: var(--emerald);
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    .badge-idc {
-      background: rgba(245, 158, 11, 0.15);
-      border: 1px solid var(--amber);
-      color: var(--amber);
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 4px;
-    }
-
-    /* CARD 3: WHITELIST PROCESSES */
-    .whitelist-box {
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 12px;
-      font-family: var(--font-mono);
-      font-size: 0.78rem;
-    }
-
-    .wl-item {
-      display: flex;
-      justify-content: space-between;
+    .btn-ghost {
+      display: inline-flex;
       align-items: center;
-      padding: 6px 10px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    }
-    .wl-item:last-child { border-bottom: none; }
-
-    /* CARD 4: MASKED KEY VAULT */
-    .vault-box {
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 12px;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-
-    .masked-key {
-      color: var(--cyan);
-      letter-spacing: 0.15em;
-    }
-
-    /* CARD 5: RUNTIME NVM */
-    .node-chips {
-      display: flex;
-      gap: 10px;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      flex-wrap: wrap;
-    }
-
-    .node-chip {
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 6px 12px;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.92rem;
+      padding: 11px 20px;
       border-radius: 8px;
-      color: var(--text-dim);
-    }
-    .node-chip.active {
-      border-color: var(--cyan);
-      color: var(--cyan);
-      background: rgba(0, 240, 255, 0.08);
+      text-decoration: none;
+      transition: all 0.2s;
     }
 
-    /* QUICK RUN TERMINAL */
-    .terminal-section {
-      max-width: 860px;
-      margin: 0 auto 100px auto;
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    /* THE NATIVE APP INTERACTIVE WINDOW (100% HTML/CSS) */
+    .app-showcase-wrap {
+      margin-bottom: 80px;
+    }
+
+    .app-hint {
       text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-faint);
+      margin-bottom: 12px;
+      font-family: var(--font-mono);
     }
 
-    .term-window {
-      background: #040710;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 16px;
+    .app-window {
+      background: #f3f6f9;
+      color: #1a202c;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 240, 255, 0.1);
       overflow: hidden;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 240, 255, 0.1);
-      font-family: var(--font-mono);
+      display: flex;
+      flex-direction: column;
+      height: 640px;
       text-align: left;
     }
 
-    .term-bar {
-      background: #090e1a;
-      padding: 12px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .term-content {
-      padding: 24px;
-    }
-
-    .cmd-box {
+    /* Windows 11 Fluent Titlebar */
+    .win-titlebar {
+      height: 38px;
+      background: #ffffff;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 12px 18px;
-      margin-bottom: 20px;
-      color: var(--cyan);
-      font-size: 0.9rem;
-      gap: 16px;
-      flex-wrap: wrap;
-    }
-
-    .btn-copy {
-      background: rgba(0, 240, 255, 0.15);
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      padding: 6px 14px;
-      border-radius: 8px;
-      font-family: var(--font-mono);
+      padding: 0 14px;
       font-size: 0.75rem;
       font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
+      letter-spacing: 0.05em;
+      color: #334155;
+      user-select: none;
     }
 
-    .btn-copy:hover {
-      background: var(--cyan);
-      color: #03060c;
+    .win-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .term-specs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .win-title img {
+      width: 14px;
+      height: 14px;
+    }
+
+    .win-controls {
+      display: flex;
       gap: 16px;
+      color: #64748b;
+      font-size: 0.85rem;
     }
 
-    @media (max-width: 680px) {
-      .term-specs {
+    /* App Workspace Split */
+    .win-workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    /* Left Sidebar */
+    .win-sidebar {
+      width: 48px;
+      background: #ffffff;
+      border-right: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 0;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .side-icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .side-icon-btn:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .side-icon-btn.active {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .side-icon-btn.active::before {
+      content: '';
+      position: absolute;
+      left: -6px;
+      width: 3px;
+      height: 16px;
+      background: #0284c7;
+      border-radius: 2px;
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+    }
+
+    /* Main View Area */
+    .win-main {
+      flex: 1;
+      padding: 24px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .view-h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 4px;
+    }
+
+    .view-sub {
+      font-size: 0.82rem;
+      color: #64748b;
+    }
+
+    .view-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    .btn-refresh {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      color: #334155;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-refresh:hover {
+      background: #f8fafc;
+    }
+
+    /* Top Summary Bar */
+    .summary-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .summary-col {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .summary-label {
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+
+    .summary-val {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .btn-outline-sm {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+    }
+
+    .section-label {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 14px;
+    }
+
+    /* 2 Core Cards Grid */
+    .app-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 768px) {
+      .app-cards-grid {
         grid-template-columns: 1fr;
       }
     }
 
-    .spec-item {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+    .app-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .badge-ok {
+      background: #dcfce7;
+      color: #15803d;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    .card-meta {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .card-meta b {
+      color: #0f172a;
+    }
+
+    .card-status-line {
+      font-size: 0.8rem;
+      color: #0284c7;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    .card-btn-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .card-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #94a3b8;
+    }
+
+    .card-btn.enabled {
+      background: #ffffff;
+      border-color: #0f172a;
+      color: #0f172a;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-btn.primary {
+      background: #0f172a;
+      border-color: #0f172a;
+      color: #ffffff;
+    }
+
+    /* Bottom Status Bar */
+    .win-statusbar {
+      height: 28px;
+      background: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 0.72rem;
+      color: #64748b;
+    }
+
+    /* 4 REAL FEATURES LIST (NO PILLARS, NO ESSAYS) */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-bottom: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: left;
+    }
+
+    .f-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .f-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* QUICK RUN & INSTALL */
+    .install-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 32px;
+      margin-bottom: 80px;
+      text-align: left;
+    }
+
+    .install-box h3 {
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .install-box p {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+    }
+
+    .code-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #04070e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
-      padding: 12px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--cyan);
+      margin-bottom: 24px;
+      gap: 16px;
+    }
+
+    .btn-copy-code {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-copy-code:hover {
+      background: #fff;
+      color: #04070e;
+    }
+
+    .download-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) {
+      .download-options {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dl-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
       text-decoration: none;
       color: inherit;
       transition: all 0.2s;
     }
 
-    .spec-item:hover {
+    .dl-item:hover {
       border-color: var(--cyan);
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .spec-item h5 {
+    .dl-item h4 {
       color: #fff;
-      font-size: 0.88rem;
-      margin-bottom: 2px;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
     }
 
-    .spec-item p {
-      color: var(--text-muted);
-      font-size: 0.72rem;
+    .dl-item span {
+      color: var(--text-faint);
+      font-size: 0.78rem;
     }
 
     /* FOOTER */
     .footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 40px 0;
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
       text-align: center;
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.82rem;
+      color: var(--text-faint);
     }
   </style>
 </head>
 <body>
 
-  <div class="cyber-grid"></div>
-  <div class="laser-glow glow-cyan"></div>
-  <div class="laser-glow glow-blue"></div>
-
-  <!-- FLOATING HEADER -->
-  <header class="header-bar">
-    <nav class="header-pill">
-      <a href="#" class="brand-logo">
+  <div class="container">
+    
+    <!-- NAVBAR -->
+    <nav class="top-nav">
+      <a href="#" class="brand">
         <img src="assets/app-icon.png" alt="Codex Beacon">
         <span>Codex Beacon</span>
       </a>
 
-      <ul class="nav-menu">
-        <li><a href="#matrix" data-i18n="nav.matrix">核心矩阵</a></li>
-        <li><a href="#launch" data-i18n="nav.launch">一键启动</a></li>
-        <li><a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener">GitHub</a></li>
-      </ul>
-
-      <div class="header-actions">
-        <div class="lang-switcher">
-          <button class="lang-btn active" id="btnZh" onclick="setLang('zh-CN')">中</button>
-          <button class="lang-btn" id="btnEn" onclick="setLang('en-US')">EN</button>
-        </div>
-
-        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-github">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-          </svg>
+      <div class="nav-actions">
+        <a href="#install" class="btn-gh" data-i18n="nav.download">下载</a>
+        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-gh">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
           <span>Star</span>
         </a>
+        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
       </div>
     </nav>
-  </header>
 
-  <!-- HERO SECTION -->
-  <section class="hero">
-    <div class="container">
-      
-      <div class="hero-tag">
-        <div class="pulse-dot"></div>
-        <span data-i18n="h.badge">v1.1.0 · 专为 Windows 打造的 OpenAI Codex 原生管控中枢</span>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-pill">
+        <div class="pill-dot"></div>
+        <span data-i18n="h.pill">v1.1.0 · WinUI 3 原生 Windows 控制台</span>
       </div>
 
-      <h1 class="hero-h1">
-        <span class="hero-grad" data-i18n="h.titleGrad">掌控 Codex 全生态</span><br>
-        <span data-i18n="h.titleSub">WinUI 3 原生 · 双层拓扑 · 出口防封判定</span>
-      </h1>
-
-      <p class="hero-p" data-i18n="h.desc">
-        统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 隧道与 Tailscale。看清每一条请求流向，彻底告别 403 阻断。
+      <h1 class="hero-h1" data-i18n="h.title">Windows 上的 OpenAI Codex 原生管控中心</h1>
+      <p class="hero-desc" data-i18n="h.desc">
+        统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。毫秒启动，双层管线，公网出口防封判定。
       </p>
 
-      <div class="hero-cta">
-        <a href="#launch" class="btn-action-glow" data-i18n="h.btnDownload">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>获取免安装便携版 (.zip)</span>
+      <div class="hero-actions">
+        <a href="#install" class="btn-primary" data-i18n="h.btnDownload">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>下载便携版 (Portable)</span>
         </a>
-        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-action-hollow">
-          <span>GitHub 开源项目</span>
+        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-ghost">
+          <span>GitHub 仓库</span>
         </a>
       </div>
+    </section>
 
-      <!-- LIVE TELEMETRY HUD BAR -->
-      <div class="telemetry-hud">
-        <div class="hud-unit">
-          <div class="green-dot"></div>
-          <span>DAEMON: ACTIVE</span>
-        </div>
-        <div class="hud-unit">
-          <span style="color:var(--text-muted)">RUNTIME:</span>
-          <span style="color:#fff">.NET 10 + WinUI 3</span>
-        </div>
-        <div class="hud-unit">
-          <span style="color:var(--text-muted)">COLD BOOT:</span>
-          <span style="color:var(--cyan)">&lt; 180ms</span>
-        </div>
-        <div class="hud-unit">
-          <span style="color:var(--text-muted)">MEMORY:</span>
-          <span style="color:var(--emerald)">~35 MB</span>
-        </div>
-      </div>
+    <!-- INTERACTIVE NATIVE APP WORKSPACE -->
+    <div class="app-showcase-wrap">
+      <div class="app-hint" data-i18n="app.hint">💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能</div>
 
-      <!-- HARDWARE FRAME MOCKUP -->
-      <div class="app-screen-frame">
-        <div class="screen-header">
-          <div class="window-dots">
-            <div class="w-dot w-red"></div>
-            <div class="w-dot w-yellow"></div>
-            <div class="w-dot w-green"></div>
+      <div class="app-window">
+        <!-- Window Titlebar -->
+        <div class="win-titlebar">
+          <div class="win-title">
+            <img src="assets/app-icon.png" alt="Icon">
+            <span>CODEX BEACON</span>
           </div>
-          <span>CodexBeacon.exe · WinUI 3 Fluent Desktop Environment</span>
-          <span style="color:var(--cyan)">● 120 FPS</span>
+          <div class="win-controls">
+            <span>—</span>
+            <span>□</span>
+            <span>✕</span>
+          </div>
         </div>
-        <div class="screen-body">
-          <img src="assets/desktop-screenshot.png" alt="Codex Beacon UI">
-        </div>
-      </div>
 
-    </div>
-  </section>
+        <!-- Main Body -->
+        <div class="win-workspace">
+          <!-- Left Navigation Rail -->
+          <div class="win-sidebar">
+            <button class="side-icon-btn" title="Menu">☰</button>
+            <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex 总览">🏠</button>
+            <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="依赖管理">📥</button>
+            <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="进程管控">📊</button>
+            <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="网络与出口">🌐</button>
+            <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers">{ }</button>
+            <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex">⚡</button>
+            <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale">🔗</button>
+            <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="设置">⚙️</button>
+          </div>
 
-  <!-- BENTO MATRIX (HIGH-TECH, SPOTLIGHT FOCUS, CONCISE) -->
-  <section id="matrix" class="bento-section">
-    <div class="container">
-      <div class="section-head">
-        <div class="section-eyebrow" data-i18n="b.eyebrow">CORE ARCHITECTURE</div>
-        <h2 class="section-title" data-i18n="b.title">五大核心技术矩阵</h2>
-      </div>
-
-      <div class="bento-container">
-        
-        <!-- CARD 1: DUAL-LAYER PIPELINE (span 8) -->
-        <div class="b-card span-8">
-          <div class="b-icon">⚡</div>
-          <h3 class="b-title" data-i18n="b.c1Title">双层管线解耦：彻底弄清数据流向</h3>
-          <p class="b-desc" data-i18n="b.c1Desc">
-            解耦“模型逻辑路由”与“物理传输网关”。一眼看清当前 AI 请求是直连 OpenAI 官方、走 OpenCodex 分流，还是被系统代理或 Tailscale 转发。
-          </p>
-          <div class="pipeline-route-box">
-            <div class="route-row">
-              <span style="color:#fff">1. 模型逻辑层 (Model Plane)</span>
-              <span class="route-tag tag-model">OpenCodex Mux (:10100) -> DeepSeek / Claude</span>
+          <!-- Dynamic Page Container -->
+          <div class="win-main" id="appMainContent">
+            
+            <!-- Default: Codex 总览 (Matches User's Screenshot Exactly) -->
+            <div class="view-header">
+              <div>
+                <h2 class="view-h2" id="vTitle">Codex 总览</h2>
+                <div class="view-sub" id="vSub">Codex 客户端管理已就绪；扩展模块为可选项。</div>
+              </div>
+              <div class="view-actions">
+                <span id="vSample">采样 23:06:51</span>
+                <button class="btn-refresh" onclick="refreshAppMock()">🔄 立即刷新</button>
+              </div>
             </div>
-            <div class="route-row">
-              <span style="color:#fff">2. 物理网络层 (Transport Plane)</span>
-              <span class="route-tag tag-net">Local Loopback -> Tailscale Mesh (100.108.45.22)</span>
+
+            <div class="summary-card">
+              <div class="summary-col">
+                <span class="summary-label">Microsoft Store</span>
+                <span class="summary-val" style="color:#15803d">运行正常</span>
+              </div>
+              <div class="summary-col">
+                <span class="summary-label">npm</span>
+                <span class="summary-val">运行正常 · 11.12.1</span>
+              </div>
+              <button class="btn-outline-sm" onclick="setAppPage('deps')">依赖设置</button>
             </div>
+
+            <div class="section-label">ChatGPT 客户端与 Codex CLI</div>
+
+            <div class="app-cards-grid">
+              <!-- Card 1: Codex 桌面客户端 -->
+              <div class="app-card">
+                <div>
+                  <div class="card-head">
+                    <span class="card-title">Codex 桌面客户端</span>
+                    <span class="badge-ok">运行正常</span>
+                  </div>
+                  <div class="card-meta">
+                    OpenAI 官方 Windows 应用<br>
+                    已安装并在运行<br>
+                    版本 <b>26.903.9818.0</b><br>
+                    <span style="color:#94a3b8">尚未查询远端版本</span>
+                  </div>
+                  <div class="card-status-line">● 运行中</div>
+                </div>
+                <div class="card-btn-group">
+                  <button class="card-btn">安装</button>
+                  <button class="card-btn">登录</button>
+                  <button class="card-btn">启动</button>
+                  <button class="card-btn enabled" onclick="alert('测试操作：已触发停止指令')">停止</button>
+                  <button class="card-btn enabled" onclick="alert('测试操作：已触发重启指令')">重启</button>
+                  <button class="card-btn">升级</button>
+                </div>
+              </div>
+
+              <!-- Card 2: Codex CLI -->
+              <div class="app-card">
+                <div>
+                  <div class="card-head">
+                    <span class="card-title">Codex CLI</span>
+                    <span class="badge-ok">运行正常</span>
+                  </div>
+                  <div class="card-meta">
+                    命令行客户端<br>
+                    npm 全局安装 · 0.147.0<br>
+                    版本 <b>0.147.0 → 0.154.0</b><br>
+                    <span style="color:#15803d">发现官方新版本</span>
+                  </div>
+                  <div class="card-status-line">● 运行中</div>
+                </div>
+                <div class="card-btn-group">
+                  <button class="card-btn">安装</button>
+                  <button class="card-btn">登录</button>
+                  <button class="card-btn">启动</button>
+                  <button class="card-btn">停止</button>
+                  <button class="card-btn">重启</button>
+                  <button class="card-btn primary" onclick="alert('测试操作：已触发升级到 0.154.0')">升级</button>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- CARD 2: RESIDENTIAL EGRESS RADAR (span 4) -->
-        <div class="b-card span-4">
-          <div class="b-icon">🌐</div>
-          <h3 class="b-title" data-i18n="b.c2Title">真实公网出口判定：规避风控封号</h3>
-          <p class="b-desc" data-i18n="b.c2Desc">
-            以 OpenAI 服务端接收视角探测真实外网回源出口。智能识别是家庭宽带（Residential）还是数据中心机房（IDC）。
-          </p>
-          <div class="radar-list">
-            <div class="radar-unit active">
-              <span>🇯🇵 JP - Tokyo (AWS Edge)</span>
-              <span class="badge-res">RESIDENTIAL · 38ms</span>
-            </div>
-            <div class="radar-unit">
-              <span>🇺🇸 US - San Jose (IDC)</span>
-              <span class="badge-idc">DATACENTER · 128ms</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARD 3: WHITELIST PROCESS ARBITER (span 4) -->
-        <div class="b-card span-4">
-          <div class="b-icon">🛡️</div>
-          <h3 class="b-title" data-i18n="b.c3Title">严格白名单仲裁：绝不误杀日常进程</h3>
-          <p class="b-desc" data-i18n="b.c3Desc">
-            一键清理卡死的代理守护进程，严格排除 ChatGPT 桌面应用与用户正常的 Node.js 开发任务。
-          </p>
-          <div class="whitelist-box">
-            <div class="wl-item">
-              <span style="color:#fff">OpenAI.Codex.exe</span>
-              <span style="color:var(--emerald); font-weight:700">PROTECTED</span>
-            </div>
-            <div class="wl-item">
-              <span style="color:#fff">opencodex-proxy (:10100)</span>
-              <span style="color:var(--cyan)">MANAGED</span>
-            </div>
-            <div class="wl-item">
-              <span style="color:#fff">codex-relay (:8787)</span>
-              <span style="color:var(--cyan)">MANAGED</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- CARD 4: PROTECTED KEY VAULT (span 4) -->
-        <div class="b-card span-4">
-          <div class="b-icon">🔒</div>
-          <h3 class="b-title" data-i18n="b.c4Title">受保护凭证隔离：零日志零泄露</h3>
-          <p class="b-desc" data-i18n="b.c4Desc">
-            默认遮罩密码框输入。Key 保存在当前用户隐藏配置文件中，严格阻断明文进入任何日志与诊断包。
-          </p>
-          <div class="vault-box">
-            <span class="masked-key">sk-••••••••••••••••39fe</span>
-            <span style="color:var(--emerald); font-size:0.7rem; font-weight:700">USER HIDDEN</span>
-          </div>
-        </div>
-
-        <!-- CARD 5: NVM & RUNTIME ORCHESTRATION (span 4) -->
-        <div class="b-card span-4">
-          <div class="b-icon">⚡</div>
-          <h3 class="b-title" data-i18n="b.c5Title">NVM & Node 依赖智能托管</h3>
-          <p class="b-desc" data-i18n="b.c5Desc">
-            一键切换 Node.js 活跃版本以满足 Relay (>= 22.14.0) 前置条件。内置国内镜像加速与自动回退。
-          </p>
-          <div class="node-chips">
-            <span class="node-chip active">v22.15.0 (Active)</span>
-            <span class="node-chip">v20.18.0</span>
-            <span class="node-chip">v18.20.4</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- QUICK RUN TERMINAL -->
-  <section id="launch" class="terminal-section">
-    <div class="container">
-      <div class="section-head">
-        <div class="section-eyebrow" data-i18n="t.eyebrow">INSTANT LAUNCH</div>
-        <h2 class="section-title" data-i18n="t.title">单文件绿色运行 · 零环境依赖</h2>
-      </div>
-
-      <div class="term-window">
-        <div class="term-bar">
-          <div class="window-dots">
-            <div class="w-dot w-red"></div>
-            <div class="w-dot w-yellow"></div>
-            <div class="w-dot w-green"></div>
-          </div>
-          <span>PowerShell 5.1 / 7+ (Zero Admin Required)</span>
-          <span style="color:var(--cyan)">PORTABLE</span>
-        </div>
-
-        <div class="term-content">
-          <div class="cmd-box">
-            <span id="cmdText">irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex</span>
-            <button class="btn-copy" onclick="copyLaunchCmd()" id="copyBtn" data-i18n="t.btnCopy">复制一键启动命令</button>
-          </div>
-
-          <div class="term-specs">
-            <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="spec-item">
-              <h5 data-i18n="t.p1">📦 CodexBeacon-portable.exe</h5>
-              <p data-i18n="t.p1d">免安装单文件，内嵌 .NET 10 与 Windows App SDK</p>
-            </a>
-            <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="spec-item">
-              <h5 data-i18n="t.p2">⚡ CodexBeacon-slim.exe</h5>
-              <p data-i18n="t.p2d">轻量化构建版本，适合统一部署运行时的环境</p>
-            </a>
-            <a href="https://github.com/hurmuri/codex-beacon/blob/main/LICENSE" target="_blank" rel="noopener" class="spec-item">
-              <h5>📜 MIT License</h5>
-              <p data-i18n="t.p3d">永久免费、开源透明、可独立安全审计</p>
-            </a>
-          </div>
+        <!-- Window Statusbar -->
+        <div class="win-statusbar">
+          <span>检测完成</span>
+          <span id="vUpdated">更新于 23:06:51</span>
         </div>
       </div>
     </div>
-  </section>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    <div class="container">
-      <p>© 2026 hurmuri / Codex Beacon. 专为 Windows 打造的 OpenAI Codex 原生管控中枢 · 基于 MIT 协议开源。</p>
+    <!-- 4 REAL CAPABILITIES (CONCISE, NO AI FLUFF) -->
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="f-title">
+          <span>🖥️</span> <span data-i18n="f1.t">双核心分离观测</span>
+        </div>
+        <p class="f-desc" data-i18n="f1.d">
+          独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="f-title">
+          <span>⚡</span> <span data-i18n="f2.t">双层链路解耦</span>
+        </div>
+        <p class="f-desc" data-i18n="f2.d">
+          将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理，还是经过 Tailscale 转发。
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="f-title">
+          <span>🌐</span> <span data-i18n="f3.t">公网出口防封雷达</span>
+        </div>
+        <p class="f-desc" data-i18n="f3.d">
+          以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。
+        </p>
+      </div>
+
+      <div class="feature-item">
+        <div class="f-title">
+          <span>🛡️</span> <span data-i18n="f4.t">安全进程白名单</span>
+        </div>
+        <p class="f-desc" data-i18n="f4.d">
+          仅清理异常卡死的代理后台，绝不误杀 ChatGPT 桌面端与日常 Node 进程。Provider Key 严格保存在用户专属隐藏文件，禁止进入日志。
+        </p>
+      </div>
     </div>
-  </footer>
+
+    <!-- INSTALL & DOWNLOAD BOX -->
+    <div class="install-box" id="install">
+      <h3 data-i18n="i.title">开箱即用 · 免安装单文件运行</h3>
+      <p data-i18n="i.desc">无需管理员提权，内嵌 Windows App SDK 与 .NET 10，下载解压即可双击启动。</p>
+
+      <div class="code-row">
+        <span id="cmdText">irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex</span>
+        <button class="btn-copy-code" onclick="copyCmd()" id="btnCopy" data-i18n="i.copy">复制命令</button>
+      </div>
+
+      <div class="download-options">
+        <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
+          <h4>📦 CodexBeacon-portable.exe</h4>
+          <span data-i18n="i.p1">单文件便携版 · 内嵌完整运行环境 (推荐)</span>
+        </a>
+        <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
+          <h4>⚡ CodexBeacon-slim.exe</h4>
+          <span data-i18n="i.p2">轻量版本 · 适合已统一部署运行时的机器</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <p>© 2026 hurmuri / Codex Beacon · 基于 MIT 协议开源 · Windows 10 1809+ / Windows 11</p>
+    </footer>
+
+  </div>
 
   <script>
-    // DYNAMIC CARD SPOTLIGHT (光标动态焦点光斑)
-    document.querySelectorAll('.b-card, .app-screen-frame, .term-window').forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        card.style.setProperty('--mouse-x', x + 'px');
-        card.style.setProperty('--mouse-y', y + 'px');
-      });
-    });
+    // INTERACTIVE APP WORKSPACE LOGIC
+    const pages = {
+      'dashboard': {
+        titleZh: 'Codex 总览',
+        titleEn: 'Codex Dashboard',
+        subZh: 'Codex 客户端管理已就绪；扩展模块为可选项。',
+        subEn: 'Codex client management ready; optional extensions available.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">Microsoft Store</span>
+              <span class="summary-val" style="color:#15803d">运行正常</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">npm</span>
+              <span class="summary-val">运行正常 · 11.12.1</span>
+            </div>
+            <button class="btn-outline-sm" onclick="setAppPage('deps')">依赖设置</button>
+          </div>
 
-    // COPY CMD
-    function copyLaunchCmd() {
+          <div class="section-label">ChatGPT 客户端与 Codex CLI</div>
+
+          <div class="app-cards-grid">
+            <div class="app-card">
+              <div>
+                <div class="card-head">
+                  <span class="card-title">Codex 桌面客户端</span>
+                  <span class="badge-ok">运行正常</span>
+                </div>
+                <div class="card-meta">
+                  OpenAI 官方 Windows 应用<br>
+                  已安装并在运行<br>
+                  版本 <b>26.903.9818.0</b><br>
+                  <span style="color:#94a3b8">尚未查询远端版本</span>
+                </div>
+                <div class="card-status-line">● 运行中</div>
+              </div>
+              <div class="card-btn-group">
+                <button class="card-btn">安装</button>
+                <button class="card-btn">登录</button>
+                <button class="card-btn">启动</button>
+                <button class="card-btn enabled" onclick="alert('测试操作：已触发停止指令')">停止</button>
+                <button class="card-btn enabled" onclick="alert('测试操作：已触发重启指令')">重启</button>
+                <button class="card-btn">升级</button>
+              </div>
+            </div>
+
+            <div class="app-card">
+              <div>
+                <div class="card-head">
+                  <span class="card-title">Codex CLI</span>
+                  <span class="badge-ok">运行正常</span>
+                </div>
+                <div class="card-meta">
+                  命令行客户端<br>
+                  npm 全局安装 · 0.147.0<br>
+                  版本 <b>0.147.0 → 0.154.0</b><br>
+                  <span style="color:#15803d">发现官方新版本</span>
+                </div>
+                <div class="card-status-line">● 运行中</div>
+              </div>
+              <div class="card-btn-group">
+                <button class="card-btn">安装</button>
+                <button class="card-btn">登录</button>
+                <button class="card-btn">启动</button>
+                <button class="card-btn">停止</button>
+                <button class="card-btn">重启</button>
+                <button class="card-btn primary" onclick="alert('测试操作：已触发升级到 0.154.0')">升级</button>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      'network': {
+        titleZh: '网络与代理',
+        titleEn: 'Network & Egress',
+        subZh: '双层管线实时观测，探查真实外网出口 IP 与家庭宽带归属。',
+        subEn: 'Dual-plane pipeline inspection, true egress IP, and residential classification.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">真实公网出口 IP</span>
+              <span class="summary-val" style="color:#0284c7">163.228.113.120 (🇯🇵 Tokyo, Japan)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">宽带性质</span>
+              <span class="summary-val" style="color:#15803d">原生家庭宽带 (Residential · 低风控)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">运营商</span>
+              <span class="summary-val">AS2516 KDDI Corporation</span>
+            </div>
+          </div>
+
+          <div class="section-label">双层链路实时拓扑</div>
+
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:18px; font-family:var(--font-mono); font-size:0.8rem; line-height:1.7;">
+            <div><span style="color:#0284c7; font-weight:700;">[模型逻辑层]</span> Codex CLI (:4096) ➔ OpenCodex 智能代理 (:10100) ➔ DeepSeek-V3 / Claude</div>
+            <div style="margin-top:8px;"><span style="color:#15803d; font-weight:700;">[物理传输层]</span> 本地套接字 ➔ 系统代理直通 ➔ 日本出口 (延迟 38ms · 零 DNS 泄露)</div>
+          </div>
+        `
+      },
+      'processes': {
+        titleZh: 'Codex 进程管控',
+        titleEn: 'Process Arbiter',
+        subZh: '严格白名单机制，支持一键重启卡死代理，绝不误杀宿主应用。',
+        subEn: 'Strict termination whitelist. Resets proxy daemons without killing user processes.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">活跃关联进程</span>
+              <span class="summary-val">3 个受管进程</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">白名单规则</span>
+              <span class="summary-val" style="color:#15803d">已启用 (严格隔离保护)</span>
+            </div>
+            <button class="btn-outline-sm" onclick="alert('已安全重启关联代理进程')">安全重置代理</button>
+          </div>
+
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; font-size:0.8rem;">
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; background:#f8fafc; font-weight:700; border-bottom:1px solid #e2e8f0;">
+              <span>PID</span><span>进程名称</span><span>监听端口</span><span>防护级别</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid #f1f5f9;">
+              <span>14280</span><span>OpenAI.Codex.exe</span><span>:4096</span><span style="color:#15803d">核心受保护</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid #f1f5f9;">
+              <span>21904</span><span>node.exe (opencodex)</span><span>:10100</span><span style="color:#0284c7">托管重置</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px;">
+              <span>31088</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">托管重置</span>
+            </div>
+          </div>
+        `
+      },
+      'providers': {
+        titleZh: 'Providers 凭证管理',
+        titleEn: 'Model Providers & Vault',
+        subZh: '编辑与切换模型供应商，密码框保护，禁止明文落入日志。',
+        subEn: 'Manage model providers securely. Keys are kept in hidden user storage.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">当前生效 Provider</span>
+              <span class="summary-val">OpenCodex Mux (本地智能代理)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">同步文件</span>
+              <span class="summary-val">%USERPROFILE%\.codex\config.toml</span>
+            </div>
+            <button class="btn-outline-sm" onclick="alert('已切回官方直连')">切回官方直连</button>
+          </div>
+
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:20px;">
+            <div style="margin-bottom:12px;">
+              <span style="font-size:0.75rem; color:#64748b;">API Base URL:</span>
+              <div style="font-family:var(--font-mono); font-size:0.85rem; color:#0f172a; margin-top:4px;">http://127.0.0.1:10100/v1</div>
+            </div>
+            <div>
+              <span style="font-size:0.75rem; color:#64748b;">API Key (受保护隐藏存储):</span>
+              <div style="font-family:var(--font-mono); font-size:0.85rem; color:#0284c7; margin-top:4px;">sk-••••••••••••••••••••••••39fe (保存在 %USERPROFILE%\.CodexBeacon\providers.json)</div>
+            </div>
+          </div>
+        `
+      },
+      'deps': {
+        titleZh: '依赖管理 (NVM & Node.js)',
+        titleEn: 'Dependencies & NVM',
+        subZh: 'NVM for Windows 状态感知，一键切换全局 Node.js 版本。',
+        subEn: 'NVM integration and seamless Node.js version switching.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">NVM for Windows</span>
+              <span class="summary-val" style="color:#15803d">已检测到 (v1.1.12)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">当前活跃 Node.js</span>
+              <span class="summary-val" style="color:#0284c7">v22.15.0 (满足 Relay >= 22.14.0 规则)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">下载镜像源</span>
+              <span class="summary-val">npmmirror.com (自动回退)</span>
+            </div>
+          </div>
+
+          <div class="section-label">本地已安装 Node.js 版本 (点击切换)</div>
+          <div style="display:flex; gap:12px;">
+            <button class="card-btn enabled" style="padding:8px 16px; font-weight:700;" onclick="alert('当前已是 v22.15.0')">✓ v22.15.0 (活跃中)</button>
+            <button class="card-btn" style="padding:8px 16px;" onclick="alert('已切换到 v20.18.0')">v20.18.0</button>
+            <button class="card-btn" style="padding:8px 16px;" onclick="alert('已切换到 v18.20.4')">v18.20.4</button>
+          </div>
+        `
+      },
+      'opencodex': {
+        titleZh: 'OpenCodex 扩展代理',
+        titleEn: 'OpenCodex Proxy',
+        subZh: '独立管理 opencodex-proxy 计划任务与 10100 端口服务。',
+        subEn: 'Manages opencodex-proxy scheduled task and port 10100.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">服务状态</span>
+              <span class="summary-val" style="color:#15803d">运行中 (PID 21904)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">本地监听端点</span>
+              <span class="summary-val">http://127.0.0.1:10100</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">计划任务</span>
+              <span class="summary-val">opencodex-proxy (已就绪)</span>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem; color:#475569;">
+            支持将 Codex CLI 请求透明重写并多路分发给 DeepSeek-V3、Claude 3.5 Sonnet 与本地大语言模型。缺失组件绝不会误判为系统故障。
+          </div>
+        `
+      },
+      'tailscale': {
+        titleZh: 'Tailscale 局域网与设备拓扑',
+        titleEn: 'Tailscale Mesh',
+        subZh: '探测 Tailscale 本地服务、虚拟 IP 与 Tailnet 设备连通性。',
+        subEn: 'Inspects local Tailscale service and connected Tailnet devices.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">Tailscale 状态</span>
+              <span class="summary-val" style="color:#15803d">已连接 · 运行中</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">本机 Tailnet IP</span>
+              <span class="summary-val">100.108.45.22</span>
+            </div>
+          </div>
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem;">
+            <div style="font-weight:700; margin-bottom:8px;">局域组网设备:</div>
+            <div style="color:#334155; font-family:var(--font-mono);">● tokyo-gpu-server (100.80.12.4) [在线 · 延迟 38ms]</div>
+            <div style="color:#334155; font-family:var(--font-mono); margin-top:4px;">● macbook-remote (100.95.22.11) [在线 · 延迟 12ms]</div>
+          </div>
+        `
+      },
+      'settings': {
+        titleZh: '设置与关于',
+        titleEn: 'Settings & About',
+        subZh: '软件版本、语言切换、自动更新与日志路径。',
+        subEn: 'Version details, language preferences, and auto update channel.',
+        htmlZh: `
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">当前构建版本</span>
+              <span class="summary-val">v1.1.0 (win-x64 portable)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">UI 框架</span>
+              <span class="summary-val">Windows App SDK 1.8 · WinUI 3</span>
+            </div>
+            <button class="btn-outline-sm" onclick="alert('当前已是最新版本')">检查更新</button>
+          </div>
+          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem; color:#64748b;">
+            配置文件位置: %USERPROFILE%\.CodexBeacon\settings.json<br>
+            无任何外部云端数据上传，完全开源受控。
+          </div>
+        `
+      }
+    };
+
+    let curPage = 'dashboard';
+    let curLang = 'zh-CN';
+
+    function setAppPage(pageKey) {
+      curPage = pageKey;
+      document.querySelectorAll('.side-icon-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('sbtn-' + pageKey);
+      if (activeBtn) activeBtn.classList.add('active');
+
+      const data = pages[pageKey] || pages['dashboard'];
+      const isEn = curLang === 'en-US';
+
+      const main = document.getElementById('appMainContent');
+      main.innerHTML = `
+        <div class="view-header">
+          <div>
+            <h2 class="view-h2">${isEn ? data.titleEn : data.titleZh}</h2>
+            <div class="view-sub">${isEn ? data.subEn : data.subZh}</div>
+          </div>
+          <div class="view-actions">
+            <span>${isEn ? 'Sampled 23:06:51' : '采样 23:06:51'}</span>
+            <button class="btn-refresh" onclick="refreshAppMock()">🔄 ${isEn ? 'Refresh' : '立即刷新'}</button>
+          </div>
+        </div>
+        ${data.htmlZh}
+      `;
+    }
+
+    function refreshAppMock() {
+      const now = new Date().toTimeString().split(' ')[0];
+      document.getElementById('vUpdated').innerText = (curLang === 'en-US' ? 'Updated at ' : '更新于 ') + now;
+      alert(curLang === 'en-US' ? 'Refreshed telemetry sample.' : '已完成最新状态采样刷新。');
+    }
+
+    function copyCmd() {
       const text = document.getElementById('cmdText').innerText;
       navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.innerText = currentLang === 'en-US' ? 'COPIED!' : '已复制!';
+        const btn = document.getElementById('btnCopy');
+        btn.innerText = curLang === 'en-US' ? 'COPIED!' : '已复制!';
         setTimeout(() => {
-          btn.innerText = currentLang === 'en-US' ? 'Copy One-Liner' : '复制一键启动命令';
+          btn.innerText = curLang === 'en-US' ? 'Copy Command' : '复制命令';
         }, 2000);
       });
     }
 
-    // BILINGUAL LOCALIZATION
-    let currentLang = 'zh-CN';
-    const i18n = {
+    const dict = {
       'zh-CN': {
-        'nav.matrix': '核心矩阵',
-        'nav.launch': '一键启动',
-        'h.badge': 'v1.1.0 · 专为 Windows 打造的 OpenAI Codex 原生管控中枢',
-        'h.titleGrad': '掌控 Codex 全生态',
-        'h.titleSub': 'WinUI 3 原生 · 双层拓扑 · 出口防封判定',
-        'h.desc': '统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 隧道与 Tailscale。看清每一条请求流向，彻底告别 403 阻断。',
-        'h.btnDownload': '获取免安装便携版 (.zip)',
-        'b.eyebrow': 'CORE ARCHITECTURE',
-        'b.title': '五大核心技术矩阵',
-        'b.c1Title': '双层管线解耦：彻底弄清数据流向',
-        'b.c1Desc': '解耦“模型逻辑路由”与“物理传输网关”。一眼看清当前 AI 请求是直连 OpenAI 官方、走 OpenCodex 分流，还是被系统代理或 Tailscale 转发。',
-        'b.c2Title': '真实公网出口判定：规避风控封号',
-        'b.c2Desc': '以 OpenAI 服务端接收视角探测真实外网回源出口。智能识别是家庭宽带（Residential）还是数据中心机房（IDC）。',
-        'b.c3Title': '严格白名单仲裁：绝不误杀日常进程',
-        'b.c3Desc': '一键清理卡死的代理守护进程，严格排除 ChatGPT 桌面应用与用户正常的 Node.js 开发任务。',
-        'b.c4Title': '受保护凭证隔离：零日志零泄露',
-        'b.c4Desc': '默认遮罩密码框输入。Key 保存在当前用户隐藏配置文件中，严格阻断明文进入任何日志与诊断包。',
-        'b.c5Title': 'NVM & Node 依赖智能托管',
-        'b.c5Desc': '一键切换 Node.js 活跃版本以满足 Relay (>= 22.14.0) 前置条件。内置国内镜像加速与自动回退。',
-        't.eyebrow': 'INSTANT LAUNCH',
-        't.title': '单文件绿色运行 · 零环境依赖',
-        't.btnCopy': '复制一键启动命令',
-        't.p1': '📦 CodexBeacon-portable.exe',
-        't.p1d': '免安装单文件，内嵌 .NET 10 与 Windows App SDK',
-        't.p2': '⚡ CodexBeacon-slim.exe',
-        't.p2d': '轻量化构建版本，适合统一部署运行时的环境',
-        't.p3d': '永久免费、开源透明、可独立安全审计'
+        'nav.download': '下载',
+        'h.pill': 'v1.1.0 · WinUI 3 原生 Windows 控制台',
+        'h.title': 'Windows 上的 OpenAI Codex 原生管控中心',
+        'h.desc': '统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。毫秒启动，双层管线，公网出口防封判定。',
+        'h.btnDownload': '下载便携版 (Portable)',
+        'app.hint': '💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能',
+        'f1.t': '双核心分离观测',
+        'f1.d': '独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。',
+        'f2.t': '双层链路解耦',
+        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理，还是经过 Tailscale 转发。',
+        'f3.t': '公网出口防封雷达',
+        'f3.d': '以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。',
+        'f4.t': '安全进程白名单',
+        'f4.d': '仅清理异常卡死的代理后台，绝不误杀 ChatGPT 桌面端与日常 Node 进程。Provider Key 严格保存在用户专属隐藏文件，禁止进入日志。',
+        'i.title': '开箱即用 · 免安装单文件运行',
+        'i.desc': '无需管理员提权，内嵌 Windows App SDK 与 .NET 10，下载解压即可双击启动。',
+        'i.copy': '复制命令',
+        'i.p1': '单文件便携版 · 内嵌完整运行环境 (推荐)',
+        'i.p2': '轻量版本 · 适合已统一部署运行时的机器'
       },
       'en-US': {
-        'nav.matrix': 'Architecture Matrix',
-        'nav.launch': 'Instant Run',
-        'h.badge': 'v1.1.0 · Native Windows Control Center for OpenAI Codex',
-        'h.titleGrad': 'Master the Codex Ecosystem',
-        'h.titleSub': 'WinUI 3 Native · Decoupled Topology · Residential Radar',
-        'h.desc': 'Unified native control center for ChatGPT Desktop, Codex CLI, OpenCodex proxy, Codex Relay, and Tailscale. Observe every routing hop and prevent 403 blocks.',
-        'h.btnDownload': 'Download Portable Release (.zip)',
-        'b.eyebrow': 'CORE ARCHITECTURE',
-        'b.title': 'Five Core Technical Pillars',
-        'b.c1Title': 'Decoupled Dual-Plane Routing Observation',
-        'b.c1Desc': 'Decouples model logical routing from physical transport. See whether packets flow straight to OpenAI, through OpenCodex, or via system proxies and Tailscale.',
-        'b.c2Title': 'True Egress IP & Residential Broadband Radar',
-        'b.c2Desc': 'Probes the real origin IP seen by upstream OpenAI endpoints. Instantly identifies Residential broadband vs Datacenter IP blocks to prevent account flagging.',
-        'b.c3Title': 'Process Whitelist Protection & Safe Restarts',
-        'b.c3Desc': 'Strict termination whitelist cleanly resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.',
-        'b.c4Title': 'Protected Key Vault & Zero Log Leaks',
-        'b.c4Desc': 'Password fields hidden by default. Stored inside hidden user directories, strictly barred from serialization into diagnostics logs and trace dumps.',
-        'b.c5Title': 'NVM & Node Runtime Dependencies',
-        'b.c5Desc': 'Seamless active Node.js version switching to satisfy Relay (>= 22.14.0) prerequisites. Configurable mirrors with automatic official fallback.',
-        't.eyebrow': 'INSTANT LAUNCH',
-        't.title': 'Single-File Portable · Zero Prerequisites',
-        't.btnCopy': 'Copy One-Liner',
-        't.p1': '📦 CodexBeacon-portable.exe',
-        't.p1d': 'Self-contained single binary with embedded .NET 10 and Windows App SDK',
-        't.p2': '⚡ CodexBeacon-slim.exe',
-        't.p2d': 'Lightweight slim binary for pre-configured runtime environments',
-        't.p3d': '100% Free, open source, and auditable under the MIT license'
+        'nav.download': 'Download',
+        'h.pill': 'v1.1.0 · Native WinUI 3 Windows Mission Control',
+        'h.title': 'The Native Windows Control Center for OpenAI Codex',
+        'h.desc': 'Orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy multiplexing, Codex Relay, and Tailscale on Windows with sub-millisecond launch speed.',
+        'h.btnDownload': 'Download Portable (.zip)',
+        'app.hint': '💡 Click the icons on the sidebar to interactively explore each module in your browser',
+        'f1.t': 'Dual-Core Transparency',
+        'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
+        'f2.t': 'Decoupled Dual-Plane Routing',
+        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.',
+        'f3.t': 'Egress Residential Radar',
+        'f3.d': 'Probes the true origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
+        'f4.t': 'Process Whitelist Protection',
+        'f4.d': 'Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.',
+        'i.title': 'Single-File Portable · Zero Prerequisites',
+        'i.desc': 'Runs under standard user privileges. Embedded Windows App SDK and .NET 10. Extract and run.',
+        'i.copy': 'Copy Command',
+        'i.p1': 'Portable single executable · All-inclusive runtime (Recommended)',
+        'i.p2': 'Slim build · For environments with pre-installed runtimes'
       }
     };
 
-    function setLang(lang) {
-      currentLang = lang;
-      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(lang === 'zh-CN' ? 'btnZh' : 'btnEn').classList.add('active');
+    function toggleLang() {
+      curLang = curLang === 'zh-CN' ? 'en-US' : 'zh-CN';
+      document.getElementById('langBtn').innerText = curLang === 'zh-CN' ? 'EN' : '中';
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const k = el.getAttribute('data-i18n');
-        if (i18n[lang] && i18n[lang][k]) {
-          el.innerText = i18n[lang][k];
+        if (dict[curLang] && dict[curLang][k]) {
+          el.innerText = dict[curLang][k];
         }
       });
+
+      setAppPage(curPage);
     }
   </script>
 </body>
