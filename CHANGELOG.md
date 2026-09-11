@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-11
+
+### Added
+
+- Dual-layer live data pipeline architecture: separate Model Dispatch Pipeline and Network Transport Proxy flows.
+- Enriched public egress diagnostics: displaying flag emoji, country, region, city, ISP/organization, AS number, and residential/IDC line classification.
+- Dedicated Tailscale management page with unwrapped multi-IP address display and status cards.
+- Process management quick actions: one-click termination of all Codex/ChatGPT processes and clean app restart.
+- Administrator privilege indicators (🛡️) on actions requiring UAC elevation, backed by comprehensive documentation.
+
+### Changed
+
+- Cleaned up Dashboard: removed blinking progress bar, removed Tailscale from home page to focus strictly on services and data pipelines.
+- Streamlined Installation page: eliminated redundant expanders and crash-prone InfoBars; redesigned compact NVM and prerequisite cards.
+
 ## [0.2.1] - 2026-09-11
 
 ### Added
@@ -44,7 +59,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Evidence-based provider route, public egress, remote connection, and inactive endpoint views.
 - iOS AppIcon asset catalog and Windows application icon derived from one master artwork.
 
-[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.2.1...HEAD
+[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/hurmuri/codex-beacon/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/hurmuri/codex-beacon/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/hurmuri/codex-beacon/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/hurmuri/codex-beacon/compare/v0.1.0...v0.1.1

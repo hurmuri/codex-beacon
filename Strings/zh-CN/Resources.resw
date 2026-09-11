@@ -160,4 +160,15 @@
   <data name="ActionLoginName" xml:space="preserve"><value>登录</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>处理</value></data>
   <data name="RunningAction" xml:space="preserve"><value>正在{0} {1}…</value></data>
+  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
+  <data name="DataFlowHeading.Text" xml:space="preserve"><value>实时数据链路架构</value></data>
+  <data name="ModelPipelineHeading.Text" xml:space="preserve"><value>模型调度路由 (Model Dispatch Pipeline)</value></data>
+  <data name="NetworkPipelineHeading.Text" xml:space="preserve"><value>网络传输通道 (Network Transport &amp; Proxy)</value></data>
+  <data name="LineTypeIDC" xml:space="preserve"><value>机房 / 数据中心</value></data>
+  <data name="LineTypeResidential" xml:space="preserve"><value>家庭宽带 / 住宅</value></data>
+  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>终止所有 Codex / ChatGPT 进程？</value></data>
+  <data name="KillCodexProcessesBody" xml:space="preserve"><value>将强制结束所有 ChatGPT.exe、codex.exe、代码执行宿主及其实时子进程。Codex Beacon 控制台不会关闭。</value></data>
+  <data name="KillCodexProcessesButton" xml:space="preserve"><value>立即终止</value></data>
+  <data name="KillCodexBusy" xml:space="preserve"><value>正在终止所有 Codex 与 ChatGPT 进程…</value></data>
+  <data name="RestartDesktopBusy" xml:space="preserve"><value>正在清理并重新启动 ChatGPT 桌面应用…</value></data>
 </root>

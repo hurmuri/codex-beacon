@@ -35,6 +35,9 @@
                 <NavigationViewItem x:Uid="NavNetwork" Content="网络与代理" Tag="network">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE968;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem x:Uid="NavTailscale" Content="Tailscale" Tag="tailscale">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xEC27;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="NavInstallations" Content="安装管理" Tag="installations">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE896;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
@@ -44,49 +47,140 @@
             </NavigationView.MenuItems>
 
             <Grid>
+                <!-- 首页：系统脉冲与数据流 -->
                 <ScrollViewer x:Name="DashboardPage" Padding="30,22,30,40">
-                    <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch">
+                    <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch" Spacing="20">
                         <Grid>
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
                             <StackPanel>
                                 <TextBlock x:Uid="DashboardTitle" Text="系统脉冲" Style="{StaticResource PageTitleStyle}" />
                                 <TextBlock x:Uid="OverallMessage" x:Name="OverallMessageText" Text="正在读取本机 Codex 工具链…" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" />
                             </StackPanel>
-                            <Button x:Name="RefreshButton" Grid.Column="1" Style="{StaticResource QuietButtonStyle}" Click="Refresh_Click" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72C;" FontSize="15" /><TextBlock x:Uid="RefreshNow" Text="立即刷新" /></StackPanel>
-                            </Button>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                <TextBlock x:Name="PulseTimestampText" Text="等待首次采样" VerticalAlignment="Center" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontFamily="Cascadia Mono" FontSize="12" />
+                                <Button x:Name="RefreshButton" Style="{StaticResource QuietButtonStyle}" Click="Refresh_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                        <TextBlock x:Uid="RefreshNow" Text="立即刷新" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
                         </Grid>
 
-                        <InfoBar x:Uid="CurrentDataPath" IsOpen="True" Severity="Informational" Title="当前数据路径" Margin="0,18,0,0" IsClosable="False">
-                            <StackPanel Spacing="8">
-                                <ProgressBar IsIndeterminate="True" Height="3" />
-                                <Grid>
-                                    <ItemsControl x:Name="PulseHopsList" ItemsSource="{x:Bind ProxyHops}">
-                                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><StackPanel Orientation="Horizontal" Spacing="10" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                                    <FontIcon Glyph="&#xE76C;" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
-                                                </StackPanel>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                    <TextBlock x:Uid="AwaitingFirstSample" x:Name="PulseTimestampText" Text="等待首次采样" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontFamily="Cascadia Mono" FontSize="11" />
-                                </Grid>
-                            </StackPanel>
-                        </InfoBar>
+                        <!-- 数据流核心面板 -->
+                        <TextBlock x:Uid="DataFlowHeading" Text="实时数据链路架构" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
+                        <StackPanel Spacing="14">
+                            <!-- 模型调度流向 -->
+                            <Border Style="{StaticResource PanelStyle}" Padding="18,14">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE968;" FontSize="14" Foreground="{StaticResource SignalBrush}" />
+                                        <TextBlock x:Uid="ModelPipelineHeading" Text="模型调度路由 (Model Dispatch Pipeline)" FontWeight="SemiBold" FontSize="13" />
+                                    </StackPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                        <ItemsControl ItemsSource="{x:Bind ModelFlowSteps}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <Border Background="#F8FAFC" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10" Width="280">
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="36" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Border Width="34" Height="34" CornerRadius="17" Background="{Binding StateBackground}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                    <FontIcon Glyph="{Binding IconGlyph}" FontSize="15" Foreground="{Binding StateBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Text="{Binding Subtitle}" FontFamily="Cascadia Mono" FontSize="11" Foreground="{StaticResource SignalBrush}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+                                                        <FontIcon Glyph="&#xE76C;" FontSize="13" Foreground="#9DAAB6" VerticalAlignment="Center" Visibility="{Binding ArrowVisibility}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
 
-                        <TextBlock x:Uid="ServiceStatusHeading" Text="服务状态" Style="{StaticResource SectionTitleStyle}" />
-                        <ItemsControl x:Name="ComponentCards" ItemsSource="{x:Bind Components}">
-                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="360" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <!-- 底层网络出站代理流向 -->
+                            <Border Style="{StaticResource PanelStyle}" Padding="18,14">
+                                <StackPanel Spacing="12">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE774;" FontSize="14" Foreground="{StaticResource SignalBrush}" />
+                                        <TextBlock x:Uid="NetworkPipelineHeading" Text="网络传输通道 (Network Transport &amp; Proxy)" FontWeight="SemiBold" FontSize="13" />
+                                    </StackPanel>
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                        <ItemsControl ItemsSource="{x:Bind NetworkFlowSteps}">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal" Spacing="12">
+                                                        <Border Background="#F8FAFC" BorderBrush="{StaticResource HairlineBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10" Width="280">
+                                                            <Grid ColumnSpacing="12">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="36" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <Border Width="34" Height="34" CornerRadius="17" Background="{Binding StateBackground}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                                    <FontIcon Glyph="{Binding IconGlyph}" FontSize="15" Foreground="{Binding StateBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                                </Border>
+                                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Text="{Binding Subtitle}" FontFamily="Cascadia Mono" FontSize="11" Foreground="{StaticResource SignalBrush}" TextTrimming="CharacterEllipsis" />
+                                                                    <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+                                                        <FontIcon Glyph="&#xE76C;" FontSize="13" Foreground="#9DAAB6" VerticalAlignment="Center" Visibility="{Binding ArrowVisibility}" />
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- 服务状态矩阵（一行三个卡片，无 Tailscale） -->
+                        <TextBlock x:Uid="ServiceStatusHeading" Text="服务状态" Style="{StaticResource SectionTitleStyle}" Margin="0,8,0,0" />
+                        <ItemsControl x:Name="ComponentCards" ItemsSource="{x:Bind CoreComponents}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="390" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <toolkit:SettingsCard Header="{Binding Name}" Description="{Binding Detail}" Width="348" MinHeight="178" Margin="0,0,12,12" IsClickEnabled="False">
+                                    <toolkit:SettingsCard Header="{Binding Name}" Description="{Binding Detail}" Width="378" MinHeight="188" Margin="0,0,12,12" IsClickEnabled="False">
                                         <StackPanel Spacing="8" HorizontalAlignment="Stretch">
-                                            <Border HorizontalAlignment="Left" Background="{Binding StatusBackground}" CornerRadius="10" Padding="8,3">
-                                                <TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusForeground}" FontSize="12" FontWeight="SemiBold" />
-                                            </Border>
+                                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                                <Border Background="{Binding StatusBackground}" CornerRadius="10" Padding="8,3">
+                                                    <TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusForeground}" FontSize="12" FontWeight="SemiBold" />
+                                                </Border>
+                                                <Border Visibility="{Binding AdminBadgeVisibility}" Background="#FFF4CE" CornerRadius="10" Padding="6,3">
+                                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                                        <FontIcon Glyph="&#xE7EF;" FontSize="10" Foreground="#9A6700" />
+                                                        <TextBlock Text="需管理员" Foreground="#9A6700" FontSize="11" FontWeight="SemiBold" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
                                                 <TextBlock x:Uid="VersionLabel" Text="版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                                 <TextBlock Text="{Binding VersionSummary}" FontFamily="Cascadia Mono" FontSize="12" TextTrimming="CharacterEllipsis" />
@@ -105,35 +199,66 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-
-                        <TextBlock x:Uid="TailscaleOverviewHeading" Text="Tailscale 概况" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsCard x:Uid="TailscaleNetworkCard" Header="Tailscale 网络" IsClickEnabled="False">
-                            <toolkit:SettingsCard.Description>
-                                <StackPanel><TextBlock x:Uid="ReadingTailnet" x:Name="TailnetSummaryText" Text="正在读取 Tailnet…" /><TextBlock x:Uid="DeviceStatusPlaceholder" x:Name="TailnetDetailText" Text="设备状态将在这里显示" /></StackPanel>
-                            </toolkit:SettingsCard.Description>
-                            <Button x:Uid="ViewDevices" Tag="network" Click="OpenSection_Click" Content="查看设备" />
-                        </toolkit:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
 
+                <!-- 进程管理页面 -->
                 <ScrollViewer x:Name="ProcessesPage" Visibility="Collapsed" Padding="30,22,30,40">
-                    <StackPanel MaxWidth="1280">
+                    <StackPanel MaxWidth="1280" Spacing="16">
                         <TextBlock x:Uid="ProcessesTitle" Text="Codex 进程" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="ProcessesDescription" Text="按父子关系识别桌面应用、CLI、代理、Relay 及其运行时；普通 Node 进程不会被纳入。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
+                        <TextBlock x:Uid="ProcessesDescription" Text="聚焦显示 Codex 桌面客户端、CLI 及其运行时进程；普通 Node 进程已被排除。" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,8" TextWrapping="Wrap" />
+
+                        <!-- 快捷进程恢复与重启控制栏 -->
+                        <toolkit:SettingsCard Header="快捷恢复与控制" Description="一键终止所有 Codex 相关进程，或重新启动 ChatGPT 桌面应用" IsClickEnabled="False">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Style="{StaticResource DangerButtonStyle}" Tag="kill-codex" Click="KillCodexProcesses_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE711;" FontSize="13" />
+                                        <TextBlock Text="终止所有 Codex 进程" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Style="{StaticResource QuietButtonStyle}" Tag="restart-desktop" Click="RestartDesktopApp_Click">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE72C;" FontSize="13" />
+                                        <TextBlock Text="重启 ChatGPT 桌面客户端" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="ProcessList" ItemsSource="{x:Bind Processes}" SelectionMode="None">
                                 <ListView.Header>
                                     <Grid Padding="18,12" Background="#EEF3F6" ColumnSpacing="14">
-                                        <Grid.ColumnDefinitions><ColumnDefinition Width="90" /><ColumnDefinition Width="180" /><ColumnDefinition Width="100" /><ColumnDefinition Width="110" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                        <TextBlock Text="PID" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessRoleHeader" Grid.Column="1" Text="角色 / 进程" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessVersionHeader" Grid.Column="2" Text="版本" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessStartedHeader" Grid.Column="3" Text="启动时间" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessPathHeader" Grid.Column="4" Text="可执行路径" FontWeight="SemiBold" />
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="240" />
+                                            <ColumnDefinition Width="100" />
+                                            <ColumnDefinition Width="110" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="PID" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="ProcessRoleHeader" Grid.Column="1" Text="角色 / 进程" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="ProcessVersionHeader" Grid.Column="2" Text="版本" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="ProcessStartedHeader" Grid.Column="3" Text="启动时间" FontWeight="SemiBold" />
+                                        <TextBlock x:Uid="ProcessPathHeader" Grid.Column="4" Text="可执行路径" FontWeight="SemiBold" />
                                     </Grid>
                                 </ListView.Header>
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Padding="10,9" ColumnSpacing="14" ToolTipService.ToolTip="{Binding CommandLine}">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="90" /><ColumnDefinition Width="180" /><ColumnDefinition Width="100" /><ColumnDefinition Width="110" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                        <Grid Padding="12,9" ColumnSpacing="14" ToolTipService.ToolTip="{Binding CommandLine}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="240" />
+                                                <ColumnDefinition Width="100" />
+                                                <ColumnDefinition Width="110" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
                                             <TextBlock Text="{Binding Pid}" FontFamily="Cascadia Mono" VerticalAlignment="Center" />
-                                            <StackPanel Grid.Column="1"><TextBlock Text="{Binding Role}" FontWeight="SemiBold" /><TextBlock Text="{Binding Name}" Foreground="{StaticResource MutedBrush}" FontSize="12" /></StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding Role}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Name}" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                                            </StackPanel>
                                             <TextBlock Grid.Column="2" Text="{Binding Version}" FontFamily="Cascadia Mono" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="3" Text="{Binding StartedAt}" FontFamily="Cascadia Mono" FontSize="12" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="4" Text="{Binding ExecutablePath}" FontFamily="Cascadia Mono" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
@@ -142,60 +267,66 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock x:Uid="RecoveryControlsHeading" Text="恢复控制" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsCard x:Uid="BulkRecoveryCard" Header="批量恢复可选服务" Description="仅处理 OpenCodex Proxy、Codex Relay 与明确匹配的服务进程；不会关闭 Codex 桌面应用或本管理器。" IsClickEnabled="False">
-                            <CommandBar DefaultLabelPosition="Right" Background="Transparent">
-                                <AppBarButton x:Uid="TerminateServices" Label="终止服务" Icon="Cancel" Tag="kill" Click="DangerAction_Click" />
-                                <AppBarButton x:Uid="RestartAll" Label="全部重启" Icon="Refresh" Tag="restart" Click="DangerAction_Click" />
-                            </CommandBar>
-                        </toolkit:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
 
+                <!-- 网络与代理页面 -->
                 <ScrollViewer x:Name="NetworkPage" Visibility="Collapsed" Padding="30,22,30,40">
-                    <StackPanel MaxWidth="1280">
-                        <TextBlock x:Uid="NetworkTitle" Text="网络与代理" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="NetworkDescription" Text="根据配置文件、环境变量、监听端口和实际进程拼出当前请求路径。敏感凭据不会读取或展示。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
-                        <TextBlock x:Uid="ProxyChainHeading" Text="Codex 代理链" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}" Padding="0">
-                            <ListView ItemsSource="{x:Bind ProxyHops}" SelectionMode="None">
-                                <ListView.ItemTemplate>
-                                    <DataTemplate>
-                                        <Grid Padding="18,13" ColumnSpacing="14">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="48" /><ColumnDefinition Width="180" /><ColumnDefinition Width="250" /><ColumnDefinition Width="80" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                            <Border Width="32" Height="32" CornerRadius="16" Background="{StaticResource SignalSoftBrush}"><TextBlock Text="{Binding OrderLabel}" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Cascadia Mono" Foreground="{StaticResource SignalBrush}" /></Border>
-                                            <TextBlock Grid.Column="1" Text="{Binding Name}" FontWeight="SemiBold" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" Text="{Binding Address}" FontFamily="Cascadia Mono" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="3" Text="{Binding StateLabel}" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="4" Text="{Binding Evidence}" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </ListView.ItemTemplate>
-                            </ListView>
-                        </Border>
-                        <TextBlock x:Uid="PublicEgressHeading" Text="公网出口" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}" Padding="0">
+                    <StackPanel MaxWidth="1280" Spacing="20">
+                        <StackPanel>
+                            <TextBlock x:Uid="NetworkTitle" Text="网络与代理" Style="{StaticResource PageTitleStyle}" />
+                            <TextBlock x:Uid="NetworkDescription" Text="清晰呈现模型 Provider 路由与底层出站代理拓扑。敏感凭据不会读取或展示。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- 丰富的公网出口卡片 -->
+                        <TextBlock x:Uid="PublicEgressHeading" Text="公网出口" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
+                        <Border Style="{StaticResource PanelStyle}" Padding="20">
                             <ListView ItemsSource="{x:Bind PublicEgressRoutes}" SelectionMode="None">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Padding="18,14" ColumnSpacing="16">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="190" /><ColumnDefinition Width="*" /><ColumnDefinition Width="150" /></Grid.ColumnDefinitions>
-                                            <TextBlock Text="{Binding Address}" FontFamily="Cascadia Mono" FontSize="17" FontWeight="SemiBold" />
-                                            <TextBlock Grid.Column="1" Text="{Binding Route}" />
-                                            <TextBlock Grid.Column="2" Text="{Binding Evidence}" Foreground="{StaticResource MutedBrush}" />
-                                            <TextBlock Grid.Column="3" Text="{Binding CheckedAt}" FontFamily="Cascadia Mono" FontSize="12" />
+                                        <Grid ColumnSpacing="20">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="140" />
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="150" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{Binding Address}" FontFamily="Cascadia Mono" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" />
+                                                <TextBlock Text="{Binding Route}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                                            </StackPanel>
+                                            <Border Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Background="#EEF1F4" CornerRadius="10" Padding="8,4">
+                                                <TextBlock Text="{Binding LineTypeLabel}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource InkBrush}" />
+                                            </Border>
+                                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding LocationSummary}" FontSize="14" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Region}" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding IspSummary}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding AsNumber}" FontFamily="Cascadia Mono" FontSize="11" Foreground="{StaticResource MutedBrush}" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="4" Text="{Binding CheckedAt}" FontFamily="Cascadia Mono" FontSize="12" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock x:Uid="ExternalConnectionsHeading" Text="当前外网连接" Style="{StaticResource SectionTitleStyle}" />
+
+                        <!-- 当前外网连接 -->
+                        <TextBlock x:Uid="ExternalConnectionsHeading" Text="当前外网连接" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind ExternalConnections}" SelectionMode="None">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="18,12" ColumnSpacing="16">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="90" /><ColumnDefinition Width="190" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="190" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="190" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
                                             <TextBlock Text="{Binding Role}" FontWeight="SemiBold" />
                                             <TextBlock Grid.Column="1" Text="{Binding Pid}" FontFamily="Cascadia Mono" />
                                             <TextBlock Grid.Column="2" Text="{Binding ProcessName}" />
@@ -205,13 +336,19 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock x:Uid="CandidateEndpointsHeading" Text="已配置的备用端点" Style="{StaticResource SectionTitleStyle}" />
+
+                        <!-- 备用已配置端点 -->
+                        <TextBlock x:Uid="CandidateEndpointsHeading" Text="已配置的备用端点" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind CandidateEndpoints}" SelectionMode="None">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="18,12" ColumnSpacing="16">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="190" /><ColumnDefinition Width="300" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="190" />
+                                                <ColumnDefinition Width="300" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
                                             <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                                             <TextBlock Grid.Column="1" Text="{Binding Address}" FontFamily="Cascadia Mono" />
                                             <TextBlock Grid.Column="2" Text="{Binding Evidence}" Foreground="{StaticResource MutedBrush}" />
@@ -220,16 +357,79 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock x:Uid="TailnetDevicesHeading" Text="Tailnet 设备" Style="{StaticResource SectionTitleStyle}" />
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Tailscale 专属页面 -->
+                <ScrollViewer x:Name="TailscalePage" Visibility="Collapsed" Padding="30,22,30,40">
+                    <StackPanel MaxWidth="1280" Spacing="20">
+                        <StackPanel>
+                            <TextBlock Text="Tailscale 网络" Style="{StaticResource PageTitleStyle}" />
+                            <TextBlock Text="管理本机 Tailscale 节点、虚拟专用网络状态及 Tailnet 设备拓扑" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- 本机 Tailscale 状态与服务管理卡片 -->
+                        <toolkit:SettingsCard Header="Tailscale 本机服务" Description="管理 Windows 后台网络服务（需管理员权限）" IsClickEnabled="False">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Button Content="启动服务" Tag="start" Click="TailscaleServiceAction_Click" />
+                                <Button Content="停止服务" Tag="stop" Click="TailscaleServiceAction_Click" />
+                                <Button Content="重启服务" Tag="restart" Click="TailscaleServiceAction_Click" />
+                                <Button Content="网页登录授权" Tag="login" Click="TailscaleServiceAction_Click" />
+                            </StackPanel>
+                        </toolkit:SettingsCard>
+
+                        <Border Style="{StaticResource PanelStyle}" Padding="20">
+                            <Grid ColumnSpacing="20">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="本机节点" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                                    <TextBlock x:Name="TailnetSummaryText" Text="正在读取 Tailnet…" FontSize="16" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4">
+                                    <TextBlock Text="设备连接详情" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+                                    <TextBlock x:Name="TailnetDetailText" Text="设备状态将在这里显示" FontSize="14" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Uid="TailnetDevicesHeading" Text="Tailnet 设备列表" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="TailnetList" ItemsSource="{x:Bind TailnetDevices}" SelectionMode="None">
+                                <ListView.Header>
+                                    <Grid Padding="18,12" Background="#EEF3F6" ColumnSpacing="14">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="220" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="320" />
+                                            <ColumnDefinition Width="90" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="设备 / 主机名" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="1" Text="系统" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="2" Text="Tailscale IP (完整换行展示)" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="3" Text="状态" FontWeight="SemiBold" />
+                                        <TextBlock Grid.Column="4" Text="最后活跃" FontWeight="SemiBold" />
+                                    </Grid>
+                                </ListView.Header>
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Padding="18,13" ColumnSpacing="14">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="220" /><ColumnDefinition Width="90" /><ColumnDefinition Width="260" /><ColumnDefinition Width="90" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                            <StackPanel><TextBlock Text="{Binding DeviceLabel}" FontWeight="SemiBold" /><TextBlock Text="{Binding DnsName}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" /></StackPanel>
+                                        <Grid Padding="18,14" ColumnSpacing="14">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="320" />
+                                                <ColumnDefinition Width="90" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding DeviceLabel}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding DnsName}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                                            </StackPanel>
                                             <TextBlock Grid.Column="1" Text="{Binding OS}" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" Text="{Binding Addresses}" FontFamily="Cascadia Mono" FontSize="12" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="2" Text="{Binding Addresses}" FontFamily="Cascadia Mono" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="3" Text="{Binding OnlineLabel}" VerticalAlignment="Center" />
                                             <TextBlock Grid.Column="4" Text="{Binding LastSeen}" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" />
                                         </Grid>
@@ -240,36 +440,97 @@
                     </StackPanel>
                 </ScrollViewer>
 
+                <!-- 安装管理页面 -->
                 <ScrollViewer x:Name="InstallationsPage" Visibility="Collapsed" Padding="30,22,30,40">
-                    <StackPanel MaxWidth="1100">
-                        <TextBlock x:Uid="InstallationsTitle" Text="安装管理" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="InstallationsDescription" Text="从 npm 官方注册表获取版本信息。安装与升级会保留现有配置，并在完成后重新检测。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
-                        <toolkit:SettingsExpander x:Uid="NvmExpander" Header="NVM · Node.js 版本控制" Description="管理本机已安装的 Node.js 版本；Codex Relay 需要 Node.js 22.14.0 或更高版本。" IsExpanded="True" Margin="0,0,0,14">
-                            <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard x:Uid="CurrentEnvironmentCard" Header="当前环境" IsClickEnabled="False"><TextBlock x:Uid="CheckingNvm" x:Name="NvmRequirementText" Text="正在检测 NVM…" TextWrapping="Wrap" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="SwitchNodeCard" Header="切换 Node.js" Description="选择 NVM 已安装的版本" IsClickEnabled="False">
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><ComboBox x:Uid="NodeVersionPickerText" x:Name="NodeVersionPicker" Width="210" PlaceholderText="选择已安装版本" ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName" /><Button x:Uid="ApplyNodeVersion" Content="应用" Click="SwitchNode_Click" /></StackPanel>
-                                </toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="InstallNodeCard" Header="安装 Node.js" Description="输入完整版本号，例如 24.15.0" IsClickEnabled="False">
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBox x:Name="NewNodeVersionBox" Width="210" PlaceholderText="24.15.0" /><Button x:Uid="InstallNodeButton" Content="安装" Click="InstallNode_Click" /></StackPanel>
-                                </toolkit:SettingsCard>
-                            </toolkit:SettingsExpander.Items>
-                        </toolkit:SettingsExpander>
-                        <toolkit:SettingsExpander x:Uid="PrerequisitesExpander" Header="安装前置条件" Description="在安装或升级 npm 包前验证运行时与包管理器。" IsExpanded="True" Margin="0,0,0,18">
-                            <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="Node.js" IsClickEnabled="False"><TextBlock x:Uid="CheckingVersionPath" x:Name="NodeRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="npm" IsClickEnabled="False"><TextBlock x:Uid="CheckingVersionPath" x:Name="NpmRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
-                            </toolkit:SettingsExpander.Items>
-                        </toolkit:SettingsExpander>
+                    <StackPanel MaxWidth="1100" Spacing="20">
+                        <StackPanel>
+                            <TextBlock x:Uid="InstallationsTitle" Text="安装管理" Style="{StaticResource PageTitleStyle}" />
+                            <TextBlock x:Uid="InstallationsDescription" Text="管理运行环境前置条件、NVM 版本与 npm 扩展模块" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- 前置条件双卡片 -->
+                        <TextBlock Text="运行前置条件" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Style="{StaticResource PanelStyle}" Padding="18">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE774;" FontSize="15" Foreground="{StaticResource SignalBrush}" />
+                                        <TextBlock Text="Node.js 运行时" FontWeight="SemiBold" FontSize="14" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="NodeRequirementText" Text="正在检测版本与路径…" Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Style="{StaticResource PanelStyle}" Padding="18">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE896;" FontSize="15" Foreground="{StaticResource SignalBrush}" />
+                                        <TextBlock Text="npm 包管理器" FontWeight="SemiBold" FontSize="14" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="NpmRequirementText" Text="正在检测版本与路径…" Foreground="{StaticResource MutedBrush}" FontSize="12" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <!-- NVM 版本控制 -->
+                        <TextBlock Text="NVM 版本管理" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
+                        <Border Style="{StaticResource PanelStyle}" Padding="20">
+                            <StackPanel Spacing="14">
+                                <TextBlock x:Name="NvmRequirementText" Text="正在检测 NVM…" FontSize="13" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                                <Grid ColumnSpacing="20">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="6">
+                                        <TextBlock Text="切换 Node.js 版本" FontWeight="SemiBold" FontSize="13" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <ComboBox x:Name="NodeVersionPicker" Width="220" PlaceholderText="选择已安装版本" ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName" />
+                                            <Button Content="应用切换" Click="SwitchNode_Click" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="6">
+                                        <TextBlock Text="安装新 Node.js 版本" FontWeight="SemiBold" FontSize="13" />
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBox x:Name="NewNodeVersionBox" Width="180" PlaceholderText="例如 24.15.0" />
+                                            <Button Content="下载安装" Click="InstallNode_Click" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 扩展包安装列表 -->
+                        <TextBlock Text="可选扩展模块" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="InstallationList" ItemsSource="{x:Bind InstallableComponents}" SelectionMode="None">
                                 <ListView.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="18,16" ColumnSpacing="16">
-                                            <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="150" /><ColumnDefinition Width="150" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                            <StackPanel><TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" /><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Kind}" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" /><HyperlinkButton Content="{Binding RepositoryLabel}" NavigateUri="{Binding RepositoryUri}" Padding="0" FontSize="12" /></StackPanel></StackPanel>
-                                            <StackPanel Grid.Column="1"><TextBlock x:Uid="InstalledVersionLabel" Text="当前版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding InstalledVersion}" FontFamily="Cascadia Mono" /></StackPanel>
-                                            <StackPanel Grid.Column="2"><TextBlock x:Uid="LatestVersionLabel" Text="已知最新版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding LatestVersion}" FontFamily="Cascadia Mono" /></StackPanel>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="220" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel Spacing="2">
+                                                <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" />
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Kind}" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" />
+                                                    <HyperlinkButton Content="{Binding RepositoryLabel}" NavigateUri="{Binding RepositoryUri}" Padding="0" FontSize="12" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock x:Uid="InstalledVersionLabel" Text="当前版本" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                                                <TextBlock Text="{Binding InstalledVersion}" FontFamily="Cascadia Mono" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock x:Uid="LatestVersionLabel" Text="最新版本" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                                                <TextBlock Text="{Binding LatestVersion}" FontFamily="Cascadia Mono" />
+                                            </StackPanel>
                                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                                                 <Button x:Uid="InstallPackageButton" Content="安装" Tag="install" Click="PackageAction_Click" IsEnabled="{Binding CanInstall}" />
                                                 <Button x:Uid="UpgradePackageButton" Content="升级" Tag="upgrade" Click="PackageAction_Click" IsEnabled="{Binding CanUpgrade}" />
@@ -279,36 +540,48 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <InfoBar x:Uid="PermissionsInfo" IsOpen="True" Severity="Informational" Title="权限说明" Message="全局 npm 安装可能需要对 Node.js 安装目录的写权限；Relay 服务的计划任务安装可能需要管理员权限。Codex Beacon 会显示明确错误，不会静默提权。" Margin="0,18,0,0" />
                     </StackPanel>
                 </ScrollViewer>
 
+                <!-- 设置页面 -->
                 <ScrollViewer x:Name="SettingsPage" Visibility="Collapsed" Padding="30,22,30,40">
-                    <StackPanel MaxWidth="760" HorizontalAlignment="Left">
-                        <TextBlock x:Uid="SettingsTitle" Text="设置" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="SettingsDescription" Text="这些值只描述本机服务，不包含任何密钥。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" />
-                        <toolkit:SettingsExpander x:Uid="GeneralSettingsExpander" Header="常规" Description="刷新频率与本机计划任务映射" IsExpanded="True">
+                    <StackPanel MaxWidth="800" HorizontalAlignment="Left" Spacing="20">
+                        <StackPanel>
+                            <TextBlock x:Uid="SettingsTitle" Text="设置" Style="{StaticResource PageTitleStyle}" />
+                            <TextBlock x:Uid="SettingsDescription" Text="配置刷新频率与语言。这些值仅存储于本机，不包含任何密钥。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" />
+                        </StackPanel>
+
+                        <toolkit:SettingsExpander Header="常规设置" Description="刷新频率、显示语言与本机任务映射" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard x:Uid="LanguageCard" Header="显示语言" Description="跟随 Windows，或在 English / 简体中文之间即时切换。" IsClickEnabled="False">
+                                <toolkit:SettingsCard Header="显示语言" Description="跟随 Windows，或在 English / 简体中文之间即时切换" IsClickEnabled="False">
                                     <ComboBox x:Name="LanguagePicker" Width="210" SelectedValuePath="Tag" SelectionChanged="LanguagePicker_SelectionChanged">
-                                        <ComboBoxItem x:Uid="LanguageSystem" Content="跟随 Windows" Tag="system" />
+                                        <ComboBoxItem Content="跟随 Windows" Tag="system" />
                                         <ComboBoxItem Content="English" Tag="en-US" />
                                         <ComboBoxItem Content="简体中文" Tag="zh-CN" />
                                     </ComboBox>
                                 </toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="RefreshIntervalCard" Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False"><NumberBox x:Name="RefreshSecondsBox" Width="160" Minimum="5" Maximum="300" SpinButtonPlacementMode="Compact" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="RelayTaskCard" Header="Codex Relay 计划任务" IsClickEnabled="False"><TextBox x:Name="RelayTaskNameBox" Width="300" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="ProxyTaskCard" Header="OpenCodex Proxy 计划任务" IsClickEnabled="False"><TextBox x:Name="ProxyTaskNameBox" Width="300" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="SaveChangesCard" Header="保存更改" Description="设置仅存储在本机，不包含凭据。" IsClickEnabled="False"><Button x:Uid="SaveButton" Content="保存" Click="SaveSettings_Click" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False">
+                                    <NumberBox x:Name="RefreshSecondsBox" Width="160" Minimum="5" Maximum="300" SpinButtonPlacementMode="Compact" />
+                                </toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="Codex Relay 计划任务" IsClickEnabled="False">
+                                    <TextBox x:Name="RelayTaskNameBox" Width="300" />
+                                </toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="OpenCodex Proxy 计划任务" IsClickEnabled="False">
+                                    <TextBox x:Name="ProxyTaskNameBox" Width="300" />
+                                </toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="保存更改" Description="立即生效并存储在本机" IsClickEnabled="False">
+                                    <Button Content="保存设置" Click="SaveSettings_Click" />
+                                </toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
-                        <TextBlock x:Uid="ReferencesHeading" Text="上游与实现参考" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsExpander x:Uid="OpenSourceProjectsExpander" Header="开源项目" Description="查看组件源码、版本管理方案与网络域名分类数据。" IsExpanded="True">
+
+                        <TextBlock Text="上游与开源参考" Style="{StaticResource SectionTitleStyle}" Margin="0,4,0,0" />
+                        <toolkit:SettingsExpander Header="参考项目" Description="组件源码与实现参考" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard x:Uid="OpenCodexReference" Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="AppManagerReference" Header="Codex App Manager" Description="Codex 桌面版本管理实现参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="RelayReference" Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="DomainListReference" Header="domain-list-community" Description="网络域名分类实现参考；当前版本未内置其数据"><HyperlinkButton Content="v2fly/domain-list-community" NavigateUri="https://github.com/v2fly/domain-list-community" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="Codex App Manager" Description="Codex 桌面版本管理方案参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="domain-list-community" Description="网络域名分类实现参考"><HyperlinkButton Content="v2fly/domain-list-community" NavigateUri="https://github.com/v2fly/domain-list-community" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
                     </StackPanel>
@@ -316,11 +589,16 @@
             </Grid>
         </NavigationView>
 
+        <!-- 状态栏 -->
         <Grid Grid.Row="2" Background="#EEF3F6" Padding="16,0">
-            <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
             <ProgressRing x:Name="BusyRing" Width="18" Height="18" IsActive="False" />
-            <TextBlock x:Uid="ReadyStatus" x:Name="StatusText" Grid.Column="1" Text="准备就绪" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource MutedBrush}" />
-            <TextBlock x:Uid="NotRefreshed" x:Name="RefreshAgeText" Grid.Column="2" Text="尚未刷新" VerticalAlignment="Center" FontFamily="Cascadia Mono" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+            <TextBlock x:Name="StatusText" Grid.Column="1" Text="准备就绪" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource MutedBrush}" />
+            <TextBlock x:Name="RefreshAgeText" Grid.Column="2" Text="尚未刷新" VerticalAlignment="Center" FontFamily="Cascadia Mono" FontSize="12" Foreground="{StaticResource MutedBrush}" />
         </Grid>
     </Grid>
 </Window>

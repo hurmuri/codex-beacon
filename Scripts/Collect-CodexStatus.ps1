@@ -9,13 +9,30 @@ $ProgressPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $OutputEncoding = [Console]::OutputEncoding
 
+function Get-CountryFlag([string]$Code) {
+    if (-not $Code -or $Code.Length -ne 2) { return '🌐' }
+    $upper = $Code.ToUpper()
+    $flags = @{
+        'HK'='🇭🇰'; 'US'='🇺🇸'; 'CN'='🇨🇳'; 'JP'='🇯🇵'; 'SG'='🇸🇬'; 'TW'='🇹🇼'; 'GB'='🇬🇧';
+        'DE'='🇩🇪'; 'FR'='🇫🇷'; 'CA'='🇨🇦'; 'AU'='🇦🇺'; 'KR'='🇰🇷'; 'IN'='🇮🇳'; 'NL'='🇳🇱'
+    }
+    if ($flags.ContainsKey($upper)) { return $flags[$upper] }
+    try {
+        $chars = $upper.ToCharArray()
+        $cp1 = 0x1F1E6 + ([int]$chars[0] - [int][char]'A')
+        $cp2 = 0x1F1E6 + ([int]$chars[1] - [int][char]'A')
+        return [char]::ConvertFromUtf32($cp1) + [char]::ConvertFromUtf32($cp2)
+    } catch { return '🌐' }
+}
+
 function Convert-UiText([string]$Text) {
     if ($Language -ne 'en-US' -or [string]::IsNullOrEmpty($Text)) { return $Text }
     $exact = @{
         '尚未查询远端版本' = 'Remote version not checked'; '远端版本清单暂时不可达' = 'The remote version manifest is temporarily unavailable'
         'Node.js 版本管理器' = 'Node.js version manager'; '安装前置条件' = 'Installation prerequisite'
         'Codex 桌面客户端' = 'Codex desktop app'; 'OpenAI 官方 Windows 应用' = 'Official OpenAI Windows app'
-        'Codex 桌面应用' = 'Codex desktop app'; 'Codex 工具运行时' = 'Codex tool runtime'; 'Codex CLI / 子进程' = 'Codex CLI / child process'
+        'Codex 桌面客户端 (ChatGPT.exe)' = 'Codex desktop app (ChatGPT.exe)'
+        'Codex CLI' = 'Codex CLI'; 'Codex 代码执行宿主' = 'Codex code mode host'
         'Codex 客户端' = 'Codex clients'; '本机进程与当前配置' = 'Local processes and active configuration'
         '当前 Provider' = 'Active provider'; 'config.toml 的 model_provider' = 'model_provider in config.toml'
         '默认 Provider' = 'Default provider'; 'OpenAI 官方服务' = 'Official OpenAI service'
@@ -31,6 +48,21 @@ function Convert-UiText([string]$Text) {
         'Codex 已安装，但当前 Provider 的本地端点未就绪' = 'Codex is installed, but the local endpoint for the active provider is not ready'
         'Codex 客户端管理已就绪；扩展模块为可选项' = 'Codex client management is ready; extension modules are optional'
         '为保护凭据，不展示进程参数' = 'Process arguments are hidden to protect credentials'
+        '直连互联网 (Direct Connection)' = 'Direct Connection (No proxy)'
+        '流量经由物理网卡直连外网' = 'Traffic routes directly via physical network interface'
+        '本地网络代理出站' = 'Outbound via local network proxy'
+        '模型请求发起端' = 'Model inference client'
+        '直连官方模型通道，未经过本地二次转发' = 'Direct official channel, no local proxy forwarding'
+        'OpenAI 官方服务分发' = 'OpenAI Official Service'
+        '上游模型端点 (Upstream API)' = 'Upstream Model API'
+        '最终执行推理的大模型接入点' = 'Final LLM inference endpoint'
+        '本机网络栈' = 'Local Network Stack'
+        '应用程序发出的网络连接' = 'Outbound socket connection from apps'
+        '公网出口 (Public Egress)' = 'Public Egress'
+        '本地分发代理 (OpenCodex)' = 'Local Dispatch Proxy (OpenCodex)'
+        '请求经由 OpenCodex 本地分发服务转发' = 'Requests forwarded by local OpenCodex proxy service'
+        '家庭宽带 / 住宅' = 'Residential'
+        '机房 / 数据中心' = 'IDC / Data Center'
     }
     if ($exact.ContainsKey($Text)) { return $exact[$Text] }
     $Text = $Text -replace '正在运行', 'Running'
@@ -46,7 +78,6 @@ function Convert-UiText([string]$Text) {
     $Text = $Text -replace '^未在 PATH 中检测到 npm\.cmd，无法安装或升级组件$', 'npm.cmd was not found on PATH; components cannot be installed or upgraded'
     $Text = $Text -replace '^未检测到 OpenAI\.Codex 应用包$', 'The OpenAI.Codex app package was not detected'
     $Text = $Text -replace '^已安装，Codex 账号尚未登录$', 'Installed; the Codex account is signed out'
-    $Text = $Text -replace '^正在运行$', 'Running'
     $Text = $Text -replace '^已安装，当前未运行$', 'Installed; currently stopped'
     $Text = $Text -replace '^未检测到全局 npm 包$', 'The global npm package was not detected'
     $Text = $Text -replace '^已安装，但尚未登录账号$', 'Installed, but signed out'
@@ -62,6 +93,7 @@ function Convert-UiText([string]$Text) {
     $Text = $Text -replace '^已安装，但尚未登录 Tailnet$', 'Installed, but signed out of the Tailnet'
     $Text = $Text -replace '^未读取到 Tailnet 状态$', 'Tailnet status could not be read'
     $Text = $Text -replace '^监听进程 PID (\d+)$', 'Listening process PID $1'
+    $Text = $Text -replace '^Codex 运行支持进程 \((.+)\)$', 'Codex supporting process ($1)'
     return $Text
 }
 
@@ -115,7 +147,7 @@ function New-Component($Id, $Name, $Kind, $State, $Detail, $Installed, $Latest, 
         Id = $Id; Name = $Name; Kind = $Kind; State = $State; Detail = $Detail
         InstalledVersion = $Installed; LatestVersion = $Latest
         IsInstalled = ($Installed -ne '—'); IsRunning = [bool]$Running
-        AccountState = [string]$Account; CanManageService = [bool]$Manage
+        AccountState = [string]$Account; CanManageService = [bool]$Manage; RequiresAdmin = ($Id -eq 'tailscale')
     }
 }
 
@@ -145,59 +177,63 @@ $script:NpmExecutable = if ($nodeCommand) { Join-Path (Split-Path $nodeCommand.S
 $npmCommand = if ($script:NpmExecutable -and (Test-Path -LiteralPath $script:NpmExecutable)) { Get-Item -LiteralPath $script:NpmExecutable } else { $null }
 $nodeVersion = '—'
 if ($nodeCommand) {
-    try {
-        $nodeVersionText = (& $nodeCommand.Source --version 2>$null | Select-Object -First 1)
-        if ($nodeVersionText) { $nodeVersion = $nodeVersionText.ToString().Trim() -replace '^[^0-9]*','' }
-    } catch {}
+    $nodeRaw = Invoke-VersionCommand $nodeCommand.Source @('--version')
+    if ($nodeRaw -match '^v?(\d+\.\d+\.\d+)') { $nodeVersion = $matches[1] }
 }
-$npmVersion = '—'
-if ($npmCommand) {
-    try {
-        $npmPackageJson = Join-Path (Split-Path $nodeCommand.Source -Parent) 'node_modules\npm\package.json'
-        if (Test-Path -LiteralPath $npmPackageJson) {
-            $npmVersion = [string](Get-Content -Raw -LiteralPath $npmPackageJson -Encoding UTF8 | ConvertFrom-Json).version
-        } else {
-            $npmVersionText = (& $script:NpmExecutable --version 2>$null | Select-Object -First 1)
-            if ($npmVersionText) { $npmVersion = $npmVersionText.ToString().Trim() }
-        }
-    } catch {}
-}
-$nodeOk = $false
-if ($nodeVersion -ne '—') {
-    try { $nodeOk = [version]($nodeVersion -replace '-.*$', '') -ge [version]'22.14.0' } catch {}
-}
-$npmOk = $npmVersion -ne '—'
+$nodeOk = ($nodeVersion -ne '—') -and ([version]$nodeVersion -ge [version]'22.14.0')
+$npmVersion = if ($npmCommand) { Invoke-VersionCommand $script:NpmExecutable @('--version') } else { '—' }
+$npmOk = ($npmVersion -ne '—')
 
-$codexVersion = if ($npmOk) { Get-NpmGlobalPackageVersion '@openai/codex' } else { '—' }
+$desktopPackage = Get-AppxPackage -Name 'OpenAI.Codex' -ErrorAction SilentlyContinue | Select-Object -First 1
+$desktopVersion = if ($desktopPackage) { [string]$desktopPackage.Version } else { '—' }
+$desktopProcesses = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.Name -eq 'ChatGPT.exe' -and $_.ExecutablePath -match '(?i)OpenAI\.Codex'
+})
+$desktopRunning = ($desktopProcesses.Count -gt 0)
+
+$codexVersion = Get-NpmGlobalPackageVersion '@openai/codex'
 $codexAccount = 'NotApplicable'
 if ($codexVersion -ne '—') {
     try {
-        $loginStatus = (& cmd.exe /d /c 'codex login status 2>&1' | Out-String).Trim()
-        $codexAccount = if ($loginStatus -match '(?i)logged in using') { 'SignedIn' } elseif ($loginStatus -match '(?i)not logged in') { 'SignedOut' } else { 'Unknown' }
+        $statusText = (& codex login status 2>&1 | Out-String).Trim()
+        if ($statusText -match 'Logged in') { $codexAccount = 'SignedIn' }
+        elseif ($statusText -match 'Not logged in') { $codexAccount = 'SignedOut' }
+        else { $codexAccount = 'Unknown' }
     } catch { $codexAccount = 'Unknown' }
 }
-$openCodexVersion = if ($npmOk) { Get-NpmGlobalPackageVersion '@bitkyc08/opencodex' } else { '—' }
-$relayPackage = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\package.json'
+
+$openCodexVersion = Get-NpmGlobalPackageVersion '@bitkyc08/opencodex'
+$proxyPorts = @()
+foreach ($port in @(10100, 51863)) { if (Test-Port $port) { $proxyPorts += $port } }
+$proxyTaskState = Get-TaskState $settings.ProxyTaskName
+
 $relayVersion = '—'
-if (Test-Path -LiteralPath $relayPackage) {
-    try { $relayVersion = [string](Get-Content -Raw -LiteralPath $relayPackage -Encoding UTF8 | ConvertFrom-Json).version } catch {}
+$relayPackageJson = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\package.json'
+if (Test-Path -LiteralPath $relayPackageJson) {
+    try { $relayVersion = [string]((Get-Content -Raw -LiteralPath $relayPackageJson | ConvertFrom-Json).version) } catch {}
+}
+if ($relayVersion -eq '—') { $relayVersion = Get-NpmGlobalPackageVersion 'codex-relay' }
+$relayListening = Test-Port 8787
+$relayTaskState = Get-TaskState $settings.RelayTaskName
+
+$tailService = Get-Service -Name 'Tailscale' -ErrorAction SilentlyContinue
+$tailVersion = '—'
+$tailCommand = Get-Command tailscale.exe -ErrorAction SilentlyContinue
+if ($tailCommand) {
+    $tailRaw = Invoke-VersionCommand $tailCommand.Source @('version')
+    if ($tailRaw -match '^([0-9.]+)') { $tailVersion = $matches[1] }
+}
+$tailJson = $null
+$tailAccount = 'NotApplicable'
+if ($tailCommand) {
+    try {
+        $tailJson = & $tailCommand.Source status --json 2>$null | Out-String | ConvertFrom-Json
+        if ($tailJson.BackendState -eq 'Running') { $tailAccount = 'SignedIn' }
+        elseif ($tailJson.BackendState -in @('NeedsLogin','Stopped')) { $tailAccount = 'SignedOut' }
+        else { $tailAccount = 'Unknown' }
+    } catch {}
 }
 
-$relayTaskState = Get-TaskState $settings.RelayTaskName
-$proxyTaskState = Get-TaskState $settings.ProxyTaskName
-$relayListening = Test-Port 8787
-$proxyPorts = @(@(10100) | Where-Object { Test-Port $_ })
-
-$tailVersion = Invoke-VersionCommand 'tailscale.exe' @('version')
-$tailService = Get-Service -Name 'Tailscale' -ErrorAction SilentlyContinue
-$tailJson = $null
-try { $tailJson = (& tailscale.exe status --json 2>$null | Out-String | ConvertFrom-Json) } catch {}
-$tailAccount = if ($tailVersion -eq '—') { 'NotApplicable' } elseif ($tailJson -and $tailJson.BackendState -eq 'Running') { 'SignedIn' } elseif ($tailJson -and $tailJson.BackendState -in @('NeedsLogin','NoState')) { 'SignedOut' } else { 'Unknown' }
-$desktopPackage = Get-AppxPackage -Name 'OpenAI.Codex' -ErrorAction SilentlyContinue | Select-Object -First 1
-$desktopVersion = if ($desktopPackage) { [string]$desktopPackage.Version } else { '—' }
-$desktopRunning = [bool](Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-    $_.ExecutablePath -match '(?i)WindowsApps[\\/]OpenAI\.Codex_[^\\/]+' -and $_.Name -eq 'ChatGPT.exe'
-} | Select-Object -First 1)
 $desktopLatest = '—'
 $desktopVersionEvidence = '尚未查询远端版本'
 if ($IncludeLatest) {
@@ -221,29 +257,37 @@ $components += New-Component 'opencodex' 'OpenCodex Proxy' 'npm · @bitkyc08/ope
 $components += New-Component 'relay' 'Codex Relay' 'npm · codex-relay' $(if ($relayListening) { 'Healthy' } elseif ($relayTaskState -eq 'Running') { 'Warning' } elseif ($relayVersion -eq '—') { 'Unavailable' } else { 'Stopped' }) $(if ($relayListening) { "127.0.0.1:8787 正在监听 · 计划任务 $relayTaskState" } elseif ($relayTaskState -eq 'NotInstalled' -and $relayVersion -ne '—') { '包已安装；点击启动可使用官方后台模式' } else { "端口 8787 未监听 · 计划任务 $relayTaskState" }) $relayVersion $(Get-NpmLatest 'codex-relay') $true $relayListening
 $components += New-Component 'tailscale' 'Tailscale' 'Windows 网络服务' $(if ($tailVersion -eq '—') { 'Unavailable' } elseif ($tailAccount -eq 'SignedOut') { 'Warning' } elseif ($tailJson -and $tailJson.Self.Online) { 'Healthy' } else { 'Stopped' }) $(if ($tailVersion -eq '—') { '未安装 Tailscale' } elseif ($tailAccount -eq 'SignedOut') { '已安装，但尚未登录 Tailnet' } elseif ($tailJson) { "$($tailJson.Self.HostName) · $($tailJson.Self.TailscaleIPs -join ', ')" } else { '未读取到 Tailnet 状态' }) $tailVersion $(Get-GitHubLatest 'tailscale/tailscale') $true ($tailService.Status -eq 'Running') $tailAccount
 
-# Include explicit Codex processes and descendants of the Codex desktop process.
 $allProcesses = @(Get-CimInstance Win32_Process)
 $byId = @{}
 foreach ($p in $allProcesses) { $byId[[int]$p.ProcessId] = $p }
-function Test-CodexProcess($Process) {
-    if (-not $Process) { return $false }
-    $identity = "$($Process.Name) $($Process.ExecutablePath) $($Process.CommandLine)"
-    if ($identity -match 'CodexBeacon|CodexServiceManager|Collect-CodexStatus') { return $false }
-    if ($identity -match '(?i)OpenAI\.Codex|@openai[\\/]codex|@bitkyc08[\\/]opencodex|codex-relay|codex\.exe|codex-cli|node_repl') { return $true }
-    $parent = $byId[[int]$Process.ParentProcessId]
-    if ($parent) {
-        $parentIdentity = "$($parent.Name) $($parent.ExecutablePath) $($parent.CommandLine)"
-        return $parentIdentity -match '(?i)OpenAI\.Codex|@openai[\\/]codex|@bitkyc08[\\/]opencodex|codex-relay'
-    }
-    return $false
-}
-
 $processes = @()
 foreach ($p in $allProcesses) {
-    if (-not (Test-CodexProcess $p)) { continue }
+    if (-not $p) { continue }
     $identity = "$($p.Name) $($p.ExecutablePath) $($p.CommandLine)"
-    $role = if ($identity -match '(?i)codex-relay') { 'Codex Relay' } elseif ($identity -match '(?i)opencodex|10100|51863') { 'OpenCodex Proxy' } elseif ($identity -match '(?i)OpenAI\.Codex') { 'Codex 桌面应用' } elseif ($identity -match '(?i)node_repl') { 'Codex 工具运行时' } else { 'Codex CLI / 子进程' }
-    $version = if ($role -eq 'Codex Relay') { $relayVersion } elseif ($role -eq 'OpenCodex Proxy') { $openCodexVersion } elseif ($role -like 'Codex CLI*') { $codexVersion } else { '—' }
+    if ($identity -match 'CodexBeacon|CodexServiceManager|Collect-CodexStatus') { continue }
+    $isDesktop = $p.Name -eq 'ChatGPT.exe' -and $p.ExecutablePath -match '(?i)OpenAI\.Codex'
+    $isCli = $p.Name -eq 'codex.exe' -or $p.Name -eq 'codex-code-mode-host.exe'
+    $isRelay = $identity -match '(?i)codex-relay'
+    $isProxy = $identity -match '(?i)@bitkyc08[\\/]opencodex|opencodex-proxy'
+    if (-not ($isDesktop -or $isCli -or $isRelay -or $isProxy)) {
+        $parent = $byId[[int]$p.ParentProcessId]
+        if ($parent) {
+            $parentDesktop = $parent.Name -eq 'ChatGPT.exe' -and $parent.ExecutablePath -match '(?i)OpenAI\.Codex'
+            $parentCli = $parent.Name -eq 'codex.exe'
+            if (-not ($parentDesktop -or $parentCli)) { continue }
+        } else { continue }
+    }
+    $role = if ($isDesktop) { 'Codex 桌面客户端 (ChatGPT.exe)' }
+            elseif ($p.Name -eq 'codex.exe') { 'Codex CLI' }
+            elseif ($p.Name -eq 'codex-code-mode-host.exe') { 'Codex 代码执行宿主' }
+            elseif ($isProxy) { 'OpenCodex Proxy' }
+            elseif ($isRelay) { 'Codex Relay' }
+            else { "Codex 运行支持进程 ($($p.Name))" }
+    $version = if ($isDesktop) { $desktopVersion }
+               elseif ($isCli -or $role -like '*CLI*') { $codexVersion }
+               elseif ($isProxy) { $openCodexVersion }
+               elseif ($isRelay) { $relayVersion }
+               else { '—' }
     if ($p.ExecutablePath -and (Test-Path -LiteralPath $p.ExecutablePath)) {
         try {
             $fileVersion = [Diagnostics.FileVersionInfo]::GetVersionInfo($p.ExecutablePath).FileVersion
@@ -270,6 +314,46 @@ foreach ($line in $configLines) {
     if ($line -match '^\s*\[model_providers\.([^\]]+)\]') { $activeSection = $matches[1] -eq $selectedProvider; continue }
     if ($activeSection -and $line -match '^\s*base_url\s*=\s*["'']([^"'']+)["'']') { $activeUrl = $matches[1]; break }
 }
+
+$modelFlow = @()
+$modelFlow += [ordered]@{
+    Title = 'Codex 客户端'
+    Subtitle = $(if ($desktopRunning) { 'ChatGPT.exe 正在运行' } else { 'OpenAI.Codex / CLI' })
+    Detail = '模型请求发起端'
+    State = $(if ($desktopRunning -or $codexVersion -ne '—') { 'Healthy' } else { 'Stopped' })
+    IconGlyph = [char]0xE756
+    IsLast = $false
+}
+if ($selectedProvider -and $selectedProvider -ne 'openai') {
+    $providerRunning = ($proxyPorts.Count -gt 0) -or ($activeUrl -match '127\.0\.0\.1:10100' -and (Test-Port 10100))
+    $modelFlow += [ordered]@{
+        Title = "本地分发代理 ($selectedProvider)"
+        Subtitle = $(if ($activeUrl) { $activeUrl } else { 'http://127.0.0.1:10100/v1' })
+        Detail = '请求经由 OpenCodex 本地分发服务转发'
+        State = $(if ($providerRunning) { 'Healthy' } else { 'Warning' })
+        IconGlyph = [char]0xE968
+        IsLast = $false
+    }
+} else {
+    $modelFlow += [ordered]@{
+        Title = 'OpenAI 官方服务分发'
+        Subtitle = 'Direct Provider'
+        Detail = '直连官方模型通道，未经过本地二次转发'
+        State = 'Healthy'
+        IconGlyph = [char]0xE774
+        IsLast = $false
+    }
+}
+$upstreamTarget = if ($activeUrl) { $activeUrl } else { 'https://api.openai.com/v1' }
+$modelFlow += [ordered]@{
+    Title = '上游模型端点 (Upstream API)'
+    Subtitle = $upstreamTarget
+    Detail = '最终执行推理的大模型接入点'
+    State = 'Healthy'
+    IconGlyph = [char]0xE909
+    IsLast = $true
+}
+
 $proxyHops = @([ordered]@{ Order = 1; Name = 'Codex 客户端'; Address = 'OpenAI.Codex / Codex CLI'; State = 'Healthy'; Evidence = '本机进程与当前配置' })
 if ($selectedProvider) {
     $proxyHops += [ordered]@{ Order = 2; Name = '当前 Provider'; Address = $selectedProvider; State = 'Healthy'; Evidence = 'config.toml 的 model_provider' }
@@ -283,6 +367,102 @@ if ($activeUrl) {
     $owner = if ($listener) { Get-CimInstance Win32_Process -Filter "ProcessId=$($listener.OwningProcess)" -ErrorAction SilentlyContinue } else { $null }
     if ($owner) { $activeOwnerPid = [int]$owner.ProcessId }
     $proxyHops += [ordered]@{ Order = $proxyHops.Count + 1; Name = $(if ($owner) { [IO.Path]::GetFileNameWithoutExtension($owner.Name) } else { 'Provider 端点' }); Address = $activeUrl; State = $(if ($listener -or ($uri -and -not $uri.IsLoopback)) { 'Healthy' } else { 'Warning' }); Evidence = $(if ($owner) { "监听进程 PID $($owner.ProcessId)" } else { '当前 provider 的 base_url' }) }
+}
+
+$detectedProxy = ''
+try {
+    $reg = Get-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -ErrorAction SilentlyContinue
+    if ($reg -and $reg.ProxyEnable -eq 1 -and $reg.ProxyServer) { $detectedProxy = [string]$reg.ProxyServer }
+} catch {}
+if (-not $detectedProxy) {
+    if ($env:ALL_PROXY) { $detectedProxy = $env:ALL_PROXY }
+    elseif ($env:HTTPS_PROXY) { $detectedProxy = $env:HTTPS_PROXY }
+    elseif ($env:HTTP_PROXY) { $detectedProxy = $env:HTTP_PROXY }
+}
+if ($detectedProxy) { $detectedProxy = $detectedProxy -replace '^https?://','' -replace '^socks5?://','' }
+
+$publicEgress = @()
+if ($IncludeLatest) {
+    try {
+        $ipData = Invoke-RestMethod -Uri 'http://ip-api.com/json/?fields=status,country,countryCode,regionName,city,isp,org,as,hosting,query' -TimeoutSec 6 -UseBasicParsing
+        if ($ipData.status -eq 'success' -and $ipData.query) {
+            $flag = Get-CountryFlag $ipData.countryCode
+            $lineType = if ($ipData.hosting) { 'IDC' } else { 'Residential' }
+            $publicEgress += [ordered]@{
+                Address = [string]$ipData.query
+                Route = '系统默认网络路径'
+                Evidence = 'ip-api.com'
+                CheckedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+                Country = [string]$ipData.country
+                CountryCode = [string]$ipData.countryCode
+                FlagEmoji = $flag
+                Region = [string]$ipData.regionName
+                City = [string]$ipData.city
+                Isp = [string]$ipData.isp
+                Org = [string]$ipData.org
+                AsNumber = [string]$ipData.as
+                LineType = $lineType
+            }
+        }
+    } catch {}
+    if ($publicEgress.Count -eq 0) {
+        try {
+            $ipResult = Invoke-RestMethod -Uri 'https://api64.ipify.org?format=json' -TimeoutSec 6 -UseBasicParsing
+            if ($ipResult.ip) {
+                $publicEgress += [ordered]@{
+                    Address = [string]$ipResult.ip; Route = '系统默认网络路径'; Evidence = 'api64.ipify.org'
+                    CheckedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
+                    Country = '—'; CountryCode = ''; FlagEmoji = '🌐'; Region = ''; City = ''
+                    Isp = '—'; Org = ''; AsNumber = ''; LineType = 'Residential'
+                }
+            }
+        } catch {}
+    }
+}
+
+$networkFlow = @()
+$networkFlow += [ordered]@{
+    Title = '本机网络栈'
+    Subtitle = 'Local Stack'
+    Detail = '应用程序发出的网络连接'
+    State = 'Healthy'
+    IconGlyph = [char]0xE770
+    IsLast = $false
+}
+if ($detectedProxy) {
+    $proxyPort = 0
+    if ($detectedProxy -match ':(d+)') { $proxyPort = [int]$matches[1] }
+    $proxyUp = if ($proxyPort) { Test-Port $proxyPort } else { $true }
+    $networkFlow += [ordered]@{
+        Title = "本地网络代理 ($detectedProxy)"
+        Subtitle = $(if ($proxyUp) { '代理监听正常' } else { '代理端口未监听' })
+        Detail = '本地网络代理出站'
+        State = $(if ($proxyUp) { 'Healthy' } else { 'Warning' })
+        IconGlyph = [char]0xE72E
+        IsLast = $false
+    }
+} else {
+    $networkFlow += [ordered]@{
+        Title = '直连互联网 (Direct Connection)'
+        Subtitle = '未启用系统代理'
+        Detail = '流量经由物理网卡直连外网'
+        State = 'Healthy'
+        IconGlyph = [char]0xE839
+        IsLast = $false
+    }
+}
+$egressIp = if ($publicEgress.Count -gt 0) { $publicEgress[0].Address } else { '按需动态路由' }
+$egressDetail = if ($publicEgress.Count -gt 0) {
+    $p = $publicEgress[0]
+    "$($p.FlagEmoji) $($p.Country) $($p.City) · $($p.Isp)"
+} else { '公网出口' }
+$networkFlow += [ordered]@{
+    Title = '公网出口 (Public Egress)'
+    Subtitle = $egressIp
+    Detail = $egressDetail
+    State = 'Healthy'
+    IconGlyph = [char]0xE909
+    IsLast = $true
 }
 
 $externalConnections = @()
@@ -316,14 +496,6 @@ foreach ($line in $configLines) {
     }
 }
 
-$publicEgress = @()
-if ($IncludeLatest) {
-    try {
-        $ipResult = Invoke-RestMethod -Uri 'https://api64.ipify.org?format=json' -TimeoutSec 6 -UseBasicParsing
-        if ($ipResult.ip) { $publicEgress += [ordered]@{ Address = [string]$ipResult.ip; Route = '系统默认网络路径'; Evidence = 'api64.ipify.org 从外部观察'; CheckedAt = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss') } }
-    } catch {}
-}
-
 $tailDevices = @()
 if ($tailJson) {
     $nodes = @($tailJson.Self) + @($tailJson.Peer.PSObject.Properties.Value)
@@ -343,7 +515,7 @@ $snapshot = [ordered]@{
     CollectedAt = (Get-Date).ToString('o')
     OverallState = $(if (-not $coreInstalled) { 'Stopped' } elseif ($routeNeedsAttention) { 'Warning' } else { 'Healthy' })
     OverallMessage = $(if (-not $coreInstalled) { '未检测到 Codex 桌面客户端或 Codex CLI' } elseif ($routeNeedsAttention) { 'Codex 已安装，但当前 Provider 的本地端点未就绪' } else { 'Codex 客户端管理已就绪；扩展模块为可选项' })
-    Components = $components; Processes = $processes; ProxyChain = $proxyHops; CandidateEndpoints = $candidateEndpoints; ExternalConnections = $externalConnections; PublicEgress = $publicEgress; TailscaleDevices = $tailDevices; NodeVersions = $nodeVersions; Error = $null
+    Components = $components; Processes = $processes; ProxyChain = $proxyHops; CandidateEndpoints = $candidateEndpoints; ExternalConnections = $externalConnections; PublicEgress = $publicEgress; TailscaleDevices = $tailDevices; NodeVersions = $nodeVersions; ModelFlow = $modelFlow; NetworkFlow = $networkFlow; Error = $null
 }
 if ($Language -eq 'en-US') {
     $snapshot.OverallMessage = Convert-UiText $snapshot.OverallMessage
@@ -354,5 +526,7 @@ if ($Language -eq 'en-US') {
     foreach ($item in $snapshot.ExternalConnections) { $item.Role = Convert-UiText $item.Role }
     foreach ($item in $snapshot.PublicEgress) { $item.Route = Convert-UiText $item.Route; $item.Evidence = Convert-UiText $item.Evidence }
     foreach ($item in $snapshot.TailscaleDevices) { $item.LastSeen = Convert-UiText $item.LastSeen }
+    foreach ($item in $snapshot.ModelFlow) { $item.Title = Convert-UiText $item.Title; $item.Subtitle = Convert-UiText $item.Subtitle; $item.Detail = Convert-UiText $item.Detail }
+    foreach ($item in $snapshot.NetworkFlow) { $item.Title = Convert-UiText $item.Title; $item.Subtitle = Convert-UiText $item.Subtitle; $item.Detail = Convert-UiText $item.Detail }
 }
 $snapshot | ConvertTo-Json -Depth 7 -Compress

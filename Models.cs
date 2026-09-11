@@ -17,7 +17,42 @@ public sealed class SystemSnapshot
     public List<ProxyHop> CandidateEndpoints { get; set; } = [];
     public List<ExternalConnection> ExternalConnections { get; set; } = [];
     public List<PublicEgress> PublicEgress { get; set; } = [];
+    public List<FlowStep> ModelFlow { get; set; } = [];
+    public List<FlowStep> NetworkFlow { get; set; } = [];
     public string? Error { get; set; }
+}
+
+public sealed class FlowStep
+{
+    public string Title { get; set; } = "";
+    public string Subtitle { get; set; } = "";
+    public string Detail { get; set; } = "";
+    public string State { get; set; } = "Healthy";
+    public string IconGlyph { get; set; } = "\uE968";
+    public bool IsLast { get; set; }
+    [JsonIgnore]
+    public Microsoft.UI.Xaml.Visibility ArrowVisibility => IsLast ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
+    [JsonIgnore]
+    public SolidColorBrush StateBrush => State switch
+    {
+        "Healthy" => Brush("#087F5B"),
+        "Warning" => Brush("#9A6700"),
+        "Stopped" => Brush("#536171"),
+        _ => Brush("#B42318")
+    };
+    [JsonIgnore]
+    public SolidColorBrush StateBackground => State switch
+    {
+        "Healthy" => Brush("#E5F6EF"),
+        "Warning" => Brush("#FFF4CE"),
+        "Stopped" => Brush("#EEF1F4"),
+        _ => Brush("#FFF0EE")
+    };
+    private static SolidColorBrush Brush(string hex)
+    {
+        var value = hex.TrimStart('#');
+        return new(Color.FromArgb(255, Convert.ToByte(value[..2], 16), Convert.ToByte(value[2..4], 16), Convert.ToByte(value[4..6], 16)));
+    }
 }
 
 public sealed class ExternalConnection
@@ -37,6 +72,21 @@ public sealed class PublicEgress
     public string Route { get; set; } = "";
     public string Evidence { get; set; } = "";
     public string CheckedAt { get; set; } = "";
+    public string Country { get; set; } = "";
+    public string CountryCode { get; set; } = "";
+    public string FlagEmoji { get; set; } = "";
+    public string Region { get; set; } = "";
+    public string City { get; set; } = "";
+    public string Isp { get; set; } = "";
+    public string Org { get; set; } = "";
+    public string AsNumber { get; set; } = "";
+    public string LineType { get; set; } = "Residential";
+    [JsonIgnore]
+    public string LineTypeLabel => LineType == "IDC" ? Localization.Get("LineTypeIDC") : Localization.Get("LineTypeResidential");
+    [JsonIgnore]
+    public string LocationSummary => string.IsNullOrEmpty(City) ? $"{FlagEmoji} {Country}".Trim() : $"{FlagEmoji} {Country} · {City}".Trim();
+    [JsonIgnore]
+    public string IspSummary => string.IsNullOrEmpty(Org) ? (string.IsNullOrEmpty(Isp) ? "—" : Isp) : $"{Isp} ({Org})";
 }
 
 public sealed class NodeRuntime
@@ -59,6 +109,9 @@ public sealed class ComponentStatus
     public bool IsRunning { get; set; }
     public string AccountState { get; set; } = "NotApplicable";
     public bool CanManageService { get; set; }
+    public bool RequiresAdmin { get; set; }
+    [JsonIgnore]
+    public Microsoft.UI.Xaml.Visibility AdminBadgeVisibility => RequiresAdmin ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
     [JsonIgnore]
     public bool CanInstall { get; set; }
     [JsonIgnore]

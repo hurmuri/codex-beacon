@@ -85,8 +85,25 @@ dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true 
 
 ## 权限与安全边界
 
-- 普通检测不需要管理员权限。
-- NVM 切换、Windows 服务控制或全局 npm 安装是否需要管理员权限取决于本机安装方式；失败时应用会显示原因，不会自动绕过 UAC。
+### 默认非管理员模式（推荐）
+
+Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心功能在标准普通用户权限下均可完整运行：
+- 实时探测 Codex 客户端、CLI、OpenCodex、Relay 运行状态与双层数据流动路径；
+- 查询公网出口 IP、归属地、运营商及网络代理类型；
+- 查看所有 Codex / ChatGPT 运行进程，一键终止进程与重新拉起 ChatGPT 客户端；
+- 检测 NVM 与 Node.js 运行时环境。
+
+### 需管理员权限的操作（界面带有 🛡️ 盾牌标识）
+
+在 Windows 系统中，以下特定操作可能受 UAC 访问控制限制：
+1. **Tailscale 系统服务控制**：通过 Windows 服务管理器启动、停止或重启 Tailscale 本地系统服务时，需要管理员权限；
+2. **NVM 全局切换 Node.js（特定安装目录）**：若 NVM 将 Node 软链接安装在 `C:\Program Files\nodejs` 等系统保护目录，执行 `nvm use` 切换版本需管理员权限（若 NVM 安装在自定义数据盘或用户目录，则无需提权）；
+3. **系统级计划任务注册**：若配置运行于系统服务账户下的计划任务，需要管理员权限。
+
+### 权限区分与错误反馈
+
+应用内部严禁任何静默提权行为。当非管理员身份执行上述受限操作时，系统会明确捕获权限不足提示，并在界面状态栏指引用户“以管理员身份运行 Codex Beacon”重试。
+
 - 不读取或显示 Token、授权头、密码、Cookie 和 API 密钥。
 - “远端服务 IP”是进程建立连接的目标，不等于本机公网出口 IP；界面会分开显示。
 - Codex 桌面客户端当前版本来自本机 `OpenAI.Codex` MSIX/AppX 包。最新 Windows 包版本来自 Codex App Mirror 清单；该项目同步 Microsoft Store 产品 `9PLM9XGG6VKS`。界面明确标注来源，安装和升级始终打开官方 Microsoft Store 页面。

@@ -17,6 +17,9 @@ public sealed partial class MainWindow : Window
     private AppSettings _settings;
 
     public ObservableCollection<ComponentStatus> Components { get; } = [];
+    public ObservableCollection<ComponentStatus> CoreComponents { get; } = [];
+    public ObservableCollection<FlowStep> ModelFlowSteps { get; } = [];
+    public ObservableCollection<FlowStep> NetworkFlowSteps { get; } = [];
     public ObservableCollection<ComponentStatus> InstallableComponents { get; } = [];
     public ObservableCollection<ProcessRecord> Processes { get; } = [];
     public ObservableCollection<ProxyHop> ProxyHops { get; } = [];
@@ -100,6 +103,9 @@ public sealed partial class MainWindow : Window
         var tailscale = snapshot.Components.FirstOrDefault(x => x.Id == "tailscale");
         if (tailscale is not null) tailscale.CanInstall = !tailscale.IsInstalled;
         Replace(Components, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "opencodex" or "relay" or "tailscale"));
+        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "opencodex" or "relay"));
+        Replace(ModelFlowSteps, snapshot.ModelFlow);
+        Replace(NetworkFlowSteps, snapshot.NetworkFlow);
         Replace(Processes, snapshot.Processes.OrderBy(x => x.Role).ThenBy(x => x.Pid));
         Replace(ProxyHops, snapshot.ProxyChain.OrderBy(x => x.Order));
         Replace(TailnetDevices, snapshot.TailscaleDevices.OrderByDescending(x => x.IsSelf).ThenByDescending(x => x.Online).ThenBy(x => x.Name));
@@ -158,6 +164,7 @@ public sealed partial class MainWindow : Window
         DashboardPage.Visibility = tag == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         ProcessesPage.Visibility = tag == "processes" ? Visibility.Visible : Visibility.Collapsed;
         NetworkPage.Visibility = tag == "network" ? Visibility.Visible : Visibility.Collapsed;
+        TailscalePage.Visibility = tag == "tailscale" ? Visibility.Visible : Visibility.Collapsed;
         InstallationsPage.Visibility = tag == "installations" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPage.Visibility = tag == "settings" ? Visibility.Visible : Visibility.Collapsed;
     }
@@ -194,6 +201,34 @@ public sealed partial class MainWindow : Window
         };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)
             await RunActionAsync("all", action == "kill" ? "kill" : "restart", Localization.Get(restarting ? "RestartingServices" : "TerminatingServices"));
+    }
+
+    private async void KillCodexProcesses_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = Content.XamlRoot,
+            Title = Localization.Get("KillCodexProcessesTitle"),
+            Content = Localization.Get("KillCodexProcessesBody"),
+            PrimaryButtonText = Localization.Get("KillCodexProcessesButton"),
+            CloseButtonText = Localization.Get("Cancel"),
+            DefaultButton = ContentDialogButton.Close
+        };
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await RunActionAsync("desktop", "kill", Localization.Get("KillCodexBusy"));
+        }
+    }
+
+    private async void RestartDesktopApp_Click(object sender, RoutedEventArgs e)
+    {
+        await RunActionAsync("desktop", "restart", Localization.Get("RestartDesktopBusy"));
+    }
+
+    private async void TailscaleServiceAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not FrameworkElement { Tag: string action }) return;
+        await RunActionAsync("tailscale", action, Localization.Format("RunningAction", ActionName(action), "Tailscale"));
     }
 
     private async Task RunActionAsync(string component, string action, string busyMessage)

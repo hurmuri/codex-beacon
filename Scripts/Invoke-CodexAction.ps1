@@ -52,8 +52,12 @@ function Convert-ActionText([string]$Text) {
         'Codex Relay 已启动' = 'Codex Relay started'; 'Codex Relay 已停止' = 'Codex Relay stopped'; 'Codex Relay 已重新启动' = 'Codex Relay restarted'
         'OpenCodex 尚未安装。请先完成安装。' = 'OpenCodex is not installed. Complete installation first.'
         '操作未完成' = 'Action did not complete'
+        '所有 Codex / ChatGPT 进程已关闭' = 'All Codex and ChatGPT processes terminated'
+        'ChatGPT 桌面客户端已重新启动' = 'ChatGPT desktop app restarted'
+        '已清理旧进程并重新拉起应用。' = 'Cleaned up stale processes and restarted the app.'
     }
     if ($exact.ContainsKey($Text)) { return $exact[$Text] }
+    $Text = $Text -replace '^已终止 (\d+) 个相关进程。$', 'Terminated $1 related process(es).' 
     $Text = $Text -replace '^Node\.js (.+) 版本过低；需要 22\.14\.0 或更高版本。$', 'Node.js $1 is too old; version 22.14.0 or newer is required.'
     $Text = $Text -replace '^未找到计划任务 \[(.+)\]。请先完成对应服务安装。$', 'Scheduled task [$1] was not found. Install the corresponding service first.'
     $Text = $Text -replace '^Node\.js (.+) 已安装$', 'Node.js $1 installed'
@@ -118,8 +122,9 @@ function Invoke-Relay([string[]]$Arguments) {
 function Stop-CodexDesktop {
     $count = 0
     foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-        $_.ExecutablePath -match '(?i)WindowsApps[\\/]OpenAI\.Codex_[^\\/]+'
+        ($_.ExecutablePath -match '(?i)WindowsApps[\\/]OpenAI\.Codex_[^\\/]+') -or ($_.Name -in @('ChatGPT.exe','codex.exe','codex-code-mode-host.exe'))
     })) {
+        if ($p.ExecutablePath -match 'CodexBeacon|CodexServiceManager') { continue }
         Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
         $count++
     }
@@ -185,13 +190,13 @@ try {
             Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
             Result $true 'Codex 桌面客户端已启动'
         } elseif ($Action -in @('stop','kill')) {
-            Stop-CodexDesktop | Out-Null
-            Result $true 'Codex 桌面客户端已关闭'
+            $count = Stop-CodexDesktop
+            Result $true '所有 Codex / ChatGPT 进程已关闭' "已终止 $count 个相关进程。"
         } elseif ($Action -eq 'restart') {
-            Stop-CodexDesktop | Out-Null
+            $count = Stop-CodexDesktop
             Start-Sleep -Milliseconds 800
             Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
-            Result $true 'Codex 桌面客户端已重新启动'
+            Result $true 'ChatGPT 桌面客户端已重新启动' "已清理旧进程并重新拉起应用。"
         }
         exit 0
     }

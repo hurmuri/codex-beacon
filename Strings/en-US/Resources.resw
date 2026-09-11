@@ -160,4 +160,15 @@
   <data name="ActionLoginName" xml:space="preserve"><value>opening sign-in for</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>processing</value></data>
   <data name="RunningAction" xml:space="preserve"><value>{0} {1}…</value></data>
+  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
+  <data name="DataFlowHeading.Text" xml:space="preserve"><value>Live Data Flow Architecture</value></data>
+  <data name="ModelPipelineHeading.Text" xml:space="preserve"><value>Model Dispatch Pipeline</value></data>
+  <data name="NetworkPipelineHeading.Text" xml:space="preserve"><value>Network Transport &amp; Proxy</value></data>
+  <data name="LineTypeIDC" xml:space="preserve"><value>IDC / Hosting</value></data>
+  <data name="LineTypeResidential" xml:space="preserve"><value>Residential / ISP</value></data>
+  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>Terminate all Codex / ChatGPT processes?</value></data>
+  <data name="KillCodexProcessesBody" xml:space="preserve"><value>Forces all ChatGPT.exe, codex.exe, code mode hosts, and runtime worker processes to exit. Codex Beacon stays open.</value></data>
+  <data name="KillCodexProcessesButton" xml:space="preserve"><value>Terminate all</value></data>
+  <data name="KillCodexBusy" xml:space="preserve"><value>Terminating all Codex and ChatGPT processes…</value></data>
+  <data name="RestartDesktopBusy" xml:space="preserve"><value>Cleaning up and restarting ChatGPT desktop app…</value></data>
 </root>

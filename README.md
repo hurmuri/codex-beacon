@@ -88,8 +88,23 @@ dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true 
 
 ## Permissions and safety boundaries
 
-- Routine inspection does not require administrator privileges.
-- NVM switching, Windows service control, and global npm installation may require elevated permissions depending on how the local tools were installed. Codex Beacon reports the failure and never bypasses UAC silently.
+### Standard Non-Admin Mode (Recommended)
+
+Codex Beacon is designed to run **without administrator privileges** by default:
+- Live detection of Codex desktop, CLI, OpenCodex, and Relay status and dual-layer data flow pipelines;
+- Querying public egress IP, geographical location, ISP, and outbound proxy type;
+- Inspecting all running Codex and ChatGPT processes, with one-click termination and app restart;
+- Detecting NVM and Node.js runtime environments.
+
+### Operations Requiring Administrator Privileges (Marked with 🛡️)
+
+The following specific actions may require UAC elevation on Windows:
+1. **Tailscale System Service Control**: Starting, stopping, or restarting the Tailscale Windows service requires administrative access;
+2. **NVM Global Version Switching (Protected Paths)**: If NVM creates symlinks under protected directories such as `C:\Program Files\nodejs`, switching versions requires administrator rights (unrestricted if NVM is installed under a user path);
+3. **System Scheduled Tasks**: Registering or updating tasks running under system service accounts.
+
+Codex Beacon never elevates silently. When an operation fails due to insufficient privileges, it provides an actionable error message prompting the user to restart as administrator if needed.
+
 - Tokens, authorization headers, passwords, cookies, and API keys are never read or displayed.
 - A remote service IP is a process destination, not the machine's public egress IP. The UI displays them separately.
 - The installed Codex desktop version comes from the local `OpenAI.Codex` MSIX/AppX package. The latest Windows package version comes from the Codex App Mirror manifest, which mirrors Microsoft Store product `9PLM9XGG6VKS`. The UI identifies that source, while installation and upgrades always open the official Microsoft Store page.
