@@ -27,20 +27,17 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          $version = '${{ github.ref_name }}'.TrimStart('v')
           @"
           ## 下载选择
 
           Codex Beacon supports English and Simplified Chinese, and follows the Windows display language by default. 可在设置中切换 English / 简体中文。
 
-          - **CodexBeacon-portable.exe** — 【推荐·开箱即用】单文件完整版，内置全套运行时，下载后直接双击运行！
-          - **CodexBeacon-slim.exe** — 【轻量依赖版】单文件精简版，需预装 .NET 10 Desktop Runtime x64 和 Windows App Runtime 1.8 x64。
+          - **CodexBeacon-$version.exe** — 【推荐·开箱即用】单文件完整版（含完整运行时），内置全套运行环境与 Windows App SDK，下载后直接双击运行！
+          - **CodexBeacon-$version-slim.exe** — 【轻量依赖版】单文件精简版（不含运行时），需本机已安装 .NET 10 Desktop Runtime x64。
           - **SHA256SUMS.txt** — 单文件程序 SHA-256 校验值。
 
           直接运行 EXE 即可，无需解压任何压缩包。未签名开源构建可能触发 Windows SmartScreen 提示。
           "@ | Set-Content -Path .\ReleaseNotes.md -Encoding utf8
-          $assets = @(
-            '.\artifacts\CodexBeacon-portable.exe'
-            '.\artifacts\CodexBeacon-slim.exe'
-            '.\artifacts\SHA256SUMS.txt'
-          )
+          $assets = @(Get-Item .\artifacts\*.exe, .\artifacts\SHA256SUMS.txt | ForEach-Object { $_.FullName })
           gh release create "${{ github.ref_name }}" @assets --title "Codex Beacon ${{ github.ref_name }}" --notes-file .\ReleaseNotes.md --generate-notes --verify-tag

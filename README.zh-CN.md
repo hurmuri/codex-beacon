@@ -95,12 +95,12 @@ Codex Beacon 采用模块化独立页面设计，遵循状态驱动控制原则�
 irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex
 ```
 
-GitHub Release 提供两个 x64 单文件可执行程序：
+GitHub Release 每次发布提供两个带版本号的 x64 独立单文件可执行程序（无任何 zip 压缩包，直接下载双击运行）：
 
 | 文件 | 适合场景 | 运行依赖 |
 | --- | --- | --- |
-| `CodexBeacon-portable.exe` | 推荐；单文件，双击即用 | 已内置 .NET 10 与 Windows App SDK |
-| `CodexBeacon-slim.exe` | 已统一部署运行环境、希望减小下载体积 | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `CodexBeacon-<version>.exe` | 【推荐·开箱即用】单文件完整版，双击即跑 | 已内置完整 .NET 10 运行时与 Windows App SDK |
+| `CodexBeacon-<version>-slim.exe` | 【轻量依赖版】单文件精简版，小巧轻量 | 需本机预装 [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) |
 | `SHA256SUMS.txt` | 两个单文件程序的 SHA-256 校验值 | — |
 
 无需解压。首次运行时，启动器会把内嵌负载展开到 `%LOCALAPPDATA%\CodexBeacon\app-portable`，再从该目录启动管理器。应用内更新依赖这一结构：它下载与当前包类型匹配的单文件程序，原地替换该启动器并重新拉起，刷新后的启动器会重新展开负载。

@@ -100,12 +100,12 @@ irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex
 
 
 
-Each GitHub Release provides two single-file x64 executables:
+Each GitHub Release provides two versioned, standalone single-file x64 executables (no zip archives required; download and run directly):
 
 | File | Best for | Runtime requirements |
 | --- | --- | --- |
-| `CodexBeacon-portable.exe` | Recommended; one file, run it directly | .NET 10 and Windows App SDK are bundled |
-| `CodexBeacon-slim.exe` | Managed environments that already deploy the runtimes | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `CodexBeacon-<version>.exe` | [Recommended] Standalone portable edition, out-of-the-box | Self-contained with bundled .NET 10 runtime & Windows App SDK |
+| `CodexBeacon-<version>-slim.exe` | [Lightweight] Standalone slim edition, minimal size | Requires pre-installed [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) |
 | `SHA256SUMS.txt` | SHA-256 checksums for both executables | — |
 
 No archive step is required. On first run the launcher expands its embedded payload into `%LOCALAPPDATA%\CodexBeacon\app-portable` and starts the manager from there. The in-app updater depends on this layout: it downloads the matching single-file build, replaces that launcher in place, and relaunches it, after which the refreshed launcher re-expands its payload.
