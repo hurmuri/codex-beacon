@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Codex Beacon · Native Windows Mission Control for OpenAI Codex</title>
-  <meta name="description" content="Native WinUI 3 control center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
+  <title>Codex Beacon · All-in-One Control Center for Codex</title>
+  <meta name="description" content="All-in-One Mission Control for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, optional OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
@@ -226,20 +226,27 @@
     }
 
     .hero-h1 {
-      font-size: clamp(2.3rem, 4.6vw, 3.8rem);
+      font-size: clamp(2rem, 3.8vw, 3.4rem);
       font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
       margin-bottom: 16px;
       color: var(--text);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 680px) {
+      .hero-h1 {
+        white-space: normal;
+      }
     }
 
     .hero-desc {
-      font-size: 1.12rem;
+      font-size: 1.08rem;
       color: var(--text-muted);
-      max-width: 740px;
+      max-width: 780px;
       margin: 0 auto 32px auto;
-      line-height: 1.55;
+      line-height: 1.6;
     }
 
     .hero-actions {
@@ -792,9 +799,9 @@
         <span data-i18n="h.pill">v1.1.0 · Native WinUI 3 Control Center</span>
       </div>
 
-      <h1 class="hero-h1" data-i18n="h.title">The Native Windows Control Center for OpenAI Codex</h1>
+      <h1 class="hero-h1" data-i18n="h.title">All-in-One Control Center for Codex</h1>
       <p class="hero-desc" data-i18n="h.desc">
-        A fast WinUI 3 dashboard to orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy, Codex Relay, and Tailscale on Windows.
+        Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional OpenCodex proxying, Codex Relay, and Tailscale.
       </p>
 
       <div class="hero-actions">
@@ -836,8 +843,8 @@
             <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes">📊</button>
             <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress">🌐</button>
             <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers">{ }</button>
-            <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex">⚡</button>
-            <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale">🔗</button>
+            <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex (Optional / 可选)">⚡</button>
+            <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale (Optional / 可选)">🔗</button>
             <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings">⚙️</button>
           </div>
 
@@ -869,7 +876,7 @@
           <span>⚡</span> <span data-i18n="f2.t">Decoupled Dual Pipeline</span>
         </div>
         <p class="f-desc" data-i18n="f2.d">
-          Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.
+          Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, optional OpenCodex proxy, or Tailscale.
         </p>
       </div>
 
@@ -1159,26 +1166,28 @@
         main.innerHTML = `
           <div class="view-header">
             <div>
-              <h2 class="view-h2">OpenCodex</h2>
-              <div class="view-sub">${isEn ? 'Manages opencodex-proxy scheduled task and port 10100.' : '独立管理 opencodex-proxy 计划任务与 10100 端口服务。'}</div>
+              <h2 class="view-h2">${isEn ? 'OpenCodex (Optional Extension)' : 'OpenCodex (可选扩展模块)'}</h2>
+              <div class="view-sub">${isEn ? 'Optional modular service for multi-model dispatch and port 10100.' : '独立管理 opencodex-proxy 计划任务与 10100 端口服务（按需开启）。'}</div>
             </div>
           </div>
           <div class="summary-card">
             <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:10100</span></div>
             <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 21904)</span></div>
+            <div class="summary-col"><span class="summary-label">Module Type</span><span class="summary-val" style="color:#0284c7">${isEn ? 'Optional Extension' : '可选扩展'}</span></div>
           </div>
         `;
       } else if (pageKey === 'tailscale') {
         main.innerHTML = `
           <div class="view-header">
             <div>
-              <h2 class="view-h2">Tailscale Mesh</h2>
-              <div class="view-sub">${isEn ? 'Inspects local Tailscale service and connected Tailnet devices.' : '探测 Tailscale 本地服务、虚拟 IP 与 Tailnet 设备连通性。'}</div>
+              <h2 class="view-h2">${isEn ? 'Tailscale Mesh (Optional Extension)' : 'Tailscale 局域网 (可选扩展模块)'}</h2>
+              <div class="view-sub">${isEn ? 'Optional mesh topology inspection for remote GPU inference.' : '探测 Tailscale 本地服务、虚拟 IP 与 Tailnet 设备连通性（按需开启）。'}</div>
             </div>
           </div>
           <div class="summary-card">
             <div class="summary-col"><span class="summary-label">Local Tailnet IP</span><span class="summary-val">100.108.45.22</span></div>
             <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Connected</span></div>
+            <div class="summary-col"><span class="summary-label">Module Type</span><span class="summary-val" style="color:#0284c7">${isEn ? 'Optional Extension' : '可选扩展'}</span></div>
           </div>
         `;
       } else {
@@ -1191,7 +1200,7 @@
           </div>
           <div class="summary-card">
             <div class="summary-col"><span class="summary-label">Version</span><span class="summary-val">v1.1.0 (win-x64 portable)</span></div>
-            <div class="summary-col"><span class="summary-label">Engine</span><span class="summary-val">Windows App SDK 1.8 · WinUI 3</span></div>
+            <div class="summary-col"><span class="summary-label">UI Engine</span><span class="summary-val">Windows App SDK 1.8 · WinUI 3</span></div>
           </div>
         `;
       }
@@ -1219,14 +1228,14 @@
       'en-US': {
         'nav.download': 'Download',
         'h.pill': 'v1.1.0 · Native WinUI 3 Control Center',
-        'h.title': 'The Native Windows Control Center for OpenAI Codex',
-        'h.desc': 'A fast WinUI 3 dashboard to orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy, Codex Relay, and Tailscale on Windows.',
+        'h.title': 'All-in-One Control Center for Codex',
+        'h.desc': 'Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional OpenCodex proxying, Codex Relay, and Tailscale.',
         'h.btnDownload': 'Download Portable (.zip)',
         'app.hint': '💡 Click the sidebar icons to interactively explore each screen right here',
         'f1.t': 'Dual-Core Transparency',
         'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
         'f2.t': 'Decoupled Dual Pipeline',
-        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.',
+        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, optional OpenCodex proxy, or Tailscale.',
         'f3.t': 'Egress Residential Radar',
         'f3.d': 'Probes the real origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
         'f4.t': 'Safe Process Whitelist',
@@ -1240,14 +1249,14 @@
       'zh-CN': {
         'nav.download': '下载',
         'h.pill': 'v1.1.0 · WinUI 3 原生 Windows 控制台',
-        'h.title': 'Windows 上的 OpenAI Codex 原生管控中心',
-        'h.desc': '统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。毫秒启动，双层管线，公网出口防封判定。',
+        'h.title': 'Codex 一站式管理中心',
+        'h.desc': '统一调度 ChatGPT 桌面端与 Codex CLI。毫秒启动，双层管线，公网检测；支持 OpenCodex 代理分流、Codex Relay 与 Tailscale（可选功能，按需开启）。',
         'h.btnDownload': '下载便携版 (Portable)',
         'app.hint': '💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能',
         'f1.t': '双核心分离观测',
         'f1.d': '独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。',
         'f2.t': '双层链路解耦',
-        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理，还是经过 Tailscale 转发。',
+        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理（可选），还是经过 Tailscale 转发（可选）。',
         'f3.t': '公网出口防封雷达',
         'f3.d': '以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。',
         'f4.t': '安全进程白名单',

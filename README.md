@@ -5,7 +5,7 @@
 <h1 align="center">Codex Beacon</h1>
 
 <p align="center">
-  <strong>Native, high-performance WinUI 3 control center for inspecting and managing OpenAI Codex desktop app, CLI, OpenCodex proxy, relay tunnels, and Tailscale on Windows.</strong>
+  <strong>All-in-One Control Center for Codex: Unified orchestration for ChatGPT Desktop and Codex CLI on Windows, with optional OpenCodex, Relay, and Tailscale extensions.</strong>
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
 
 Codex Beacon is a native, light-theme WinUI 3 control center for inspecting and managing the Codex desktop app, Codex CLI, OpenCodex Proxy, Codex Relay, Node.js/NVM/npm, and Tailscale on Windows.
 
-Version `0.2.0` supports English and Simplified Chinese. It follows the Windows display language by default, and the language can be changed under Settings. The Codex desktop app and CLI are core features; OpenCodex Proxy and Codex Relay are independent optional modules. Installing an extension never changes the active Codex provider automatically.
+Codex Beacon supports English and Simplified Chinese. It follows the Windows display language by default, and the language can be changed under Settings. `build/version.txt` is the single version source and increments on every build; the running version is always shown under Settings → About & update. The Codex desktop app and CLI are core features; OpenCodex Proxy and Codex Relay are independent optional modules. Installing an extension never changes the active Codex provider automatically.
 
 ## About
 
@@ -39,10 +39,11 @@ Before Codex Beacon, monitoring and managing these components required juggling 
 ### Key Highlights
 
 - **Windows Native & Modern**: Crafted exclusively with WinUI 3, Windows App SDK 1.8, and Fluent Design System guidelines. Lightweight, clean, high-contrast light theme without web-wrapper overhead.
-- **Privacy & Zero-Credential Philosophy**: Strictly collects runtime metrics, process hierarchies, and network topologies without ever reading, storing, or transmitting sensitive credentials, API keys, tokens, or session payloads.
+- **Protected Credentials**: The vNext Provider editor uses a password field hidden by default. An explicitly saved key is stored locally in a current-user-only configuration file and is excluded from uploads, command lines, logs, errors, diagnostics, crash reports, status text, and default exports.
 - **State-Driven Workflow**: Every action (install, sign in, start, stop, restart, upgrade) is strictly bounded by component status—preventing accidental duplicate instances or broken configurations.
 - **Modular & Non-Intrusive**: Codex desktop and CLI are core; OpenCodex and Codex Relay are purely optional extensions. Missing extensions never degrade core system status.
 - **Bilingual & Instant Switching**: Seamlessly supports English and Simplified Chinese with instant, in-app UI switching without requiring process restarts.
+- **Self-Updating**: Checks the official GitHub release feed, shows a banner when a newer build exists, streams the download with progress and a SHA-256 check, then replaces the install package in place and restarts into the new version.
 
 ## Upstream projects
 
@@ -60,28 +61,44 @@ Before Codex Beacon, monitoring and managing these components required juggling 
 
 ## Implemented
 
-- Separate version, process, sign-in, and update detection for the Codex desktop app and Codex CLI.
+- Separate version, process, sign-in, and update detection for the Codex desktop app and Codex CLI. Each executable's version is read from its own install source (npm global, `PATH`, or the copy bundled with the desktop app), so several different versions can coexist on one machine.
 - Local/latest version comparison for `@openai/codex`, `@bitkyc08/opencodex`, and `codex-relay` using the official npm registry.
-- Three service controls per desktop row with state-driven install, sign-in, start, stop, restart, and upgrade actions.
+- State-driven actions per component (install, sign in, start, stop, restart, upgrade), plus a separate optional-module list on the Installation page.
 - NVM for Windows detection, installed Node.js inventory, version installation, and active-version switching.
+- Node.js downloads use a configurable mirror and fall back to the official host automatically, so an unreachable `nodejs.org` can no longer stall an install.
 - Node.js ≥ 22.14.0 and npm prerequisite checks before npm-based modules can be installed.
-- Evidence-based active proxy path built from `model_provider`, `base_url`, listener ownership, and observed TCP connections.
-- Configured but inactive endpoints shown separately from the active data path.
-- Machine public egress separated from remote endpoints contacted by Codex-related processes.
+- Provider switching that rewrites `model_provider` — and adds or removes the local-proxy `openai_base_url` — in `%USERPROFILE%\.codex\config.toml`.
+- Public egress reported from OpenAI's point of view, enriched with country, region, city, ISP, AS number, hosting/proxy classification, and a trust score.
 - Tailscale service, local node, Tailnet device, address, online, and last-seen status.
 - Allowlisted bulk recovery that excludes the Codex desktop app, Codex Beacon, and unrelated Node.js processes.
+- Long-running actions stream native tool output and can be cancelled, and every action has a hard timeout so the window never appears frozen.
 - English and Simplified Chinese UI, diagnostics, action results, and instant in-app language switching.
+- Every build bumps its own version from `build/version.txt`, so each compiled artifact carries a distinct version.
+- In-app updates against the official GitHub Releases channel: version check, prompt on startup, manual check, streamed download with progress and speed, SHA-256 verification, skip-this-version, and an in-place restart into the new build.
+
+## Approved vNext direction
+
+The canonical plan is [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). The app will use nine focused destinations: Codex overview, Dependencies, Codex processes, Network, Providers, OpenCodex, Tailscale, Codex Relay, and Settings / About & updates.
+
+The overview will focus only on ChatGPT desktop and the active user-managed Codex CLI, while dependency repair, network checks, provider CRUD/testing, and optional modules move to dedicated pages. OpenCodex will expose its structured provider, model, health, and native-integration capabilities through its own page.
+
+Every download will show its real stage, transferred/total bytes when available, percentage, speed, elapsed time, and safe cancellation. Provider keys use a password field hidden by default and may be saved in plaintext under `%USERPROFILE%\.CodexBeacon\providers.json`; `.CodexBeacon` is explicitly hidden, the file is restricted to the current Windows user, and keys are excluded from uploads, command lines, logs, errors, diagnostics, and default exports.
+
+The current About and application-update experience remains. Component-specific task names and settings move to their owning pages: runtime sources to Dependencies, proxy options to Network, OpenCodex service/task settings to OpenCodex, and Relay service/task settings to Codex Relay.
 
 ## Download and run
 
-Each GitHub Release provides two x64 builds:
+Each GitHub Release provides two single-file x64 executables:
 
 | File | Best for | Runtime requirements |
 | --- | --- | --- |
-| `CodexBeacon-portable-win-x64.zip` | Recommended; extract and run | .NET 10 and Windows App SDK are included |
-| `CodexBeacon-runtime-dependent-win-x64.zip` | Managed environments that already deploy the runtimes | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `CodexBeacon-portable.exe` | Recommended; one file, run it directly | .NET 10 and Windows App SDK are bundled |
+| `CodexBeacon-slim.exe` | Managed environments that already deploy the runtimes | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `SHA256SUMS.txt` | SHA-256 checksums for both executables | — |
 
-Extract the complete directory, then run `CodexBeacon.exe`. Do not launch the executable directly inside the archive. Windows does not include .NET 10 or the required Windows App Runtime by default; choose the `portable` build when unsure.
+No archive step is required. On first run the launcher expands its embedded payload into `%LOCALAPPDATA%\CodexBeacon\app-portable` and starts the manager from there. The in-app updater depends on this layout: it downloads the matching single-file build, replaces that launcher in place, and relaunches it, after which the refreshed launcher re-expands its payload.
+
+Windows does not include .NET 10 or the required Windows App Runtime by default; choose the `portable` build when unsure.
 
 Both builds require x64 Windows 10 1809 (build 17763) or later. Status collection uses Windows PowerShell 5.1, which is included with supported Windows versions. Unsigned community builds may trigger Windows SmartScreen. Network access is used for version checks, official installers, sign-in, and public-egress discovery.
 
@@ -123,7 +140,7 @@ The following specific actions may require UAC elevation on Windows:
 
 Codex Beacon never elevates silently. When an operation fails due to insufficient privileges, it provides an actionable error message prompting the user to restart as administrator if needed.
 
-- Tokens, authorization headers, passwords, cookies, and API keys are never read or displayed.
+- Diagnostics never read or display tokens, authorization headers, passwords, cookies, or API keys. Saved provider keys remain masked and are excluded from diagnostic collection and export.
 - A remote service IP is a process destination, not the machine's public egress IP. The UI displays them separately.
 - The installed Codex desktop version comes from the local `OpenAI.Codex` MSIX/AppX package. The latest Windows package version comes from the Codex App Mirror manifest, which mirrors Microsoft Store product `9PLM9XGG6VKS`. The UI identifies that source, while installation and upgrades always open the official Microsoft Store page.
 
@@ -131,7 +148,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [DESIGN.md](DESIGN.md), [SECURITY.md](SE
 
 ## Local adaptation
 
-The Settings page can override the `Codex Relay` and `opencodex-proxy` scheduled-task names. These listener ports are detected by default, but the active path only includes an endpoint supported by the selected provider and observed runtime evidence:
+In vNext, the OpenCodex page owns the `opencodex-proxy` scheduled-task/service name and the Codex Relay page owns the `Codex Relay` name. These listener ports are detected by default, but the active path only includes an endpoint supported by the selected provider and observed runtime evidence:
 
 - OpenCodex Proxy: `127.0.0.1:10100`
 - Codex Relay: `127.0.0.1:8787`

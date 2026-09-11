@@ -5,7 +5,7 @@
 <h1 align="center">Codex Beacon</h1>
 
 <p align="center">
-  <strong>专为 Windows 打造的 OpenAI Codex 原生服务、CLI、代理与隧道生态管控中心。</strong>
+  <strong>Codex 一站式管理中心：统一调度 ChatGPT 桌面端与 Codex CLI，支持可选 OpenCodex、Relay 与 Tailscale 扩展。</strong>
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
 
 Codex Beacon 是一个明亮主题的 WinUI 3 本机控制台，用于检查和管理 Windows 上的 Codex 桌面客户端、Codex CLI、OpenCodex Proxy、Codex Relay、Node.js/NVM/npm 与 Tailscale。
 
-当前版本为 `0.2.0`，支持英文和简体中文，默认跟随 Windows 显示语言，也可在设置页切换。Codex 桌面客户端与 CLI 是产品核心；OpenCodex Proxy 和 Codex Relay 为独立可选模块。安装扩展不会自动修改 Codex 的当前 provider。
+支持英文和简体中文，默认跟随 Windows 显示语言，也可在设置页切换。`build/version.txt` 是唯一版本源，每次构建都会自增；当前运行版本始终显示在「设置 → 关于与更新」中。Codex 桌面客户端与 CLI 是产品核心；OpenCodex Proxy 和 Codex Relay 为独立可选模块。安装扩展不会自动修改 Codex 的当前 provider。
 
 ## 关于项目 (About)
 
@@ -39,10 +39,11 @@ Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌�
 ### 核心特性
 
 - **微软原生体验**：基于 WinUI 3 与 Windows App SDK 1.8 打造，遵循 Windows 11 Fluent 视觉与动效规范。轻量明亮主题，杜绝 Web/Electron 包装带来的冗余资源消耗。
-- **隐私优先与零凭据原则**：仅探测系统进程父子拓扑、网络连接端点与运行状态；严格禁止且绝不读取、存储或传输任何 API Key、Token、密码或用户数据流载荷。
+- **受保护的凭据输入**：vNext Provider 编辑器使用默认隐藏的密码框。用户明确保存后，Key 以明文写入仅当前 Windows 用户可访问的本地配置文件，并排除在上传、命令行、日志、错误、诊断、崩溃报告、状态文字和默认导出之外。
 - **状态驱动操作**：所有控制按钮（安装、登录、启动、停止、重启、升级）均由真实运行状态驱动，杜绝盲目点击导致的冲突或脏配置。
 - **独立解耦架构**：Codex 官方客户端与 CLI 为产品核心，OpenCodex 与 Codex Relay 为独立可选扩展；缺少可选组件绝不会判定系统异常。
 - **原生双语支持**：完整支持英文与简体中文，跟随系统或在设置中一键即时热切换，无需重启应用程序。
+- **应用内自更新**：查询官方 GitHub 发行通道，发现新版本时在窗口顶部提示；下载过程实时显示进度与速度并做 SHA-256 校验，校验通过后原地替换安装包并自动重启到新版本。
 
 ## 上游项目与参考
 
@@ -57,28 +58,44 @@ Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌�
 
 ## 已实现
 
-- Codex 桌面客户端与 CLI 分开检测版本、进程、账号和更新方式。
+- Codex 桌面客户端与 CLI 分开检测版本、进程、账号和更新方式；每个可执行文件的版本按各自安装来源（npm 全局、`PATH` 或桌面端内置副本）单独读取，同一台机器可同时存在多个版本。
 - 从 npm 官方注册表比较 `@openai/codex`、`@bitkyc08/opencodex` 与 `codex-relay` 的本机/最新版本。
-- 每行三个服务控制项，按状态启用安装、登录、启动、停止、重启或升级。
+- 按状态启用每个组件的安装、登录、启动、停止、重启与升级，并在安装页单独提供可选模块列表。
 - NVM for Windows 检测、Node.js 版本列表、指定版本安装与当前版本切换。
+- Node.js 下载使用可配置镜像，镜像不可用时自动回退官方源，`nodejs.org` 不可达也不会再卡住安装。
 - 安装 npm 模块前验证 Node.js ≥ 22.14.0 与 npm 前置条件。
-- 根据 `model_provider`、`base_url`、监听端口归属和 TCP 连接构建实际代理主路径。
-- 未激活的配置端点单独列出，不混入当前数据流。
-- 分开显示本机公网出口 IP 与 Codex 相关进程连接的远端 IP。
+- 切换 Provider 时改写 `%USERPROFILE%\.codex\config.toml` 中的 `model_provider`，并按需写入或清除本地代理的 `openai_base_url`。
+- 以 OpenAI 视角展示本机公网出口，并补充国家/地区、城市、运营商、AS 号、机房/住宅分类与信任分。
 - Tailscale 服务、本机节点、Tailnet 设备、地址、在线状态和最后活动时间。
 - 安全的批量停止/重启，排除 Codex 桌面应用、Codex Beacon 和无关 Node 进程。
+- 长时间操作会流式输出原生工具进度并支持取消，且每个操作都有硬超时，界面不会看起来卡死。
 - 英文与简体中文界面、诊断和操作结果，并支持应用内即时切换语言。
+- 每次构建都会基于 `build/version.txt` 自增版本号，确保每个产物都有独立版本。
+- 应用内自更新：对接官方 GitHub Releases 通道，包含版本检测、启动主动提示、手动检查、带进度与速度的流式下载、SHA-256 校验、跳过指定版本，以及原地重启到新版本。
+
+## 已确认的 vNext 方向
+
+完整产品规格以 [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) 为准。应用将采用九个聚焦页面：Codex 总览、依赖管理、Codex 进程、网络管理、Provider、OpenCodex、Tailscale、Codex Relay、设置/关于与更新。
+
+总览只关注 ChatGPT 桌面端与当前用户实际使用的 Codex CLI；依赖修复、网络检测、Provider 增删改与测试，以及各可选模块均进入独立页面。OpenCodex 页面通过其结构化能力管理服务健康、Provider、静态/在线模型和 Codex 集成状态。
+
+所有涉及下载的操作都必须显示真实阶段、已下载量/总量（可用时）、百分比、速度、耗时和安全取消。Provider Key 使用默认隐藏的密码框，并可明文保存到 `%USERPROFILE%\.CodexBeacon\providers.json`；`.CodexBeacon` 会显式设置 Windows 隐藏属性，该文件仅允许当前 Windows 用户访问，Key 不得上传或进入命令行、日志、错误、诊断和默认导出。
+
+现有“关于与更新”完整保留。组件专属设置回到对应管理页：运行时源放在依赖管理，代理选项放在网络管理，OpenCodex 计划任务/服务设置放在 OpenCodex，Relay 计划任务/服务设置放在 Codex Relay。
 
 ## 下载与直接运行
 
-GitHub Release 同时提供两个 x64 构建：
+GitHub Release 提供两个 x64 单文件可执行程序：
 
 | 文件 | 适合场景 | 运行依赖 |
 | --- | --- | --- |
-| `CodexBeacon-portable-win-x64.zip` | 推荐；解压即用 | 已包含 .NET 10 与 Windows App SDK |
-| `CodexBeacon-runtime-dependent-win-x64.zip` | 已统一部署运行环境、希望减小下载体积 | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `CodexBeacon-portable.exe` | 推荐；单文件，双击即用 | 已内置 .NET 10 与 Windows App SDK |
+| `CodexBeacon-slim.exe` | 已统一部署运行环境、希望减小下载体积 | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+| `SHA256SUMS.txt` | 两个单文件程序的 SHA-256 校验值 | — |
 
-两种版本都要先解压完整目录再运行 `CodexBeacon.exe`。Windows 不会默认附带 .NET 10 和指定版本的 Windows App Runtime；不确定时请选择 `portable`。
+无需解压。首次运行时，启动器会把内嵌负载展开到 `%LOCALAPPDATA%\CodexBeacon\app-portable`，再从该目录启动管理器。应用内更新依赖这一结构：它下载与当前包类型匹配的单文件程序，原地替换该启动器并重新拉起，刷新后的启动器会重新展开负载。
+
+Windows 不会默认附带 .NET 10 和指定版本的 Windows App Runtime；不确定时请选择 `portable`。
 
 便携版本体只要求 Windows 10 1809（build 17763）或更高版本的 x64 Windows；状态采集使用系统自带的 Windows PowerShell 5.1。首次运行未签名的开源构建时，Windows SmartScreen 可能要求确认。联网仅用于获取最新版、打开官方安装程序、登录和查询公网出口。
 
@@ -122,7 +139,7 @@ Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心
 
 应用内部严禁任何静默提权行为。当非管理员身份执行上述受限操作时，系统会明确捕获权限不足提示，并在界面状态栏指引用户“以管理员身份运行 Codex Beacon”重试。
 
-- 不读取或显示 Token、授权头、密码、Cookie 和 API 密钥。
+- 诊断不读取或显示 Token、授权头、密码、Cookie 和 API Key；已保存的 Provider Key 始终保持遮罩，并排除在诊断采集和导出之外。
 - “远端服务 IP”是进程建立连接的目标，不等于本机公网出口 IP；界面会分开显示。
 - Codex 桌面客户端当前版本来自本机 `OpenAI.Codex` MSIX/AppX 包。最新 Windows 包版本来自 Codex App Mirror 清单；该项目同步 Microsoft Store 产品 `9PLM9XGG6VKS`。界面明确标注来源，安装和升级始终打开官方 Microsoft Store 页面。
 
@@ -130,7 +147,7 @@ Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心
 
 ## 本机适配
 
-设置页可配置 `Codex Relay` 与 `opencodex-proxy` 的计划任务名称。默认检测以下端口，但当前数据流只采用与激活 provider 及运行证据相符的端点：
+vNext 中，OpenCodex 页面负责配置 `opencodex-proxy` 计划任务/服务名称，Codex Relay 页面负责配置 `Codex Relay` 名称。默认检测以下端口，但当前数据流只采用与激活 provider 及运行证据相符的端点：
 
 - OpenCodex Proxy：`127.0.0.1:10100`
 - Codex Relay：`127.0.0.1:8787`
