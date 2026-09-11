@@ -8,7 +8,7 @@
 
 Codex Beacon 是一个明亮主题的 WinUI 3 本机控制台，用于检查和管理 Windows 上的 Codex 桌面客户端、Codex CLI、OpenCodex Proxy、Codex Relay、Node.js/NVM/npm 与 Tailscale。
 
-当前版本为 `0.1.0`。Codex 桌面客户端与 CLI 是产品核心；OpenCodex Proxy 和 Codex Relay 为独立可选模块，未安装不会导致整体状态异常。安装模块不会自动修改 Codex 的 provider 配置。
+当前版本为 `0.1.1`。Codex 桌面客户端与 CLI 是产品核心；OpenCodex Proxy 和 Codex Relay 为独立可选模块，未安装不会导致整体状态异常。安装模块不会自动修改 Codex 的 provider 配置。
 
 ## 上游项目
 
@@ -43,9 +43,26 @@ Codex 桌面包的主进程名为 `ChatGPT.exe`，程序通过其 `OpenAI.Codex`
 - Tailscale 状态、本机节点、Tailnet 设备、地址、在线状态和最后活动时间。
 - 安全的批量停止/重启：排除 Codex 桌面应用、Codex Beacon 和无关 Node 进程。
 
+## 下载与直接运行
+
+GitHub Release 同时提供两个 x64 构建：
+
+| 文件 | 适合场景 | 运行依赖 |
+| --- | --- | --- |
+| `CodexBeacon-portable-win-x64.zip` | 推荐；解压即用 | .NET 10 与 Windows App SDK 已随包提供 |
+| `CodexBeacon-runtime-dependent-win-x64.zip` | 已统一部署运行环境、希望减小下载体积 | [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) + [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads) |
+
+两种版本都要先解压完整目录再运行 `CodexBeacon.exe`。请勿只从压缩包中单独打开 EXE，因为程序需要同目录中的文件。Windows 不会默认附带 .NET 10 和指定版本的 Windows App Runtime；不确定时请选择 `portable`。
+
+便携版本体只要求 Windows 10 1809（build 17763）或更高版本的 x64 Windows；状态采集使用系统自带的 Windows PowerShell 5.1。首次运行未签名的开源构建时，Windows SmartScreen 可能要求用户确认。联网仅用于获取最新版、下载官方安装程序、登录和查询公网出口。
+
+Node.js、npm、NVM、Tailscale、OpenCodex 与 Codex Relay 都不是启动 Codex Beacon 的前置依赖。只有使用相应管理功能时才需要安装；界面会先检测并按“安装 → 登录 → 启动”的正确顺序引导。安装 OpenCodex 或 Codex Relay 前需要 Node.js 与 npm，其中 Relay 要求 Node.js ≥ 22.14.0。
+
+自包含目录当前约 214 MB，压缩后约 87 MB。体积主要来自随包携带的 .NET 10 运行时、WinUI 3 / Windows App SDK，以及 Windows App SDK 的 DirectML、ONNX Runtime 等本机组件。这是“解压即用”与较大包体之间的取舍。
+
 ## 构建与运行
 
-需要 Windows 10 1809 或更高版本，以及 .NET 10 SDK（发布版可包含 .NET 运行时）。
+从源码构建需要 Windows 10 1809 或更高版本，以及 .NET 10 SDK。
 
 ```powershell
 dotnet build .\CodexBeacon.csproj -c Release

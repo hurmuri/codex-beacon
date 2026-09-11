@@ -15,12 +15,35 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      - name: Publish win-x64
-        run: dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true -o .\publish\win-x64
-      - name: Create archive
+      - name: Publish portable win-x64
+        run: dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true -p:WindowsAppSDKSelfContained=true -o .\publish\portable-win-x64
+      - name: Publish runtime-dependent win-x64
+        run: dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained false -p:WindowsAppSDKSelfContained=false -o .\publish\runtime-dependent-win-x64
+      - name: Create archives and checksums
         shell: pwsh
-        run: Compress-Archive -Path .\publish\win-x64\* -DestinationPath .\CodexBeacon-win-x64.zip
+        run: |
+          Compress-Archive -Path .\publish\portable-win-x64\* -DestinationPath .\CodexBeacon-portable-win-x64.zip
+          Compress-Archive -Path .\publish\runtime-dependent-win-x64\* -DestinationPath .\CodexBeacon-runtime-dependent-win-x64.zip
+          Get-FileHash .\CodexBeacon-*-win-x64.zip -Algorithm SHA256 |
+            ForEach-Object { "$($_.Hash.ToLowerInvariant()) *$(Split-Path $_.Path -Leaf)" } |
+            Set-Content -Path .\SHA256SUMS.txt -Encoding utf8
       - name: Create GitHub release
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" .\CodexBeacon-win-x64.zip --generate-notes --verify-tag
+        run: |
+          @"
+          ## 下载选择
+
+          - **CodexBeacon-portable-win-x64.zip** — 推荐。包含 .NET 10 与 Windows App SDK，解压完整目录后直接运行 `CodexBeacon.exe`。
+          - **CodexBeacon-runtime-dependent-win-x64.zip** — 小体积。需要预装 [.NET 10 Desktop Runtime x64](https://dotnet.microsoft.com/download/dotnet/10.0) 和 [Windows App Runtime 1.8 x64](https://learn.microsoft.com/windows/apps/windows-app-sdk/downloads)。这两项并非 Windows 默认组件。
+          - **SHA256SUMS.txt** — 两个压缩包的 SHA-256 校验值。
+
+          两种构建都要求 Windows 10 1809（build 17763）或更高版本的 x64 Windows。请先解压完整目录，不要直接在压缩包中运行 EXE。未签名构建可能触发 Windows SmartScreen 提示。
+          "@ | Set-Content -Path .\ReleaseNotes.md -Encoding utf8
+          $assets = @(
+            '.\CodexBeacon-portable-win-x64.zip'
+            '.\CodexBeacon-runtime-dependent-win-x64.zip'
+            '.\SHA256SUMS.txt'
+          )
+          gh release create "${{ github.ref_name }}" @assets --title "Codex Beacon ${{ github.ref_name }}" --notes-file .\ReleaseNotes.md --generate-notes --verify-tag

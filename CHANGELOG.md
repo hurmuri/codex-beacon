@@ -4,6 +4,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-11
+
+### Changed
+
+- Release both a self-contained portable build and a smaller runtime-dependent build.
+- Publish SHA-256 checksums and explicit runtime guidance with each GitHub Release.
+
 ## [0.1.0] - 2026-09-11
 
 ### Added
@@ -17,5 +24,6 @@ All notable changes to this project are documented here. The format follows [Kee
 - Evidence-based provider route, public egress, remote connection, and inactive endpoint views.
 - iOS AppIcon asset catalog and Windows application icon derived from one master artwork.
 
-[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/hurmuri/codex-beacon/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/hurmuri/codex-beacon/releases/tag/v0.1.0
