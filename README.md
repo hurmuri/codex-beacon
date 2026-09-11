@@ -1,12 +1,30 @@
-# Codex Beacon
+<p align="center">
+  <a href="https://hurmuri.com"><img src="Assets/codex-beacon-hero-en.png" alt="Codex Beacon: Native WinUI 3 Control Center for OpenAI Codex on Windows" width="100%"></a>
+</p>
 
-<p align="center"><img src="Assets/app-icon.png" width="128" alt="Codex Beacon icon"></p>
+<h1 align="center">Codex Beacon</h1>
 
-<p align="center"><strong><a href="README.zh-CN.md">简体中文说明</a></strong></p>
+<p align="center">
+  <strong>Native, high-performance WinUI 3 control center for inspecting and managing OpenAI Codex desktop app, CLI, OpenCodex proxy, relay tunnels, and Tailscale on Windows.</strong>
+</p>
 
-[![Build](https://github.com/hurmuri/codex-beacon/actions/workflows/build.yml/badge.svg)](https://github.com/hurmuri/codex-beacon/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Windows](https://img.shields.io/badge/Windows-10%201809%2B-0078D4.svg)](https://github.com/hurmuri/codex-beacon)
+<p align="center">
+  <a href="https://hurmuri.com"><strong>🌐 Official Website: hurmuri.com</strong></a> · 
+  <a href="#downloads--quick-run"><strong>⚡ Download Portable Release</strong></a> · 
+  <a href="README.zh-CN.md">简体中文说明</a>
+</p>
+
+<p align="center">
+  <a href="https://hurmuri.com"><img src="https://img.shields.io/badge/Website-hurmuri.com-087F5B?style=flat&logo=safari&logoColor=white" alt="Official Website"></a>
+  <a href="https://github.com/hurmuri/codex-beacon/releases"><img src="https://img.shields.io/github/v/release/hurmuri/codex-beacon?style=flat&label=release&color=10B981" alt="Latest Release"></a>
+  <a href="https://github.com/hurmuri/codex-beacon"><img src="https://img.shields.io/badge/Windows-10%201809%2B%20%7C%2011-0078D4?style=flat&logo=windows&logoColor=white" alt="Supported OS"></a>
+  <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="MIT License"></a>
+  <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/OpenAI-Codex%20Ecosystem-17202A?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex"></a>
+  <a href="https://github.com/lidge-jun/opencodex"><img src="https://img.shields.io/badge/Extension-OpenCodex%20Proxy-4F46E5?style=flat" alt="OpenCodex"></a>
+  <a href="https://github.com/gronxb/codex-relay"><img src="https://img.shields.io/badge/Extension-Codex%20Relay-059669?style=flat" alt="Codex Relay"></a>
+  <a href="https://tailscale.com"><img src="https://img.shields.io/badge/Mesh-Tailscale-2B3137?style=flat&logo=tailscale&logoColor=white" alt="Tailscale"></a>
+</p>
 
 Codex Beacon is a native, light-theme WinUI 3 control center for inspecting and managing the Codex desktop app, Codex CLI, OpenCodex Proxy, Codex Relay, Node.js/NVM/npm, and Tailscale on Windows.
 

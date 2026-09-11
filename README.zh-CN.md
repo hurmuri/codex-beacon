@@ -1,12 +1,30 @@
-# Codex Beacon
+<p align="center">
+  <a href="https://hurmuri.com"><img src="Assets/codex-beacon-hero-zh.png" alt="Codex Beacon：专为 Windows 打造的 OpenAI Codex 原生服务与代理生态管控中心" width="100%"></a>
+</p>
 
-<p align="center"><img src="Assets/app-icon.png" width="128" alt="Codex Beacon 图标"></p>
+<h1 align="center">Codex Beacon</h1>
 
-<p align="center"><strong><a href="README.md">English</a> · 简体中文</strong></p>
+<p align="center">
+  <strong>专为 Windows 打造的 OpenAI Codex 原生服务、CLI、代理与隧道生态管控中心。</strong>
+</p>
 
-[![Build](https://github.com/hurmuri/codex-beacon/actions/workflows/build.yml/badge.svg)](https://github.com/hurmuri/codex-beacon/actions/workflows/build.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Windows](https://img.shields.io/badge/Windows-10%201809%2B-0078D4.svg)](https://github.com/hurmuri/codex-beacon)
+<p align="center">
+  <a href="https://hurmuri.com"><strong>🌐 官方主页 hurmuri.com</strong></a> · 
+  <a href="#下载与直接运行"><strong>⚡ 下载免安装便携版</strong></a> · 
+  <a href="README.md">English Documentation</a>
+</p>
+
+<p align="center">
+  <a href="https://hurmuri.com"><img src="https://img.shields.io/badge/Website-hurmuri.com-087F5B?style=flat&logo=safari&logoColor=white" alt="Official Website"></a>
+  <a href="https://github.com/hurmuri/codex-beacon/releases"><img src="https://img.shields.io/github/v/release/hurmuri/codex-beacon?style=flat&label=release&color=10B981" alt="Latest Release"></a>
+  <a href="https://github.com/hurmuri/codex-beacon"><img src="https://img.shields.io/badge/Windows-10%201809%2B%20%7C%2011-0078D4?style=flat&logo=windows&logoColor=white" alt="Supported OS"></a>
+  <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="MIT License"></a>
+  <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/OpenAI-Codex%20Ecosystem-17202A?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex"></a>
+  <a href="https://github.com/lidge-jun/opencodex"><img src="https://img.shields.io/badge/Extension-OpenCodex%20Proxy-4F46E5?style=flat" alt="OpenCodex"></a>
+  <a href="https://github.com/gronxb/codex-relay"><img src="https://img.shields.io/badge/Extension-Codex%20Relay-059669?style=flat" alt="Codex Relay"></a>
+  <a href="https://tailscale.com"><img src="https://img.shields.io/badge/Mesh-Tailscale-2B3137?style=flat&logo=tailscale&logoColor=white" alt="Tailscale"></a>
+</p>
 
 Codex Beacon 是一个明亮主题的 WinUI 3 本机控制台，用于检查和管理 Windows 上的 Codex 桌面客户端、Codex CLI、OpenCodex Proxy、Codex Relay、Node.js/NVM/npm 与 Tailscale。
 
