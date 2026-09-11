@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Codex Beacon · Windows 上的 OpenAI Codex 原生管控中心</title>
-  <meta name="description" content="Windows 上的 OpenAI Codex 原生 WinUI 3 管控中心。统一管理 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。">
+  <title>Codex Beacon · Native Windows Mission Control for OpenAI Codex</title>
+  <meta name="description" content="Native WinUI 3 control center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
@@ -14,11 +14,13 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    :root {
-      --bg: #090d16;
-      --bg-surface: #0e1526;
+    /* THEME VARIABLES */
+    :root[data-theme="dark"] {
+      --bg: #080c15;
+      --bg-surface: #0f172a;
+      --bg-card: rgba(15, 23, 42, 0.7);
       --border: rgba(255, 255, 255, 0.1);
-      --border-focus: rgba(0, 240, 255, 0.4);
+      --border-strong: rgba(255, 255, 255, 0.2);
       
       --cyan: #00f0ff;
       --blue: #3b82f6;
@@ -29,29 +31,85 @@
       --text-muted: #94a3b8;
       --text-faint: #64748b;
       
-      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --hero-grad-start: #ffffff;
+      --hero-grad-end: #7dd3fc;
+      --radial-glow: rgba(30, 58, 138, 0.35);
+
+      /* App Window in Dark Mode */
+      --app-bg: #111827;
+      --app-titlebar: #0b0f19;
+      --app-sidebar: #0f172a;
+      --app-border: #1f2937;
+      --app-card-bg: #1f2937;
+      --app-card-border: #374151;
+      --app-text: #f3f4f6;
+      --app-text-muted: #9ca3af;
+      --app-btn-bg: #374151;
+      --app-btn-border: #4b5563;
+      --app-btn-text: #e5e7eb;
+      --app-btn-active-bg: #ffffff;
+      --app-btn-active-text: #111827;
+      --app-btn-active-border: #ffffff;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.9);
+      --border: rgba(0, 0, 0, 0.08);
+      --border-strong: rgba(0, 0, 0, 0.15);
+      
+      --cyan: #0284c7;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --amber: #d97706;
+      
+      --text: #0f172a;
+      --text-muted: #475569;
+      --text-faint: #94a3b8;
+      
+      --hero-grad-start: #0f172a;
+      --hero-grad-end: #0369a1;
+      --radial-glow: rgba(186, 230, 253, 0.4);
+
+      /* App Window in Light Mode (Matches Native WinUI 3 perfectly) */
+      --app-bg: #f8fafc;
+      --app-titlebar: #ffffff;
+      --app-sidebar: #ffffff;
+      --app-border: #e2e8f0;
+      --app-card-bg: #ffffff;
+      --app-card-border: #e2e8f0;
+      --app-text: #0f172a;
+      --app-text-muted: #64748b;
+      --app-btn-bg: #f8fafc;
+      --app-btn-border: #e2e8f0;
+      --app-btn-text: #94a3b8;
+      --app-btn-active-bg: #0f172a;
+      --app-btn-active-text: #ffffff;
+      --app-btn-active-border: #0f172a;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
     }
 
     html {
       scroll-behavior: smooth;
       background: var(--bg);
       color: var(--text);
-      font-family: var(--font-sans);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
     }
 
     body {
       min-height: 100vh;
       background: 
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(30, 58, 138, 0.35), transparent 70%),
+        radial-gradient(ellipse 80% 50% at 50% -10%, var(--radial-glow), transparent 70%),
         var(--bg);
+      position: relative;
     }
 
     .container {
@@ -65,7 +123,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 24px 0;
+      padding: 22px 0;
       border-bottom: 1px solid var(--border);
     }
 
@@ -74,7 +132,7 @@
       align-items: center;
       gap: 10px;
       text-decoration: none;
-      color: #fff;
+      color: var(--text);
       font-weight: 700;
       font-size: 1.05rem;
     }
@@ -88,24 +146,31 @@
     .nav-actions {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
-    .lang-btn {
+    .toggle-btn {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid var(--border);
       color: var(--text-muted);
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       font-weight: 600;
-      padding: 5px 12px;
+      padding: 6px 12px;
       border-radius: 6px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       transition: all 0.2s;
     }
 
-    .lang-btn:hover {
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.3);
+    :root[data-theme="light"] .toggle-btn {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .toggle-btn:hover {
+      color: var(--text);
+      border-color: var(--border-strong);
     }
 
     .btn-gh {
@@ -114,7 +179,7 @@
       gap: 6px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid var(--border);
-      color: #fff;
+      color: var(--text);
       font-size: 0.82rem;
       font-weight: 600;
       padding: 6px 14px;
@@ -123,14 +188,17 @@
       transition: all 0.2s;
     }
 
+    :root[data-theme="light"] .btn-gh {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
     .btn-gh:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
+      border-color: var(--border-strong);
     }
 
     /* HERO */
     .hero {
-      padding: 70px 0 40px 0;
+      padding: 68px 0 36px 0;
       text-align: center;
     }
 
@@ -144,7 +212,7 @@
       border-radius: 9999px;
       color: var(--cyan);
       font-size: 0.78rem;
-      font-family: var(--font-mono);
+      font-family: 'JetBrains Mono', monospace;
       font-weight: 600;
       margin-bottom: 20px;
     }
@@ -158,18 +226,18 @@
     }
 
     .hero-h1 {
-      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      font-size: clamp(2.3rem, 4.6vw, 3.8rem);
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.15;
       margin-bottom: 16px;
-      color: #fff;
+      color: var(--text);
     }
 
     .hero-desc {
-      font-size: 1.1rem;
+      font-size: 1.12rem;
       color: var(--text-muted);
-      max-width: 720px;
+      max-width: 740px;
       margin: 0 auto 32px auto;
       line-height: 1.55;
     }
@@ -179,15 +247,15 @@
       justify-content: center;
       gap: 14px;
       flex-wrap: wrap;
-      margin-bottom: 48px;
+      margin-bottom: 44px;
     }
 
     .btn-primary {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: #fff;
-      color: #090d16;
+      background: var(--text);
+      color: var(--bg);
       font-weight: 700;
       font-size: 0.92rem;
       padding: 11px 22px;
@@ -197,7 +265,7 @@
     }
 
     .btn-primary:hover {
-      background: #e2e8f0;
+      opacity: 0.9;
       transform: translateY(-1px);
     }
 
@@ -205,9 +273,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--bg-surface);
       border: 1px solid var(--border);
-      color: #fff;
+      color: var(--text);
       font-weight: 600;
       font-size: 0.92rem;
       padding: 11px 20px;
@@ -217,11 +285,10 @@
     }
 
     .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.25);
+      border-color: var(--border-strong);
     }
 
-    /* THE NATIVE APP INTERACTIVE WINDOW (100% HTML/CSS) */
+    /* INTERACTIVE APP SHOWCASE WINDOW */
     .app-showcase-wrap {
       margin-bottom: 80px;
     }
@@ -231,15 +298,15 @@
       font-size: 0.8rem;
       color: var(--text-faint);
       margin-bottom: 12px;
-      font-family: var(--font-mono);
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .app-window {
-      background: #f3f6f9;
-      color: #1a202c;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: var(--app-bg);
+      color: var(--app-text);
+      border: 1px solid var(--border-strong);
       border-radius: 12px;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 240, 255, 0.1);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -250,8 +317,8 @@
     /* Windows 11 Fluent Titlebar */
     .win-titlebar {
       height: 38px;
-      background: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
+      background: var(--app-titlebar);
+      border-bottom: 1px solid var(--app-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -259,7 +326,7 @@
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.05em;
-      color: #334155;
+      color: var(--app-text);
       user-select: none;
     }
 
@@ -277,7 +344,7 @@
     .win-controls {
       display: flex;
       gap: 16px;
-      color: #64748b;
+      color: var(--app-text-muted);
       font-size: 0.85rem;
     }
 
@@ -286,14 +353,14 @@
       display: flex;
       flex: 1;
       overflow: hidden;
-      background: #f8fafc;
+      background: var(--app-bg);
     }
 
     /* Left Sidebar */
     .win-sidebar {
       width: 48px;
-      background: #ffffff;
-      border-right: 1px solid #e2e8f0;
+      background: var(--app-sidebar);
+      border-right: 1px solid var(--app-border);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -308,7 +375,7 @@
       border-radius: 6px;
       border: none;
       background: transparent;
-      color: #64748b;
+      color: var(--app-text-muted);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -319,13 +386,13 @@
     }
 
     .side-icon-btn:hover {
-      background: #f1f5f9;
-      color: #0f172a;
+      background: rgba(125, 125, 125, 0.1);
+      color: var(--app-text);
     }
 
     .side-icon-btn.active {
-      background: #e2e8f0;
-      color: #0f172a;
+      background: rgba(125, 125, 125, 0.15);
+      color: var(--app-text);
     }
 
     .side-icon-btn.active::before {
@@ -359,15 +426,15 @@
     }
 
     .view-h2 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--app-text);
       margin-bottom: 4px;
     }
 
     .view-sub {
       font-size: 0.82rem;
-      color: #64748b;
+      color: var(--app-text-muted);
     }
 
     .view-actions {
@@ -375,17 +442,17 @@
       align-items: center;
       gap: 12px;
       font-size: 0.78rem;
-      color: #64748b;
+      color: var(--app-text-muted);
     }
 
     .btn-refresh {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
+      background: var(--app-card-bg);
+      border: 1px solid var(--app-card-border);
       padding: 5px 12px;
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.78rem;
-      color: #334155;
+      color: var(--app-text);
       font-weight: 600;
       display: inline-flex;
       align-items: center;
@@ -393,13 +460,13 @@
     }
 
     .btn-refresh:hover {
-      background: #f8fafc;
+      opacity: 0.9;
     }
 
     /* Top Summary Bar */
     .summary-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      background: var(--app-card-bg);
+      border: 1px solid var(--app-card-border);
       border-radius: 8px;
       padding: 12px 20px;
       display: flex;
@@ -416,34 +483,34 @@
 
     .summary-label {
       font-size: 0.72rem;
-      color: #64748b;
+      color: var(--app-text-muted);
     }
 
     .summary-val {
       font-size: 0.85rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--app-text);
     }
 
     .btn-outline-sm {
       background: transparent;
-      border: 1px solid #cbd5e1;
+      border: 1px solid var(--app-card-border);
       padding: 5px 12px;
       border-radius: 6px;
       font-size: 0.75rem;
       font-weight: 600;
-      color: #334155;
+      color: var(--app-text);
       cursor: pointer;
     }
 
     .section-label {
       font-size: 0.92rem;
       font-weight: 700;
-      color: #1e293b;
+      color: var(--app-text);
       margin-bottom: 14px;
     }
 
-    /* 2 Core Cards Grid */
+    /* Core Cards Grid */
     .app-cards-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -457,8 +524,8 @@
     }
 
     .app-card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      background: var(--app-card-bg);
+      border: 1px solid var(--app-card-border);
       border-radius: 10px;
       padding: 20px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -477,12 +544,12 @@
     .card-title {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #0f172a;
+      color: var(--app-text);
     }
 
     .badge-ok {
-      background: #dcfce7;
-      color: #15803d;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
       font-size: 0.7rem;
       font-weight: 600;
       padding: 2px 8px;
@@ -491,13 +558,13 @@
 
     .card-meta {
       font-size: 0.78rem;
-      color: #64748b;
+      color: var(--app-text-muted);
       margin-bottom: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
     .card-meta b {
-      color: #0f172a;
+      color: var(--app-text);
     }
 
     .card-status-line {
@@ -519,38 +586,37 @@
       font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
-      border: 1px solid #e2e8f0;
-      background: #f8fafc;
-      color: #94a3b8;
+      border: 1px solid var(--app-btn-border);
+      background: var(--app-btn-bg);
+      color: var(--app-btn-text);
     }
 
     .card-btn.enabled {
-      background: #ffffff;
-      border-color: #0f172a;
-      color: #0f172a;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      background: var(--app-btn-active-bg);
+      border-color: var(--app-btn-active-border);
+      color: var(--app-btn-active-text);
     }
 
     .card-btn.primary {
-      background: #0f172a;
-      border-color: #0f172a;
+      background: #0284c7;
+      border-color: #0284c7;
       color: #ffffff;
     }
 
     /* Bottom Status Bar */
     .win-statusbar {
       height: 28px;
-      background: #ffffff;
-      border-top: 1px solid #e2e8f0;
+      background: var(--app-titlebar);
+      border-top: 1px solid var(--app-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 0 16px;
       font-size: 0.72rem;
-      color: #64748b;
+      color: var(--app-text-muted);
     }
 
-    /* 4 REAL FEATURES LIST (NO PILLARS, NO ESSAYS) */
+    /* 4 FEATURES GRID */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -575,7 +641,7 @@
     .f-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text);
       margin-bottom: 8px;
       display: flex;
       align-items: center;
@@ -588,7 +654,7 @@
       line-height: 1.55;
     }
 
-    /* QUICK RUN & INSTALL */
+    /* INSTALL & DOWNLOAD */
     .install-box {
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -600,7 +666,7 @@
 
     .install-box h3 {
       font-size: 1.25rem;
-      color: #fff;
+      color: var(--text);
       margin-bottom: 8px;
     }
 
@@ -614,11 +680,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #04070e;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 10px 16px;
-      font-family: var(--font-mono);
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.85rem;
       color: var(--cyan);
       margin-bottom: 24px;
@@ -627,9 +693,9 @@
 
     .btn-copy-code {
       background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: #fff;
-      font-family: var(--font-mono);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'JetBrains Mono', monospace;
       font-size: 0.75rem;
       font-weight: 600;
       padding: 5px 12px;
@@ -639,8 +705,8 @@
     }
 
     .btn-copy-code:hover {
-      background: #fff;
-      color: #04070e;
+      background: var(--text);
+      color: var(--bg);
     }
 
     .download-options {
@@ -671,7 +737,7 @@
     }
 
     .dl-item h4 {
-      color: #fff;
+      color: var(--text);
       font-size: 0.9rem;
       margin-bottom: 4px;
     }
@@ -703,12 +769,19 @@
       </a>
 
       <div class="nav-actions">
-        <a href="#install" class="btn-gh" data-i18n="nav.download">下载</a>
+        <a href="#install" class="toggle-btn" data-i18n="nav.download">Download</a>
         <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-gh">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
           <span>Star</span>
         </a>
-        <button class="lang-btn" id="langBtn" onclick="toggleLang()">EN</button>
+
+        <!-- Dark / Light Theme Toggle -->
+        <button class="toggle-btn" id="themeBtn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">☀️</span>
+        </button>
+
+        <!-- Language Switcher (Default: English) -->
+        <button class="toggle-btn" id="langBtn" onclick="toggleLang()" title="Switch Language">中</button>
       </div>
     </nav>
 
@@ -716,31 +789,31 @@
     <section class="hero">
       <div class="hero-pill">
         <div class="pill-dot"></div>
-        <span data-i18n="h.pill">v1.1.0 · WinUI 3 原生 Windows 控制台</span>
+        <span data-i18n="h.pill">v1.1.0 · Native WinUI 3 Control Center</span>
       </div>
 
-      <h1 class="hero-h1" data-i18n="h.title">Windows 上的 OpenAI Codex 原生管控中心</h1>
+      <h1 class="hero-h1" data-i18n="h.title">The Native Windows Control Center for OpenAI Codex</h1>
       <p class="hero-desc" data-i18n="h.desc">
-        统一调度 ChatGPT 桌面端、Codex CLI、OpenCodex 代理分流、Codex Relay 与 Tailscale。毫秒启动，双层管线，公网出口防封判定。
+        A fast WinUI 3 dashboard to orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy, Codex Relay, and Tailscale on Windows.
       </p>
 
       <div class="hero-actions">
         <a href="#install" class="btn-primary" data-i18n="h.btnDownload">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>下载便携版 (Portable)</span>
+          <span>Download Portable (.zip)</span>
         </a>
         <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-ghost">
-          <span>GitHub 仓库</span>
+          <span>GitHub Repository</span>
         </a>
       </div>
     </section>
 
-    <!-- INTERACTIVE NATIVE APP WORKSPACE -->
+    <!-- INTERACTIVE NATIVE APP WORKSPACE (100% HTML/CSS) -->
     <div class="app-showcase-wrap">
-      <div class="app-hint" data-i18n="app.hint">💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能</div>
+      <div class="app-hint" data-i18n="app.hint">💡 Click the sidebar icons to interactively explore each screen right here</div>
 
-      <div class="app-window">
-        <!-- Window Titlebar -->
+      <div class="app-window" id="appWindow">
+        <!-- Titlebar -->
         <div class="win-titlebar">
           <div class="win-title">
             <img src="assets/app-icon.png" alt="Icon">
@@ -753,452 +826,132 @@
           </div>
         </div>
 
-        <!-- Main Body -->
+        <!-- Workspace -->
         <div class="win-workspace">
           <!-- Left Navigation Rail -->
           <div class="win-sidebar">
             <button class="side-icon-btn" title="Menu">☰</button>
-            <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex 总览">🏠</button>
-            <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="依赖管理">📥</button>
-            <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="进程管控">📊</button>
-            <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="网络与出口">🌐</button>
+            <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex Dashboard">🏠</button>
+            <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="Dependencies">📥</button>
+            <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes">📊</button>
+            <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress">🌐</button>
             <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers">{ }</button>
             <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex">⚡</button>
             <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale">🔗</button>
-            <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="设置">⚙️</button>
+            <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings">⚙️</button>
           </div>
 
           <!-- Dynamic Page Container -->
-          <div class="win-main" id="appMainContent">
-            
-            <!-- Default: Codex 总览 (Matches User's Screenshot Exactly) -->
-            <div class="view-header">
-              <div>
-                <h2 class="view-h2" id="vTitle">Codex 总览</h2>
-                <div class="view-sub" id="vSub">Codex 客户端管理已就绪；扩展模块为可选项。</div>
-              </div>
-              <div class="view-actions">
-                <span id="vSample">采样 23:06:51</span>
-                <button class="btn-refresh" onclick="refreshAppMock()">🔄 立即刷新</button>
-              </div>
-            </div>
-
-            <div class="summary-card">
-              <div class="summary-col">
-                <span class="summary-label">Microsoft Store</span>
-                <span class="summary-val" style="color:#15803d">运行正常</span>
-              </div>
-              <div class="summary-col">
-                <span class="summary-label">npm</span>
-                <span class="summary-val">运行正常 · 11.12.1</span>
-              </div>
-              <button class="btn-outline-sm" onclick="setAppPage('deps')">依赖设置</button>
-            </div>
-
-            <div class="section-label">ChatGPT 客户端与 Codex CLI</div>
-
-            <div class="app-cards-grid">
-              <!-- Card 1: Codex 桌面客户端 -->
-              <div class="app-card">
-                <div>
-                  <div class="card-head">
-                    <span class="card-title">Codex 桌面客户端</span>
-                    <span class="badge-ok">运行正常</span>
-                  </div>
-                  <div class="card-meta">
-                    OpenAI 官方 Windows 应用<br>
-                    已安装并在运行<br>
-                    版本 <b>26.903.9818.0</b><br>
-                    <span style="color:#94a3b8">尚未查询远端版本</span>
-                  </div>
-                  <div class="card-status-line">● 运行中</div>
-                </div>
-                <div class="card-btn-group">
-                  <button class="card-btn">安装</button>
-                  <button class="card-btn">登录</button>
-                  <button class="card-btn">启动</button>
-                  <button class="card-btn enabled" onclick="alert('测试操作：已触发停止指令')">停止</button>
-                  <button class="card-btn enabled" onclick="alert('测试操作：已触发重启指令')">重启</button>
-                  <button class="card-btn">升级</button>
-                </div>
-              </div>
-
-              <!-- Card 2: Codex CLI -->
-              <div class="app-card">
-                <div>
-                  <div class="card-head">
-                    <span class="card-title">Codex CLI</span>
-                    <span class="badge-ok">运行正常</span>
-                  </div>
-                  <div class="card-meta">
-                    命令行客户端<br>
-                    npm 全局安装 · 0.147.0<br>
-                    版本 <b>0.147.0 → 0.154.0</b><br>
-                    <span style="color:#15803d">发现官方新版本</span>
-                  </div>
-                  <div class="card-status-line">● 运行中</div>
-                </div>
-                <div class="card-btn-group">
-                  <button class="card-btn">安装</button>
-                  <button class="card-btn">登录</button>
-                  <button class="card-btn">启动</button>
-                  <button class="card-btn">停止</button>
-                  <button class="card-btn">重启</button>
-                  <button class="card-btn primary" onclick="alert('测试操作：已触发升级到 0.154.0')">升级</button>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          <div class="win-main" id="appMainContent"></div>
         </div>
 
-        <!-- Window Statusbar -->
+        <!-- Statusbar -->
         <div class="win-statusbar">
-          <span>检测完成</span>
-          <span id="vUpdated">更新于 23:06:51</span>
+          <span id="vStatus">Ready</span>
+          <span id="vUpdated">Sampled 23:06:51</span>
         </div>
       </div>
     </div>
 
-    <!-- 4 REAL CAPABILITIES (CONCISE, NO AI FLUFF) -->
+    <!-- 4 REAL CAPABILITIES (NO ESSAYS, MINIMAL WORDS) -->
     <div class="features-grid">
       <div class="feature-item">
         <div class="f-title">
-          <span>🖥️</span> <span data-i18n="f1.t">双核心分离观测</span>
+          <span>🖥️</span> <span data-i18n="f1.t">Dual-Core Transparency</span>
         </div>
         <p class="f-desc" data-i18n="f1.d">
-          独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。
+          Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.
         </p>
       </div>
 
       <div class="feature-item">
         <div class="f-title">
-          <span>⚡</span> <span data-i18n="f2.t">双层链路解耦</span>
+          <span>⚡</span> <span data-i18n="f2.t">Decoupled Dual Pipeline</span>
         </div>
         <p class="f-desc" data-i18n="f2.d">
-          将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理，还是经过 Tailscale 转发。
+          Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.
         </p>
       </div>
 
       <div class="feature-item">
         <div class="f-title">
-          <span>🌐</span> <span data-i18n="f3.t">公网出口防封雷达</span>
+          <span>🌐</span> <span data-i18n="f3.t">Egress Residential Radar</span>
         </div>
         <p class="f-desc" data-i18n="f3.d">
-          以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。
+          Probes the real origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.
         </p>
       </div>
 
       <div class="feature-item">
         <div class="f-title">
-          <span>🛡️</span> <span data-i18n="f4.t">安全进程白名单</span>
+          <span>🛡️</span> <span data-i18n="f4.t">Safe Process Whitelist</span>
         </div>
         <p class="f-desc" data-i18n="f4.d">
-          仅清理异常卡死的代理后台，绝不误杀 ChatGPT 桌面端与日常 Node 进程。Provider Key 严格保存在用户专属隐藏文件，禁止进入日志。
+          Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.
         </p>
       </div>
     </div>
 
-    <!-- INSTALL & DOWNLOAD BOX -->
+    <!-- QUICK RUN & DOWNLOAD -->
     <div class="install-box" id="install">
-      <h3 data-i18n="i.title">开箱即用 · 免安装单文件运行</h3>
-      <p data-i18n="i.desc">无需管理员提权，内嵌 Windows App SDK 与 .NET 10，下载解压即可双击启动。</p>
+      <h3 data-i18n="i.title">Single-File Portable · Zero Prerequisites</h3>
+      <p data-i18n="i.desc">No administrative escalation required. Embedded Windows App SDK and .NET 10. Extract and run.</p>
 
       <div class="code-row">
         <span id="cmdText">irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex</span>
-        <button class="btn-copy-code" onclick="copyCmd()" id="btnCopy" data-i18n="i.copy">复制命令</button>
+        <button class="btn-copy-code" onclick="copyCmd()" id="btnCopy" data-i18n="i.copy">Copy Command</button>
       </div>
 
       <div class="download-options">
         <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
           <h4>📦 CodexBeacon-portable.exe</h4>
-          <span data-i18n="i.p1">单文件便携版 · 内嵌完整运行环境 (推荐)</span>
+          <span data-i18n="i.p1">Single-file portable binary · Embedded runtimes (Recommended)</span>
         </a>
         <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
           <h4>⚡ CodexBeacon-slim.exe</h4>
-          <span data-i18n="i.p2">轻量版本 · 适合已统一部署运行时的机器</span>
+          <span data-i18n="i.p2">Slim build · For environments with pre-installed runtimes</span>
         </a>
       </div>
     </div>
 
     <!-- FOOTER -->
     <footer class="footer">
-      <p>© 2026 hurmuri / Codex Beacon · 基于 MIT 协议开源 · Windows 10 1809+ / Windows 11</p>
+      <p>© 2026 hurmuri / Codex Beacon · Open source under MIT license · Windows 10 1809+ / Windows 11</p>
     </footer>
 
   </div>
 
   <script>
-    // INTERACTIVE APP WORKSPACE LOGIC
-    const pages = {
-      'dashboard': {
-        titleZh: 'Codex 总览',
-        titleEn: 'Codex Dashboard',
-        subZh: 'Codex 客户端管理已就绪；扩展模块为可选项。',
-        subEn: 'Codex client management ready; optional extensions available.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">Microsoft Store</span>
-              <span class="summary-val" style="color:#15803d">运行正常</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">npm</span>
-              <span class="summary-val">运行正常 · 11.12.1</span>
-            </div>
-            <button class="btn-outline-sm" onclick="setAppPage('deps')">依赖设置</button>
-          </div>
+    // 1. THEME SWITCHER (DARK / LIGHT)
+    let curTheme = 'dark';
 
-          <div class="section-label">ChatGPT 客户端与 Codex CLI</div>
-
-          <div class="app-cards-grid">
-            <div class="app-card">
-              <div>
-                <div class="card-head">
-                  <span class="card-title">Codex 桌面客户端</span>
-                  <span class="badge-ok">运行正常</span>
-                </div>
-                <div class="card-meta">
-                  OpenAI 官方 Windows 应用<br>
-                  已安装并在运行<br>
-                  版本 <b>26.903.9818.0</b><br>
-                  <span style="color:#94a3b8">尚未查询远端版本</span>
-                </div>
-                <div class="card-status-line">● 运行中</div>
-              </div>
-              <div class="card-btn-group">
-                <button class="card-btn">安装</button>
-                <button class="card-btn">登录</button>
-                <button class="card-btn">启动</button>
-                <button class="card-btn enabled" onclick="alert('测试操作：已触发停止指令')">停止</button>
-                <button class="card-btn enabled" onclick="alert('测试操作：已触发重启指令')">重启</button>
-                <button class="card-btn">升级</button>
-              </div>
-            </div>
-
-            <div class="app-card">
-              <div>
-                <div class="card-head">
-                  <span class="card-title">Codex CLI</span>
-                  <span class="badge-ok">运行正常</span>
-                </div>
-                <div class="card-meta">
-                  命令行客户端<br>
-                  npm 全局安装 · 0.147.0<br>
-                  版本 <b>0.147.0 → 0.154.0</b><br>
-                  <span style="color:#15803d">发现官方新版本</span>
-                </div>
-                <div class="card-status-line">● 运行中</div>
-              </div>
-              <div class="card-btn-group">
-                <button class="card-btn">安装</button>
-                <button class="card-btn">登录</button>
-                <button class="card-btn">启动</button>
-                <button class="card-btn">停止</button>
-                <button class="card-btn">重启</button>
-                <button class="card-btn primary" onclick="alert('测试操作：已触发升级到 0.154.0')">升级</button>
-              </div>
-            </div>
-          </div>
-        `
-      },
-      'network': {
-        titleZh: '网络与代理',
-        titleEn: 'Network & Egress',
-        subZh: '双层管线实时观测，探查真实外网出口 IP 与家庭宽带归属。',
-        subEn: 'Dual-plane pipeline inspection, true egress IP, and residential classification.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">真实公网出口 IP</span>
-              <span class="summary-val" style="color:#0284c7">163.228.113.120 (🇯🇵 Tokyo, Japan)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">宽带性质</span>
-              <span class="summary-val" style="color:#15803d">原生家庭宽带 (Residential · 低风控)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">运营商</span>
-              <span class="summary-val">AS2516 KDDI Corporation</span>
-            </div>
-          </div>
-
-          <div class="section-label">双层链路实时拓扑</div>
-
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:18px; font-family:var(--font-mono); font-size:0.8rem; line-height:1.7;">
-            <div><span style="color:#0284c7; font-weight:700;">[模型逻辑层]</span> Codex CLI (:4096) ➔ OpenCodex 智能代理 (:10100) ➔ DeepSeek-V3 / Claude</div>
-            <div style="margin-top:8px;"><span style="color:#15803d; font-weight:700;">[物理传输层]</span> 本地套接字 ➔ 系统代理直通 ➔ 日本出口 (延迟 38ms · 零 DNS 泄露)</div>
-          </div>
-        `
-      },
-      'processes': {
-        titleZh: 'Codex 进程管控',
-        titleEn: 'Process Arbiter',
-        subZh: '严格白名单机制，支持一键重启卡死代理，绝不误杀宿主应用。',
-        subEn: 'Strict termination whitelist. Resets proxy daemons without killing user processes.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">活跃关联进程</span>
-              <span class="summary-val">3 个受管进程</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">白名单规则</span>
-              <span class="summary-val" style="color:#15803d">已启用 (严格隔离保护)</span>
-            </div>
-            <button class="btn-outline-sm" onclick="alert('已安全重启关联代理进程')">安全重置代理</button>
-          </div>
-
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; font-size:0.8rem;">
-            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; background:#f8fafc; font-weight:700; border-bottom:1px solid #e2e8f0;">
-              <span>PID</span><span>进程名称</span><span>监听端口</span><span>防护级别</span>
-            </div>
-            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid #f1f5f9;">
-              <span>14280</span><span>OpenAI.Codex.exe</span><span>:4096</span><span style="color:#15803d">核心受保护</span>
-            </div>
-            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid #f1f5f9;">
-              <span>21904</span><span>node.exe (opencodex)</span><span>:10100</span><span style="color:#0284c7">托管重置</span>
-            </div>
-            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px;">
-              <span>31088</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">托管重置</span>
-            </div>
-          </div>
-        `
-      },
-      'providers': {
-        titleZh: 'Providers 凭证管理',
-        titleEn: 'Model Providers & Vault',
-        subZh: '编辑与切换模型供应商，密码框保护，禁止明文落入日志。',
-        subEn: 'Manage model providers securely. Keys are kept in hidden user storage.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">当前生效 Provider</span>
-              <span class="summary-val">OpenCodex Mux (本地智能代理)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">同步文件</span>
-              <span class="summary-val">%USERPROFILE%\.codex\config.toml</span>
-            </div>
-            <button class="btn-outline-sm" onclick="alert('已切回官方直连')">切回官方直连</button>
-          </div>
-
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:20px;">
-            <div style="margin-bottom:12px;">
-              <span style="font-size:0.75rem; color:#64748b;">API Base URL:</span>
-              <div style="font-family:var(--font-mono); font-size:0.85rem; color:#0f172a; margin-top:4px;">http://127.0.0.1:10100/v1</div>
-            </div>
-            <div>
-              <span style="font-size:0.75rem; color:#64748b;">API Key (受保护隐藏存储):</span>
-              <div style="font-family:var(--font-mono); font-size:0.85rem; color:#0284c7; margin-top:4px;">sk-••••••••••••••••••••••••39fe (保存在 %USERPROFILE%\.CodexBeacon\providers.json)</div>
-            </div>
-          </div>
-        `
-      },
-      'deps': {
-        titleZh: '依赖管理 (NVM & Node.js)',
-        titleEn: 'Dependencies & NVM',
-        subZh: 'NVM for Windows 状态感知，一键切换全局 Node.js 版本。',
-        subEn: 'NVM integration and seamless Node.js version switching.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">NVM for Windows</span>
-              <span class="summary-val" style="color:#15803d">已检测到 (v1.1.12)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">当前活跃 Node.js</span>
-              <span class="summary-val" style="color:#0284c7">v22.15.0 (满足 Relay >= 22.14.0 规则)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">下载镜像源</span>
-              <span class="summary-val">npmmirror.com (自动回退)</span>
-            </div>
-          </div>
-
-          <div class="section-label">本地已安装 Node.js 版本 (点击切换)</div>
-          <div style="display:flex; gap:12px;">
-            <button class="card-btn enabled" style="padding:8px 16px; font-weight:700;" onclick="alert('当前已是 v22.15.0')">✓ v22.15.0 (活跃中)</button>
-            <button class="card-btn" style="padding:8px 16px;" onclick="alert('已切换到 v20.18.0')">v20.18.0</button>
-            <button class="card-btn" style="padding:8px 16px;" onclick="alert('已切换到 v18.20.4')">v18.20.4</button>
-          </div>
-        `
-      },
-      'opencodex': {
-        titleZh: 'OpenCodex 扩展代理',
-        titleEn: 'OpenCodex Proxy',
-        subZh: '独立管理 opencodex-proxy 计划任务与 10100 端口服务。',
-        subEn: 'Manages opencodex-proxy scheduled task and port 10100.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">服务状态</span>
-              <span class="summary-val" style="color:#15803d">运行中 (PID 21904)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">本地监听端点</span>
-              <span class="summary-val">http://127.0.0.1:10100</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">计划任务</span>
-              <span class="summary-val">opencodex-proxy (已就绪)</span>
-            </div>
-          </div>
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem; color:#475569;">
-            支持将 Codex CLI 请求透明重写并多路分发给 DeepSeek-V3、Claude 3.5 Sonnet 与本地大语言模型。缺失组件绝不会误判为系统故障。
-          </div>
-        `
-      },
-      'tailscale': {
-        titleZh: 'Tailscale 局域网与设备拓扑',
-        titleEn: 'Tailscale Mesh',
-        subZh: '探测 Tailscale 本地服务、虚拟 IP 与 Tailnet 设备连通性。',
-        subEn: 'Inspects local Tailscale service and connected Tailnet devices.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">Tailscale 状态</span>
-              <span class="summary-val" style="color:#15803d">已连接 · 运行中</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">本机 Tailnet IP</span>
-              <span class="summary-val">100.108.45.22</span>
-            </div>
-          </div>
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem;">
-            <div style="font-weight:700; margin-bottom:8px;">局域组网设备:</div>
-            <div style="color:#334155; font-family:var(--font-mono);">● tokyo-gpu-server (100.80.12.4) [在线 · 延迟 38ms]</div>
-            <div style="color:#334155; font-family:var(--font-mono); margin-top:4px;">● macbook-remote (100.95.22.11) [在线 · 延迟 12ms]</div>
-          </div>
-        `
-      },
-      'settings': {
-        titleZh: '设置与关于',
-        titleEn: 'Settings & About',
-        subZh: '软件版本、语言切换、自动更新与日志路径。',
-        subEn: 'Version details, language preferences, and auto update channel.',
-        htmlZh: `
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">当前构建版本</span>
-              <span class="summary-val">v1.1.0 (win-x64 portable)</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">UI 框架</span>
-              <span class="summary-val">Windows App SDK 1.8 · WinUI 3</span>
-            </div>
-            <button class="btn-outline-sm" onclick="alert('当前已是最新版本')">检查更新</button>
-          </div>
-          <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; font-size:0.82rem; color:#64748b;">
-            配置文件位置: %USERPROFILE%\.CodexBeacon\settings.json<br>
-            无任何外部云端数据上传，完全开源受控。
-          </div>
-        `
+    function initTheme() {
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) {
+        curTheme = savedTheme;
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        curTheme = 'light';
       }
-    };
+      applyTheme(curTheme);
+    }
 
+    function toggleTheme() {
+      curTheme = curTheme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme', curTheme);
+      applyTheme(curTheme);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.getElementById('themeIcon');
+      if (icon) {
+        icon.innerText = theme === 'dark' ? '☀️' : '🌙';
+      }
+    }
+
+    // 2. INTERACTIVE APP WORKSPACE
     let curPage = 'dashboard';
-    let curLang = 'zh-CN';
+    let curLang = 'en-US'; // DEFAULT TO ENGLISH
 
     function setAppPage(pageKey) {
       curPage = pageKey;
@@ -1206,23 +959,242 @@
       const activeBtn = document.getElementById('sbtn-' + pageKey);
       if (activeBtn) activeBtn.classList.add('active');
 
-      const data = pages[pageKey] || pages['dashboard'];
       const isEn = curLang === 'en-US';
-
       const main = document.getElementById('appMainContent');
-      main.innerHTML = `
-        <div class="view-header">
-          <div>
-            <h2 class="view-h2">${isEn ? data.titleEn : data.titleZh}</h2>
-            <div class="view-sub">${isEn ? data.subEn : data.subZh}</div>
+
+      if (pageKey === 'dashboard') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Codex Dashboard' : 'Codex 总览'}</h2>
+              <div class="view-sub">${isEn ? 'Codex client management ready; optional extensions available.' : 'Codex 客户端管理已就绪；扩展模块为可选项。'}</div>
+            </div>
+            <div class="view-actions">
+              <span>${isEn ? 'Sampled 23:06:51' : '采样 23:06:51'}</span>
+              <button class="btn-refresh" onclick="refreshAppMock()">🔄 ${isEn ? 'Refresh' : '立即刷新'}</button>
+            </div>
           </div>
-          <div class="view-actions">
-            <span>${isEn ? 'Sampled 23:06:51' : '采样 23:06:51'}</span>
-            <button class="btn-refresh" onclick="refreshAppMock()">🔄 ${isEn ? 'Refresh' : '立即刷新'}</button>
+
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">Microsoft Store</span>
+              <span class="summary-val" style="color:#15803d">${isEn ? 'Healthy' : '运行正常'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">npm</span>
+              <span class="summary-val">${isEn ? 'Healthy · 11.12.1' : '运行正常 · 11.12.1'}</span>
+            </div>
+            <button class="btn-outline-sm" onclick="setAppPage('deps')">${isEn ? 'Dependency Settings' : '依赖设置'}</button>
           </div>
-        </div>
-        ${data.htmlZh}
-      `;
+
+          <div class="section-label">${isEn ? 'ChatGPT Desktop Client & Codex CLI' : 'ChatGPT 客户端与 Codex CLI'}</div>
+
+          <div class="app-cards-grid">
+            <div class="app-card">
+              <div>
+                <div class="card-head">
+                  <span class="card-title">${isEn ? 'Codex Desktop App' : 'Codex 桌面客户端'}</span>
+                  <span class="badge-ok">${isEn ? 'Healthy' : '运行正常'}</span>
+                </div>
+                <div class="card-meta">
+                  ${isEn ? 'Official OpenAI Windows Store App' : 'OpenAI 官方 Windows 应用'}<br>
+                  ${isEn ? 'Installed and Running' : '已安装并在运行'}<br>
+                  ${isEn ? 'Version' : '版本'} <b>26.903.9818.0</b><br>
+                  <span style="color:var(--app-text-muted)">${isEn ? 'Remote version not queried' : '尚未查询远端版本'}</span>
+                </div>
+                <div class="card-status-line">● ${isEn ? 'Running' : '运行中'}</div>
+              </div>
+              <div class="card-btn-group">
+                <button class="card-btn">${isEn ? 'Install' : '安装'}</button>
+                <button class="card-btn">${isEn ? 'Login' : '登录'}</button>
+                <button class="card-btn">${isEn ? 'Start' : '启动'}</button>
+                <button class="card-btn enabled" onclick="alert('${isEn ? 'Triggered Stop' : '已触发停止指令'}')">${isEn ? 'Stop' : '停止'}</button>
+                <button class="card-btn enabled" onclick="alert('${isEn ? 'Triggered Restart' : '已触发重启指令'}')">${isEn ? 'Restart' : '重启'}</button>
+                <button class="card-btn">${isEn ? 'Upgrade' : '升级'}</button>
+              </div>
+            </div>
+
+            <div class="app-card">
+              <div>
+                <div class="card-head">
+                  <span class="card-title">${isEn ? 'Codex CLI' : 'Codex CLI'}</span>
+                  <span class="badge-ok">${isEn ? 'Healthy' : '运行正常'}</span>
+                </div>
+                <div class="card-meta">
+                  ${isEn ? 'Command Line Client' : '命令行客户端'}<br>
+                  ${isEn ? 'npm Global · 0.147.0' : 'npm 全局安装 · 0.147.0'}<br>
+                  ${isEn ? 'Version' : '版本'} <b>0.147.0 → 0.154.0</b><br>
+                  <span style="color:#15803d">${isEn ? 'Upstream update available' : '发现官方新版本'}</span>
+                </div>
+                <div class="card-status-line">● ${isEn ? 'Running' : '运行中'}</div>
+              </div>
+              <div class="card-btn-group">
+                <button class="card-btn">${isEn ? 'Install' : '安装'}</button>
+                <button class="card-btn">${isEn ? 'Login' : '登录'}</button>
+                <button class="card-btn">${isEn ? 'Start' : '启动'}</button>
+                <button class="card-btn">${isEn ? 'Stop' : '停止'}</button>
+                <button class="card-btn">${isEn ? 'Restart' : '重启'}</button>
+                <button class="card-btn primary" onclick="alert('${isEn ? 'Triggered Upgrade' : '已触发升级到 0.154.0'}')">${isEn ? 'Upgrade' : '升级'}</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'network') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Network & Egress' : '网络与代理'}</h2>
+              <div class="view-sub">${isEn ? 'Decoupled dual pipeline and true residential egress detection.' : '双层管线实时观测，探查真实外网出口 IP 与家庭宽带归属。'}</div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'True Public Egress IP' : '真实公网出口 IP'}</span>
+              <span class="summary-val" style="color:#0284c7">163.228.113.120 (🇯🇵 Tokyo, Japan)</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Broadband Type' : '宽带性质'}</span>
+              <span class="summary-val" style="color:#15803d">${isEn ? 'Verified Residential (Low Risk)' : '原生家庭宽带 (Residential · 低风控)'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Carrier / ASN' : '运营商'}</span>
+              <span class="summary-val">AS2516 KDDI Corporation</span>
+            </div>
+          </div>
+
+          <div class="section-label">${isEn ? 'Real-time Dual-Layer Topology' : '双层链路实时拓扑'}</div>
+          <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; padding:18px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.7;">
+            <div><span style="color:#0284c7; font-weight:700;">[Model Plane]</span> Codex CLI (:4096) ➔ OpenCodex Mux (:10100) ➔ DeepSeek-V3 / Claude</div>
+            <div style="margin-top:8px;"><span style="color:#15803d; font-weight:700;">[Transport Plane]</span> Local Socket ➔ Direct System Proxy ➔ Tokyo Edge (38ms · Zero Leak)</div>
+          </div>
+        `;
+      } else if (pageKey === 'processes') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Process Arbiter' : 'Codex 进程管控'}</h2>
+              <div class="view-sub">${isEn ? 'Strict whitelist prevents killing unrelated developer tooling.' : '严格白名单机制，支持一键重启卡死代理，绝不误杀宿主应用。'}</div>
+            </div>
+            <div class="view-actions">
+              <button class="btn-refresh" onclick="alert('${isEn ? 'Proxy daemons reset safely' : '已安全重启关联代理进程'}')">${isEn ? 'Reset Proxies' : '安全重置代理'}</button>
+            </div>
+          </div>
+
+          <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; overflow:hidden; font-size:0.8rem;">
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; background:rgba(125,125,125,0.05); font-weight:700; border-bottom:1px solid var(--app-card-border);">
+              <span>PID</span><span>${isEn ? 'Name' : '进程名称'}</span><span>${isEn ? 'Port' : '监听端口'}</span><span>${isEn ? 'Policy' : '防护级别'}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid var(--app-card-border);">
+              <span>14280</span><span>OpenAI.Codex.exe</span><span>:4096</span><span style="color:#15803d">${isEn ? 'Protected' : '核心受保护'}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid var(--app-card-border);">
+              <span>21904</span><span>node.exe (opencodex)</span><span>:10100</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
+            </div>
+            <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px;">
+              <span>31088</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'providers') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Providers & Secret Vault' : 'Providers 凭证管理'}</h2>
+              <div class="view-sub">${isEn ? 'Manage model providers securely. Keys are kept in hidden user-only storage.' : '编辑与切换模型供应商，密码框保护，禁止明文落入日志。'}</div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Active Provider' : '当前生效 Provider'}</span>
+              <span class="summary-val">OpenCodex Mux (${isEn ? 'Local Smart Dispatch' : '本地智能代理'})</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Config Path' : '配置文件'}</span>
+              <span class="summary-val">%USERPROFILE%\\.codex\\config.toml</span>
+            </div>
+            <button class="btn-outline-sm" onclick="alert('${isEn ? 'Switched to Direct OpenAI' : '已切回官方直连'}')">${isEn ? 'Direct OpenAI' : '切回官方直连'}</button>
+          </div>
+
+          <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; padding:20px;">
+            <div style="margin-bottom:12px;">
+              <span style="font-size:0.75rem; color:var(--app-text-muted);">API Base URL:</span>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--app-text); margin-top:4px;">http://127.0.0.1:10100/v1</div>
+            </div>
+            <div>
+              <span style="font-size:0.75rem; color:var(--app-text-muted);">API Key (${isEn ? 'Protected Hidden Storage' : '受保护隐藏存储'}):</span>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:#0284c7; margin-top:4px;">sk-••••••••••••••••••••••••39fe (%USERPROFILE%\\.CodexBeacon\\providers.json)</div>
+            </div>
+          </div>
+        `;
+      } else if (pageKey === 'deps') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Dependencies & NVM' : '依赖管理 (NVM & Node.js)'}</h2>
+              <div class="view-sub">${isEn ? 'NVM for Windows integration and Node.js version switching.' : 'NVM for Windows 状态感知，一键切换全局 Node.js 版本。'}</div>
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">NVM for Windows</span>
+              <span class="summary-val" style="color:#15803d">${isEn ? 'Detected (v1.1.12)' : '已检测到 (v1.1.12)'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Active Node.js' : '当前活跃 Node.js'}</span>
+              <span class="summary-val" style="color:#0284c7">v22.15.0 (${isEn ? 'Meets Relay >= 22.14.0' : '满足 Relay >= 22.14.0 规则'})</span>
+            </div>
+          </div>
+
+          <div class="section-label">${isEn ? 'Installed Node.js Versions' : '本地已安装 Node.js 版本 (点击切换)'}</div>
+          <div style="display:flex; gap:12px;">
+            <button class="card-btn enabled" style="padding:8px 16px; font-weight:700;">✓ v22.15.0 (${isEn ? 'Active' : '活跃中'})</button>
+            <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v20.18.0' : '已切换到 v20.18.0'}')">v20.18.0</button>
+            <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v18.20.4' : '已切换到 v18.20.4'}')">v18.20.4</button>
+          </div>
+        `;
+      } else if (pageKey === 'opencodex') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">OpenCodex</h2>
+              <div class="view-sub">${isEn ? 'Manages opencodex-proxy scheduled task and port 10100.' : '独立管理 opencodex-proxy 计划任务与 10100 端口服务。'}</div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:10100</span></div>
+            <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 21904)</span></div>
+          </div>
+        `;
+      } else if (pageKey === 'tailscale') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">Tailscale Mesh</h2>
+              <div class="view-sub">${isEn ? 'Inspects local Tailscale service and connected Tailnet devices.' : '探测 Tailscale 本地服务、虚拟 IP 与 Tailnet 设备连通性。'}</div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-col"><span class="summary-label">Local Tailnet IP</span><span class="summary-val">100.108.45.22</span></div>
+            <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Connected</span></div>
+          </div>
+        `;
+      } else {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Settings & About' : '设置与关于'}</h2>
+              <div class="view-sub">${isEn ? 'Version details, language preferences, and update channel.' : '软件版本、语言切换、自动更新与日志路径。'}</div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-col"><span class="summary-label">Version</span><span class="summary-val">v1.1.0 (win-x64 portable)</span></div>
+            <div class="summary-col"><span class="summary-label">Engine</span><span class="summary-val">Windows App SDK 1.8 · WinUI 3</span></div>
+          </div>
+        `;
+      }
     }
 
     function refreshAppMock() {
@@ -1242,7 +1214,29 @@
       });
     }
 
+    // 3. BILINGUAL SWITCHER (DEFAULT: EN)
     const dict = {
+      'en-US': {
+        'nav.download': 'Download',
+        'h.pill': 'v1.1.0 · Native WinUI 3 Control Center',
+        'h.title': 'The Native Windows Control Center for OpenAI Codex',
+        'h.desc': 'A fast WinUI 3 dashboard to orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy, Codex Relay, and Tailscale on Windows.',
+        'h.btnDownload': 'Download Portable (.zip)',
+        'app.hint': '💡 Click the sidebar icons to interactively explore each screen right here',
+        'f1.t': 'Dual-Core Transparency',
+        'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
+        'f2.t': 'Decoupled Dual Pipeline',
+        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.',
+        'f3.t': 'Egress Residential Radar',
+        'f3.d': 'Probes the real origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
+        'f4.t': 'Safe Process Whitelist',
+        'f4.d': 'Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.',
+        'i.title': 'Single-File Portable · Zero Prerequisites',
+        'i.desc': 'Runs under standard user privileges. Embedded Windows App SDK and .NET 10. Extract and run.',
+        'i.copy': 'Copy Command',
+        'i.p1': 'Portable single executable · All-inclusive runtime (Recommended)',
+        'i.p2': 'Slim build · For environments with pre-installed runtimes'
+      },
       'zh-CN': {
         'nav.download': '下载',
         'h.pill': 'v1.1.0 · WinUI 3 原生 Windows 控制台',
@@ -1263,43 +1257,37 @@
         'i.copy': '复制命令',
         'i.p1': '单文件便携版 · 内嵌完整运行环境 (推荐)',
         'i.p2': '轻量版本 · 适合已统一部署运行时的机器'
-      },
-      'en-US': {
-        'nav.download': 'Download',
-        'h.pill': 'v1.1.0 · Native WinUI 3 Windows Mission Control',
-        'h.title': 'The Native Windows Control Center for OpenAI Codex',
-        'h.desc': 'Orchestrate ChatGPT Desktop, Codex CLI, OpenCodex proxy multiplexing, Codex Relay, and Tailscale on Windows with sub-millisecond launch speed.',
-        'h.btnDownload': 'Download Portable (.zip)',
-        'app.hint': '💡 Click the icons on the sidebar to interactively explore each module in your browser',
-        'f1.t': 'Dual-Core Transparency',
-        'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
-        'f2.t': 'Decoupled Dual-Plane Routing',
-        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, OpenCodex, or Tailscale.',
-        'f3.t': 'Egress Residential Radar',
-        'f3.d': 'Probes the true origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
-        'f4.t': 'Process Whitelist Protection',
-        'f4.d': 'Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.',
-        'i.title': 'Single-File Portable · Zero Prerequisites',
-        'i.desc': 'Runs under standard user privileges. Embedded Windows App SDK and .NET 10. Extract and run.',
-        'i.copy': 'Copy Command',
-        'i.p1': 'Portable single executable · All-inclusive runtime (Recommended)',
-        'i.p2': 'Slim build · For environments with pre-installed runtimes'
       }
     };
 
     function toggleLang() {
-      curLang = curLang === 'zh-CN' ? 'en-US' : 'zh-CN';
-      document.getElementById('langBtn').innerText = curLang === 'zh-CN' ? 'EN' : '中';
+      curLang = curLang === 'en-US' ? 'zh-CN' : 'en-US';
+      localStorage.setItem('lang', curLang);
+      applyLang(curLang);
+    }
+
+    function applyLang(lang) {
+      document.documentElement.lang = lang === 'en-US' ? 'en' : 'zh-CN';
+      document.getElementById('langBtn').innerText = lang === 'en-US' ? '中' : 'EN';
 
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const k = el.getAttribute('data-i18n');
-        if (dict[curLang] && dict[curLang][k]) {
-          el.innerText = dict[curLang][k];
+        if (dict[lang] && dict[lang][k]) {
+          el.innerText = dict[lang][k];
         }
       });
 
       setAppPage(curPage);
     }
+
+    // INIT
+    initTheme();
+    const savedLang = localStorage.getItem('lang');
+    if (savedLang) {
+      curLang = savedLang;
+    }
+    applyLang(curLang);
+    setAppPage('dashboard');
   </script>
 </body>
 </html>
