@@ -76,17 +76,29 @@ Before Codex Beacon, monitoring and managing these components required juggling 
 - Every build bumps its own version from `build/version.txt`, so each compiled artifact carries a distinct version.
 - In-app updates against the official GitHub Releases channel: version check, prompt on startup, manual check, streamed download with progress and speed, SHA-256 verification, skip-this-version, and an in-place restart into the new build.
 
-## Approved vNext direction
+## Core Functional Modules
 
-The canonical plan is [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). The app will use nine focused destinations: Codex overview, Dependencies, Codex processes, Network, Providers, OpenCodex, Tailscale, Codex Relay, and Settings / About & updates.
+Codex Beacon is built around nine modular, state-driven destinations:
 
-The overview will focus only on ChatGPT desktop and the active user-managed Codex CLI, while dependency repair, network checks, provider CRUD/testing, and optional modules move to dedicated pages. OpenCodex will expose its structured provider, model, health, and native-integration capabilities through its own page.
-
-Every download will show its real stage, transferred/total bytes when available, percentage, speed, elapsed time, and safe cancellation. Provider keys use a password field hidden by default and may be saved in plaintext under `%USERPROFILE%\.CodexBeacon\providers.json`; `.CodexBeacon` is explicitly hidden, the file is restricted to the current Windows user, and keys are excluded from uploads, command lines, logs, errors, diagnostics, and default exports.
-
-The current About and application-update experience remains. Component-specific task names and settings move to their owning pages: runtime sources to Dependencies, proxy options to Network, OpenCodex service/task settings to OpenCodex, and Relay service/task settings to Codex Relay.
+1. **Codex Dashboard**: Dual-core visibility for official Microsoft Store ChatGPT (`OpenAI.Codex`) and global npm `@openai/codex` CLI. Compares local builds against upstream npm registry metadata.
+2. **Dependencies & NVM**: Automatic NVM for Windows detection, Node.js version switching (satisfying Relay Node.js >= 22.14.0 prerequisite), and mirror acceleration with automatic fallback.
+3. **Process Arbiter**: Real-time inventory of all related processes (PID, paths, ports, memory) with a strict termination whitelist that prevents killing host apps or unrelated Node.js workflows.
+4. **Network & Egress**: Decoupled dual-plane pipeline observation (Model Plane vs Transport Plane) and true public egress IP probing with automatic Residential vs Datacenter tagging to avoid OpenAI 403 blocks.
+5. **Providers & Safe Vault**: Visual provider switching synced to `config.toml`. Password fields are masked by default, and keys are saved in hidden user directories (`%USERPROFILE%\.CodexBeacon\providers.json`) with zero serialization into logs.
+6. **OpenCodex Proxy (Optional Extension)**: Independent management of the `opencodex-proxy` scheduled task and port 10100, enabling multi-model dispatch and failover.
+7. **Codex Relay (Optional Extension)**: Dedicated management of the Codex Relay daemon on port 8787, optimized for low-latency streaming Server-Sent Events (SSE).
+8. **Tailscale Mesh (Optional Extension)**: Local Tailscale daemon inspection, virtual IP discovery, and remote node inventory for private GPU computing.
+9. **Settings & Self-Updating**: Version telemetry, instant English/Chinese bilingual switching, and in-place GitHub Releases self-updates with SHA-256 verification.
 
 ## Download and run
+
+### One-Liner PowerShell Quick Start
+
+```powershell
+irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex
+```
+
+
 
 Each GitHub Release provides two single-file x64 executables:
 

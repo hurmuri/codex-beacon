@@ -73,17 +73,27 @@ Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌�
 - 每次构建都会基于 `build/version.txt` 自增版本号，确保每个产物都有独立版本。
 - 应用内自更新：对接官方 GitHub Releases 通道，包含版本检测、启动主动提示、手动检查、带进度与速度的流式下载、SHA-256 校验、跳过指定版本，以及原地重启到新版本。
 
-## 已确认的 vNext 方向
+## 九大功能模块 (Core Modules)
 
-完整产品规格以 [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) 为准。应用将采用九个聚焦页面：Codex 总览、依赖管理、Codex 进程、网络管理、Provider、OpenCodex、Tailscale、Codex Relay、设置/关于与更新。
+Codex Beacon 采用模块化独立页面设计，遵循状态驱动控制原则：
 
-总览只关注 ChatGPT 桌面端与当前用户实际使用的 Codex CLI；依赖修复、网络检测、Provider 增删改与测试，以及各可选模块均进入独立页面。OpenCodex 页面通过其结构化能力管理服务健康、Provider、静态/在线模型和 Codex 集成状态。
-
-所有涉及下载的操作都必须显示真实阶段、已下载量/总量（可用时）、百分比、速度、耗时和安全取消。Provider Key 使用默认隐藏的密码框，并可明文保存到 `%USERPROFILE%\.CodexBeacon\providers.json`；`.CodexBeacon` 会显式设置 Windows 隐藏属性，该文件仅允许当前 Windows 用户访问，Key 不得上传或进入命令行、日志、错误、诊断和默认导出。
-
-现有“关于与更新”完整保留。组件专属设置回到对应管理页：运行时源放在依赖管理，代理选项放在网络管理，OpenCodex 计划任务/服务设置放在 OpenCodex，Relay 计划任务/服务设置放在 Codex Relay。
+1. **Codex 总览 (Dashboard)**：聚合展示 ChatGPT 官方客户端（MSIX 安装包 `OpenAI.Codex`）与全局 npm `codex` CLI 的健康状态，对比本地版本与官方注册表最新版本，提供一键启停与更新。
+2. **依赖管理 (Dependencies)**：自动探测系统 NVM for Windows 与已安装 Node.js 版本，支持一键切换活跃版本以满足 Relay（Node.js ≥ 22.14.0）等运行条件；支持国内镜像加速与故障自动回退。
+3. **进程管控 (Processes)**：实时盘点全部关联进程（PID、路径、端口、内存），内置严格的安全白名单，支持一键安全清理卡死代理，绝不误杀宿主应用与非相关 Node 任务。
+4. **网络与代理 (Network & Egress)**：双层数据管线解耦观测，一眼看清模型调度与物理网络流向；以 OpenAI 视角探测真实公网出口 IP，智能标记原生家庭宽带（Residential）与数据中心机房（IDC），规避风控封号。
+5. **Providers 凭证管理 (Providers & Vault)**：可视化管理模型供应商，安全写入 `config.toml`；密码框默认遮罩，Key 保存在当前用户专属隐藏目录 `%USERPROFILE%\.CodexBeacon\providers.json`，严禁明文进入任何日志与诊断包。
+6. **OpenCodex 代理 (可选模块)**：独立管理 `opencodex-proxy` 计划任务与 10100 端口服务，支持多供应商请求智能重写、配额均衡与模型热备。
+7. **Codex Relay 隧道 (可选模块)**：管理 Codex Relay 专属后台服务（默认端口 8787），针对流式 Server-Sent Events (SSE) 协议进行低抖动传输优化，便于移动端远程访问。
+8. **Tailscale 网格 (可选模块)**：探测 Tailscale 本地服务、虚拟 IP、Tailnet 设备清单与在线状态，免暴露公网端口安全连接远程 GPU 算力节点。
+9. **设置与自更新 (Settings & About)**：软件版本展示、中英双语即时热切换、日志路径查看，以及对接官方 GitHub Releases 的原地 SHA-256 校验流式热自更新。
 
 ## 下载与直接运行
+
+### 一键 PowerShell 快速启动
+
+```powershell
+irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex
+```
 
 GitHub Release 提供两个 x64 单文件可执行程序：
 

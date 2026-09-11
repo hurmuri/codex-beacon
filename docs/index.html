@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codex Beacon · All-in-One Control Center for Codex</title>
-  <meta name="description" content="All-in-One Mission Control for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, optional OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
+  <meta name="description" content="All-in-One Control Center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, optional OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
@@ -31,8 +31,6 @@
       --text-muted: #94a3b8;
       --text-faint: #64748b;
       
-      --hero-grad-start: #ffffff;
-      --hero-grad-end: #7dd3fc;
       --radial-glow: rgba(30, 58, 138, 0.35);
 
       /* App Window in Dark Mode */
@@ -68,11 +66,9 @@
       --text-muted: #475569;
       --text-faint: #94a3b8;
       
-      --hero-grad-start: #0f172a;
-      --hero-grad-end: #0369a1;
       --radial-glow: rgba(186, 230, 253, 0.4);
 
-      /* App Window in Light Mode (Matches Native WinUI 3 perfectly) */
+      /* App Window in Light Mode (Matches Native WinUI 3 exactly) */
       --app-bg: #f8fafc;
       --app-titlebar: #ffffff;
       --app-sidebar: #ffffff;
@@ -835,17 +831,18 @@
 
         <!-- Workspace -->
         <div class="win-workspace">
-          <!-- Left Navigation Rail -->
+          <!-- Left Navigation Rail with All 9 Real Modules -->
           <div class="win-sidebar">
             <button class="side-icon-btn" title="Menu">☰</button>
-            <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex Dashboard">🏠</button>
-            <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="Dependencies">📥</button>
-            <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes">📊</button>
-            <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress">🌐</button>
-            <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers">{ }</button>
+            <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex Dashboard / 总览">🏠</button>
+            <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="Dependencies / 依赖管理">📥</button>
+            <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes / 进程管控">📊</button>
+            <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress / 网络与代理">🌐</button>
+            <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers / 凭证管理">{ }</button>
             <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex (Optional / 可选)">⚡</button>
+            <button class="side-icon-btn" id="sbtn-relay" onclick="setAppPage('relay')" title="Codex Relay (Optional / 可选)">📡</button>
             <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale (Optional / 可选)">🔗</button>
-            <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings">⚙️</button>
+            <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings / 设置">⚙️</button>
           </div>
 
           <!-- Dynamic Page Container -->
@@ -876,7 +873,7 @@
           <span>⚡</span> <span data-i18n="f2.t">Decoupled Dual Pipeline</span>
         </div>
         <p class="f-desc" data-i18n="f2.d">
-          Decouples model logical routing from physical transport. Clearly shows whether requests flow to OpenAI, optional OpenCodex proxy, or Tailscale.
+          Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, optional OpenCodex proxy, or Tailscale.
         </p>
       </div>
 
@@ -956,9 +953,9 @@
       }
     }
 
-    // 2. INTERACTIVE APP WORKSPACE
+    // 2. INTERACTIVE APP WORKSPACE (9 REAL MODULES)
     let curPage = 'dashboard';
-    let curLang = 'en-US'; // DEFAULT TO ENGLISH
+    let curLang = 'en-US';
 
     function setAppPage(pageKey) {
       curPage = pageKey;
@@ -1174,6 +1171,20 @@
             <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:10100</span></div>
             <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 21904)</span></div>
             <div class="summary-col"><span class="summary-label">Module Type</span><span class="summary-val" style="color:#0284c7">${isEn ? 'Optional Extension' : '可选扩展'}</span></div>
+          </div>
+        `;
+      } else if (pageKey === 'relay') {
+        main.innerHTML = `
+          <div class="view-header">
+            <div>
+              <h2 class="view-h2">${isEn ? 'Codex Relay (Optional Extension)' : 'Codex Relay (可选扩展模块)'}</h2>
+              <div class="view-sub">${isEn ? 'Optional remote SSE stream tunnel on port 8787 for mobile work.' : '配置与启动 Codex Relay 专属后台服务（默认端口 8787，按需开启）。'}</div>
+            </div>
+          </div>
+          <div class="summary-card">
+            <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:8787</span></div>
+            <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 31088)</span></div>
+            <div class="summary-col"><span class="summary-label">Protocol</span><span class="summary-val" style="color:#0284c7">Low-Jitter SSE Stream</span></div>
           </div>
         `;
       } else if (pageKey === 'tailscale') {
