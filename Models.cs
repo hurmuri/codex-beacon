@@ -1,121 +1,149 @@
 using System.Text.Json.Serialization;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using Windows.UI;
 
 namespace CodexBeacon;
 
+/// <summary>
+/// Shared status palette. Colour supplements explicit text, never replaces it.
+/// </summary>
+internal static class Palette
+{
+    public const string Dash = "—";
+
+    private static readonly Color HealthyBackground = Color.FromArgb(255, 229, 246, 239);
+    private static readonly Color HealthyForeground = Color.FromArgb(255, 8, 127, 91);
+    private static readonly Color WarningBackground = Color.FromArgb(255, 255, 244, 206);
+    private static readonly Color WarningForeground = Color.FromArgb(255, 128, 90, 0);
+    private static readonly Color NeutralBackground = Color.FromArgb(255, 238, 241, 244);
+    private static readonly Color NeutralForeground = Color.FromArgb(255, 83, 97, 113);
+    private static readonly Color DangerBackground = Color.FromArgb(255, 255, 240, 238);
+    private static readonly Color DangerForeground = Color.FromArgb(255, 180, 35, 24);
+
+    public static SolidColorBrush Background(string state) => state switch
+    {
+        "Healthy" => new SolidColorBrush(HealthyBackground),
+        "Warning" => new SolidColorBrush(WarningBackground),
+        "Stopped" => new SolidColorBrush(NeutralBackground),
+        _ => new SolidColorBrush(DangerBackground)
+    };
+
+    public static SolidColorBrush Foreground(string state) => state switch
+    {
+        "Healthy" => new SolidColorBrush(HealthyForeground),
+        "Warning" => new SolidColorBrush(WarningForeground),
+        "Stopped" => new SolidColorBrush(NeutralForeground),
+        _ => new SolidColorBrush(DangerForeground)
+    };
+}
+
 public sealed class SystemSnapshot
 {
     public DateTime CollectedAt { get; set; }
     public string OverallState { get; set; } = "Unknown";
-    public string OverallMessage { get; set; } = "";
+    public string OverallKey { get; set; } = "";
     public List<ComponentStatus> Components { get; set; } = [];
     public List<ProcessRecord> Processes { get; set; } = [];
-    public List<ProxyHop> ProxyChain { get; set; } = [];
     public List<TailnetDevice> TailscaleDevices { get; set; } = [];
     public List<NodeRuntime> NodeVersions { get; set; } = [];
-    public List<ProxyHop> CandidateEndpoints { get; set; } = [];
-    public List<ExternalConnection> ExternalConnections { get; set; } = [];
     public List<PublicEgress> PublicEgress { get; set; } = [];
-    public List<FlowStep> ModelFlow { get; set; } = [];
-    public List<FlowStep> NetworkFlow { get; set; } = [];
+    public List<ModelProviderItem> Providers { get; set; } = [];
+    public List<NetworkProbe> NetworkProbes { get; set; } = [];
+    public List<OpenCodexModel> OpenCodexModels { get; set; } = [];
+    public List<OpenCodexProvider> OpenCodexProviders { get; set; } = [];
+    public string NodeMirror { get; set; } = "";
+    public string NpmRegistry { get; set; } = "";
+    public string OpenCodexIntegration { get; set; } = "";
+    public string NodeMinimumVersion { get; set; } = "22.14.0";
+    public string CodexStoreProductId { get; set; } = "";
     public string? Error { get; set; }
 }
 
-public sealed class FlowStep
+public sealed class NetworkProbe
 {
-    public string Title { get; set; } = "";
-    public string Subtitle { get; set; } = "";
-    public string Detail { get; set; } = "";
-    public string State { get; set; } = "Healthy";
-    public string IconGlyph { get; set; } = "\uE968";
-    public bool IsLast { get; set; }
-    [JsonIgnore]
-    public Microsoft.UI.Xaml.Visibility ArrowVisibility => IsLast ? Microsoft.UI.Xaml.Visibility.Collapsed : Microsoft.UI.Xaml.Visibility.Visible;
-    [JsonIgnore]
-    public SolidColorBrush StateBrush => State switch
-    {
-        "Healthy" => Brush("#087F5B"),
-        "Warning" => Brush("#9A6700"),
-        "Stopped" => Brush("#536171"),
-        _ => Brush("#B42318")
-    };
-    [JsonIgnore]
-    public SolidColorBrush StateBackground => State switch
-    {
-        "Healthy" => Brush("#E5F6EF"),
-        "Warning" => Brush("#FFF4CE"),
-        "Stopped" => Brush("#EEF1F4"),
-        _ => Brush("#FFF0EE")
-    };
-    private static SolidColorBrush Brush(string hex)
-    {
-        var value = hex.TrimStart('#');
-        return new(Color.FromArgb(255, Convert.ToByte(value[..2], 16), Convert.ToByte(value[2..4], 16), Convert.ToByte(value[4..6], 16)));
-    }
-}
-
-public sealed class ExternalConnection
-{
-    public string ProcessName { get; set; } = "";
-    public int Pid { get; set; }
-    public string Role { get; set; } = "";
-    public string RemoteAddress { get; set; } = "";
-    public int RemotePort { get; set; }
-    public string State { get; set; } = "";
-    public string RemoteEndpoint => $"{RemoteAddress}:{RemotePort}";
-}
-
-public sealed class PublicEgress
-{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
     public string Address { get; set; } = "";
-    public string Route { get; set; } = "";
-    public string Evidence { get; set; } = "";
-    public string CheckedAt { get; set; } = "";
-    public string Country { get; set; } = "";
-    public string CountryCode { get; set; } = "";
-    public string FlagEmoji { get; set; } = "";
-    public string Region { get; set; } = "";
-    public string City { get; set; } = "";
-    public string Isp { get; set; } = "";
-    public string Org { get; set; } = "";
-    public string AsNumber { get; set; } = "";
-    public string LineType { get; set; } = "Residential";
-    [JsonIgnore]
-    public string LineTypeLabel => LineType == "IDC" ? Localization.Get("LineTypeIDC") : Localization.Get("LineTypeResidential");
-    [JsonIgnore]
-    public string LocationSummary => string.IsNullOrEmpty(City) ? $"{FlagEmoji} {Country}".Trim() : $"{FlagEmoji} {Country} · {City}".Trim();
-    [JsonIgnore]
-    public string IspSummary => string.IsNullOrEmpty(Org) ? (string.IsNullOrEmpty(Isp) ? "—" : Isp) : $"{Isp} ({Org})";
+    public string State { get; set; } = "Unknown";
+    public string Detail { get; set; } = "";
+    public long LatencyMs { get; set; } = -1;
+
+    [JsonIgnore] public string LatencyLabel => LatencyMs < 0 ? Palette.Dash : $"{LatencyMs} ms";
+    [JsonIgnore] public string StatusLabel => State switch
+    {
+        "Connected" => Localization.Get("NetworkConnected"),
+        "Disconnected" => Localization.Get("NetworkDisconnected"),
+        "Unreachable" => Localization.Get("NetworkUnreachable"),
+        _ => Localization.Get("StatusUnknown")
+    };
+    [JsonIgnore] public SolidColorBrush StatusBackground => Palette.Background(State == "Connected" ? "Healthy" : State == "Unknown" ? "Stopped" : "Warning");
+    [JsonIgnore] public SolidColorBrush StatusForeground => Palette.Foreground(State == "Connected" ? "Healthy" : State == "Unknown" ? "Stopped" : "Warning");
 }
 
-public sealed class NodeRuntime
+public sealed class OpenCodexModel
 {
-    public string Version { get; set; } = "";
-    public bool IsCurrent { get; set; }
-    public string DisplayName => IsCurrent ? $"{Version} · {Localization.Get("CurrentInUse")}" : Version;
+    public string Id { get; set; } = "";
+    public string Provider { get; set; } = "";
+    [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Id} · {Provider}";
+}
+
+public sealed class OpenCodexProvider
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string BaseUrl { get; set; } = "";
+    public bool Enabled { get; set; }
 }
 
 public sealed class ComponentStatus
 {
     public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string Kind { get; set; } = "";
+    public string NameKey { get; set; } = "";
+    public string KindKey { get; set; } = "";
     public string State { get; set; } = "Unknown";
-    public string Detail { get; set; } = "";
-    public string InstalledVersion { get; set; } = "—";
-    public string LatestVersion { get; set; } = "—";
+    public string DetailKey { get; set; } = "";
+    public string DetailArgs { get; set; } = "";
+    public string EvidenceKey { get; set; } = "";
+    public string EvidenceArgs { get; set; } = "";
+    public string Path { get; set; } = "";
+    public string InstalledVersion { get; set; } = "";
+    public string LatestVersion { get; set; } = "";
     public bool IsInstalled { get; set; }
     public bool IsRunning { get; set; }
     public string AccountState { get; set; } = "NotApplicable";
     public bool CanManageService { get; set; }
-    public bool RequiresAdmin { get; set; }
-    [JsonIgnore]
-    public Microsoft.UI.Xaml.Visibility AdminBadgeVisibility => RequiresAdmin ? Microsoft.UI.Xaml.Visibility.Visible : Microsoft.UI.Xaml.Visibility.Collapsed;
-    [JsonIgnore]
-    public bool CanInstall { get; set; }
-    [JsonIgnore]
     public bool PrerequisitesReady { get; set; } = true;
+    public bool RequiresAdmin { get; set; }
+
+    // Resolved by the view layer after collection.
+    [JsonIgnore] public bool CanInstall { get; set; }
+
+    [JsonIgnore] public string Name => Localization.Get(NameKey);
+    [JsonIgnore] public string Kind => Localization.Get(KindKey);
+    [JsonIgnore] public string Detail => Localization.Compose(DetailKey, DetailArgs);
+    [JsonIgnore] public string Evidence => Localization.Compose(EvidenceKey, EvidenceArgs);
+    [JsonIgnore] public Visibility EvidenceVisibility =>
+        string.IsNullOrEmpty(EvidenceKey) ? Visibility.Collapsed : Visibility.Visible;
+    [JsonIgnore] public Visibility AdminBadgeVisibility => RequiresAdmin ? Visibility.Visible : Visibility.Collapsed;
+    [JsonIgnore] public Visibility SettingsVisibility => !PrerequisitesReady ? Visibility.Visible : Visibility.Collapsed;
+
+    [JsonIgnore]
+    public string InstalledVersionLabel => string.IsNullOrEmpty(InstalledVersion) ? Palette.Dash : InstalledVersion;
+    [JsonIgnore] public string LatestVersionLabel => string.IsNullOrEmpty(LatestVersion) ? Palette.Dash : LatestVersion;
+
+    [JsonIgnore]
+    public string VersionSummary
+    {
+        get
+        {
+            var installed = InstalledVersionLabel;
+            if (string.IsNullOrEmpty(LatestVersion) || LatestVersion == InstalledVersion) return installed;
+            return $"{installed}  →  {LatestVersion}";
+        }
+    }
+
     [JsonIgnore]
     public bool CanStart => IsInstalled && CanManageService && !IsRunning;
     [JsonIgnore]
@@ -123,34 +151,27 @@ public sealed class ComponentStatus
     [JsonIgnore]
     public bool CanRestart => CanStop;
     [JsonIgnore]
-    public bool CanUpgrade => IsInstalled && PrerequisitesReady
-        && Version.TryParse(InstalledVersion, out var installed)
-        && Version.TryParse(LatestVersion, out var latest) && latest > installed;
-    [JsonIgnore]
     public bool CanLogin => IsInstalled && AccountState == "SignedOut";
     [JsonIgnore]
-    public string ReadinessLabel => !IsInstalled ? Localization.Get("ReadinessInstall")
-        : AccountState == "SignedOut" ? Localization.Get("ReadinessLogin")
-        : AccountState == "Unknown" ? Localization.Get("ReadinessUnknownAccount")
+    public bool CanUpgrade => IsInstalled && PrerequisitesReady
+        && !string.IsNullOrWhiteSpace(LatestVersion)
+        && LatestVersion != InstalledVersion
+        && (!Version.TryParse(InstalledVersion, out var installed) || !Version.TryParse(LatestVersion, out var latest) || latest > installed);
+
+    [JsonIgnore]
+    public bool ShowsVersion => Id is "desktop" or "codex";
+
+    [JsonIgnore]
+    public string ReadinessLabel => IsRunning ? Localization.Get("StatusRunning")
+        : !IsInstalled ? Localization.Get("ReadinessInstall")
         : !PrerequisitesReady ? Localization.Get("ReadinessPrerequisites")
+        : AccountState == "SignedOut" ? Localization.Get("ReadinessLogin")
+        : AccountState == "Unknown" && Id == "desktop" ? Localization.Get("ReadinessUnknownAccount")
         : !IsRunning && CanManageService ? Localization.Get("ReadinessStart")
         : CanUpgrade ? Localization.Get("ReadinessUpgrade")
         : Localization.Get("ReadinessReady");
+
     [JsonIgnore]
-    public Uri? RepositoryUri => Id switch
-    {
-        "desktop" => new("https://github.com/Wangnov/Codex-App-Manager"),
-        "codex" => new("https://github.com/openai/codex"),
-        "opencodex" => new("https://github.com/lidge-jun/opencodex"),
-        "relay" => new("https://github.com/gronxb/codex-relay"),
-        "nvm" => new("https://github.com/coreybutler/nvm-windows"),
-        "node" => new("https://github.com/nodejs/node"),
-        "npm" => new("https://github.com/npm/cli"),
-        "tailscale" => new("https://github.com/tailscale/tailscale"),
-        _ => null
-    };
-    [JsonIgnore]
-    public string RepositoryLabel => Id == "desktop" ? Localization.Get("VersionManagementReference") : "GitHub";
     public string StatusLabel => State switch
     {
         "Healthy" => Localization.Get("StatusHealthy"),
@@ -159,31 +180,33 @@ public sealed class ComponentStatus
         "Unavailable" => Localization.Get("StatusUnavailable"),
         _ => Localization.Get("StatusUnknown")
     };
-    public string VersionSummary => LatestVersion is not "—" && InstalledVersion != LatestVersion
-        ? $"{InstalledVersion}  →  {LatestVersion}"
-        : InstalledVersion;
+
+    [JsonIgnore] public SolidColorBrush StatusBackground => Palette.Background(State);
+    [JsonIgnore] public SolidColorBrush StatusForeground => Palette.Foreground(State);
+
     [JsonIgnore]
-    public SolidColorBrush StatusBackground => State switch
+    public Uri? RepositoryUri => Id switch
     {
-        "Healthy" => Brush("#E5F6EF"),
-        "Warning" => Brush("#FFF4CE"),
-        "Stopped" => Brush("#EEF1F4"),
-        _ => Brush("#FFF0EE")
-    };
-    [JsonIgnore]
-    public SolidColorBrush StatusForeground => State switch
-    {
-        "Healthy" => Brush("#087F5B"),
-        "Warning" => Brush("#805A00"),
-        "Stopped" => Brush("#536171"),
-        _ => Brush("#B42318")
+        "desktop" => new Uri("https://github.com/Wangnov/Codex-App-Manager"),
+        "codex" => new Uri("https://github.com/openai/codex"),
+        "opencodex" => new Uri("https://github.com/lidge-jun/opencodex"),
+        "relay" => new Uri("https://github.com/gronxb/codex-relay"),
+        "nvm" => new Uri("https://github.com/coreybutler/nvm-windows"),
+        "appinstaller" or "winget" => new Uri("https://github.com/microsoft/winget-cli"),
+        "msstore" => new Uri("https://apps.microsoft.com/detail/9NBLGGH4NNS1"),
+        "node" => new Uri("https://github.com/nodejs/node"),
+        "npm" => new Uri("https://github.com/npm/cli"),
+        "tailscale" => new Uri("https://github.com/tailscale/tailscale"),
+        _ => null
     };
 
-    private static SolidColorBrush Brush(string hex)
+    [JsonIgnore]
+    public string RepositoryLabel => Id switch
     {
-        var value = hex.TrimStart('#');
-        return new(Color.FromArgb(255, Convert.ToByte(value[..2], 16), Convert.ToByte(value[2..4], 16), Convert.ToByte(value[4..6], 16)));
-    }
+        "desktop" => Localization.Get("VersionManagementReference"),
+        "msstore" => "Microsoft Store",
+        _ => "GitHub"
+    };
 }
 
 public sealed class ProcessRecord
@@ -191,23 +214,124 @@ public sealed class ProcessRecord
     public int Pid { get; set; }
     public int ParentPid { get; set; }
     public string Name { get; set; } = "";
-    public string Role { get; set; } = "";
-    public string Version { get; set; } = "—";
-    public string Architecture { get; set; } = "—";
-    public string StartedAt { get; set; } = "—";
-    public string ExecutablePath { get; set; } = "—";
-    public string CommandLine { get; set; } = "—";
+    public string RoleKey { get; set; } = "";
+    public string RoleArgs { get; set; } = "";
+    public string Version { get; set; } = "";
+    public string Architecture { get; set; } = "";
+    public string StartedAt { get; set; } = "";
+    public string ExecutablePath { get; set; } = "";
+
+    [JsonIgnore] public string Role => Localization.Compose(RoleKey, RoleArgs);
+    [JsonIgnore] public string VersionLabel => string.IsNullOrEmpty(Version) ? Palette.Dash : Version;
+    [JsonIgnore] public string StartedAtLabel => string.IsNullOrEmpty(StartedAt) ? Palette.Dash : StartedAt;
+    [JsonIgnore] public string PathLabel => string.IsNullOrEmpty(ExecutablePath) ? Palette.Dash : ExecutablePath;
 }
 
-public sealed class ProxyHop
+public sealed class ModelProviderItem
 {
-    public int Order { get; set; }
+    public string Id { get; set; } = "";
     public string Name { get; set; } = "";
+    public string BaseUrl { get; set; } = "";
+    public string WireApi { get; set; } = "";
+    public bool IsActive { get; set; }
+    public string TestModel { get; set; } = "gpt-5.4";
+
+    [JsonIgnore] public bool CanSwitch => !IsActive;
+    [JsonIgnore] public string SwitchButtonText => Localization.Get(IsActive ? "ProviderActiveBtn" : "ProviderSwitchBtn");
+    [JsonIgnore] public string StatusLabel => Localization.Get(IsActive ? "ProviderActive" : "ProviderInactive");
+    [JsonIgnore] public SolidColorBrush StatusBackground => Palette.Background(IsActive ? "Healthy" : "Stopped");
+    [JsonIgnore] public SolidColorBrush StatusForeground => Palette.Foreground(IsActive ? "Healthy" : "Stopped");
+}
+
+/// <summary>
+/// User-managed provider configuration. ApiKey is serialized only by ProviderStore;
+/// it must never be copied into diagnostics, command-line arguments, or status output.
+/// </summary>
+public sealed class ProviderProfile
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string BaseUrl { get; set; } = "https://api.openai.com/v1";
+    public string WireApi { get; set; } = "responses";
+    public string ApiKey { get; set; } = "";
+    public string TestModel { get; set; } = "gpt-5.4";
+    public bool IsDefault { get; set; }
+
+    [JsonIgnore] public bool HasApiKey => !string.IsNullOrWhiteSpace(ApiKey);
+    [JsonIgnore] public string KeyStatus => Localization.Get(HasApiKey ? "ProviderKeyConfigured" : "ProviderKeyMissing");
+}
+
+public sealed class OperationProgress
+{
+    public string Stage { get; set; } = "";
+    public long BytesReceived { get; set; }
+    public long? TotalBytes { get; set; }
+    public double? Percent { get; set; }
+    public double? BytesPerSecond { get; set; }
+    public double? EtaSeconds { get; set; }
+    public double ElapsedSeconds { get; set; }
+    public string Source { get; set; } = "";
+    public string Message { get; set; } = "";
+}
+
+public sealed class PublicEgress
+{
     public string Address { get; set; } = "";
-    public string State { get; set; } = "Unknown";
-    public string Evidence { get; set; } = "";
-    public string OrderLabel => Order.ToString("00");
-    public string StateLabel => State == "Healthy" ? Localization.Get("Reachable") : State == "Warning" ? Localization.Get("PendingVerification") : Localization.Get("Unreachable");
+    public string SourceKey { get; set; } = "";
+    public string CheckedAt { get; set; } = "";
+    public string Country { get; set; } = "";
+    public string CountryCode { get; set; } = "";
+    public string FlagEmoji { get; set; } = "";
+    public string Region { get; set; } = "";
+    public string City { get; set; } = "";
+    public string Isp { get; set; } = "";
+    public string AsNumber { get; set; } = "";
+    public string HostingName { get; set; } = "";
+    public bool IsHosting { get; set; }
+    public bool IsProxy { get; set; }
+    public int TrustScore { get; set; } = -1;
+    public bool Resolved { get; set; }
+
+    [JsonIgnore]
+    public string LocationSummary
+    {
+        get
+        {
+            var place = string.IsNullOrEmpty(City) ? Country : $"{Country} · {City}";
+            return string.IsNullOrWhiteSpace(place) ? Localization.Get("EgressLocationUnknown") : $"{FlagEmoji} {place}".Trim();
+        }
+    }
+
+    [JsonIgnore]
+    public string RegionLabel => string.IsNullOrEmpty(Region) ? Palette.Dash : Region;
+
+    [JsonIgnore]
+    public string IspLabel => string.IsNullOrEmpty(Isp) ? Palette.Dash : Isp;
+
+    [JsonIgnore]
+    public string AsNumberLabel => string.IsNullOrEmpty(AsNumber) ? Palette.Dash : AsNumber;
+
+    [JsonIgnore]
+    public string LineTypeLabel => Localization.Get(IsHosting ? "LineTypeIDC" : "LineTypeResidential");
+
+    [JsonIgnore]
+    public Visibility LineTypeVisibility => IsHosting ? Visibility.Visible : Visibility.Collapsed;
+
+    [JsonIgnore]
+    public string SourceLabel => Localization.Get(string.IsNullOrEmpty(SourceKey) ? "EgressSourceIpEcho" : SourceKey);
+
+    [JsonIgnore]
+    public string TrustLabel => TrustScore < 0 ? Palette.Dash : $"{TrustScore}/100";
+
+    [JsonIgnore]
+    public bool CanOpenWebsite => Resolved;
+}
+
+public sealed class NodeRuntime
+{
+    public string Version { get; set; } = "";
+    public bool IsCurrent { get; set; }
+    public string DisplayName => IsCurrent ? $"{Version} · {Localization.Get("CurrentInUse")}" : Version;
 }
 
 public sealed class TailnetDevice
@@ -219,15 +343,35 @@ public sealed class TailnetDevice
     public bool Online { get; set; }
     public bool IsSelf { get; set; }
     public string LastSeen { get; set; } = "";
-    public string OnlineLabel => Online ? Localization.Get("Online") : Localization.Get("Offline");
-    public string DeviceLabel => IsSelf ? $"{Name} · {Localization.Get("ThisDevice")}" : Name;
+
+    [JsonIgnore]
+    public string LastSeenLabel => LastSeen.StartsWith('@') ? Localization.Get(LastSeen[1..])
+        : string.IsNullOrEmpty(LastSeen) ? Palette.Dash : LastSeen;
+
+    [JsonIgnore] public string OnlineLabel => Localization.Get(Online ? "Online" : "Offline");
+    [JsonIgnore] public string DeviceLabel => IsSelf ? $"{Name} · {Localization.Get("ThisDevice")}" : Name;
+    [JsonIgnore] public string DnsLabel => string.IsNullOrEmpty(DnsName) ? Palette.Dash : DnsName;
+    [JsonIgnore] public string OsLabel => string.IsNullOrEmpty(OS) ? Palette.Dash : OS;
+    [JsonIgnore] public string AddressLabel => string.IsNullOrEmpty(Addresses) ? Palette.Dash : Addresses;
 }
 
 public sealed class ActionResult
 {
     public bool Success { get; set; }
-    public string Message { get; set; } = "";
+    public string MessageKey { get; set; } = "";
+    public string MessageArgs { get; set; } = "";
+    public string HintKey { get; set; } = "";
+    public string HintArgs { get; set; } = "";
     public string Details { get; set; } = "";
+
+    [JsonIgnore] public string Message => Localization.Compose(MessageKey, MessageArgs);
+    [JsonIgnore] public string Hint => Localization.Compose(HintKey, HintArgs);
+    [JsonIgnore] public string Summary => string.IsNullOrWhiteSpace(Hint) ? Message : $"{Message} {Hint}";
+
+    [JsonIgnore]
+    public string DisplayText => Success
+        ? Summary
+        : string.IsNullOrWhiteSpace(Details) ? Message : Localization.Format("MessageWithDetails", Message, Details);
 }
 
 public sealed class AppSettings
@@ -236,4 +380,17 @@ public sealed class AppSettings
     public string RelayTaskName { get; set; } = "Codex Relay";
     public string ProxyTaskName { get; set; } = "opencodex-proxy";
     public string Language { get; set; } = Localization.SystemLanguage;
+    public string NodeMirror { get; set; } = "https://cdn.npmmirror.com/binaries/node";
+    public string NpmRegistry { get; set; } = "https://registry.npmjs.org/";
+    public string NetworkMode { get; set; } = "system";
+    public string CustomHttpProxy { get; set; } = "";
+    public bool ManagesUserProxyEnvironment { get; set; }
+    public string? PreviousHttpProxy { get; set; }
+    public string? PreviousHttpsProxy { get; set; }
+
+    /// <summary>Query GitHub for a newer release shortly after startup.</summary>
+    public bool AutoCheckUpdates { get; set; } = true;
+
+    /// <summary>Release the user asked not to be prompted about again.</summary>
+    public string SkippedVersion { get; set; } = "";
 }

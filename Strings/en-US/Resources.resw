@@ -4,154 +4,267 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Navigation -->
   <data name="NavDashboard.Content" xml:space="preserve"><value>Overview</value></data>
   <data name="NavProcesses.Content" xml:space="preserve"><value>Processes</value></data>
   <data name="NavNetwork.Content" xml:space="preserve"><value>Network &amp; proxy</value></data>
+  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
   <data name="NavInstallations.Content" xml:space="preserve"><value>Installations</value></data>
   <data name="NavSettings.Content" xml:space="preserve"><value>Settings</value></data>
-  <data name="DashboardTitle.Text" xml:space="preserve"><value>System pulse</value></data>
+
+  <!-- Overview -->
+  <data name="DashboardTitle.Text" xml:space="preserve"><value>Codex overview</value></data>
   <data name="OverallMessage.Text" xml:space="preserve"><value>Reading the local Codex toolchain…</value></data>
-  <data name="RefreshNow.Text" xml:space="preserve"><value>Refresh now</value></data>
-  <data name="CurrentDataPath.Title" xml:space="preserve"><value>Current data path</value></data>
   <data name="AwaitingFirstSample.Text" xml:space="preserve"><value>Awaiting first sample</value></data>
-  <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>Service status</value></data>
+  <data name="RefreshNow.Text" xml:space="preserve"><value>Refresh now</value></data>
+  <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>ChatGPT client and Codex CLI</value></data>
   <data name="VersionLabel.Text" xml:space="preserve"><value>Version</value></data>
-  <data name="ActionInstall.Label" xml:space="preserve"><value>Install</value></data>
-  <data name="ActionLogin.Label" xml:space="preserve"><value>Sign in</value></data>
-  <data name="ActionStart.Label" xml:space="preserve"><value>Start</value></data>
-  <data name="ActionStop.Label" xml:space="preserve"><value>Stop</value></data>
-  <data name="ActionRestart.Label" xml:space="preserve"><value>Restart</value></data>
-  <data name="ActionUpgrade.Label" xml:space="preserve"><value>Upgrade</value></data>
-  <data name="TailscaleOverviewHeading.Text" xml:space="preserve"><value>Tailscale overview</value></data>
-  <data name="TailscaleNetworkCard.Header" xml:space="preserve"><value>Tailscale network</value></data>
-  <data name="ReadingTailnet.Text" xml:space="preserve"><value>Reading Tailnet…</value></data>
-  <data name="DeviceStatusPlaceholder.Text" xml:space="preserve"><value>Device status will appear here</value></data>
-  <data name="ViewDevices.Content" xml:space="preserve"><value>View devices</value></data>
+  <data name="ActionInstall.Content" xml:space="preserve"><value>Install</value></data>
+  <data name="ActionLogin.Content" xml:space="preserve"><value>Sign in</value></data>
+  <data name="ActionStart.Content" xml:space="preserve"><value>Start</value></data>
+  <data name="ActionStop.Content" xml:space="preserve"><value>Stop</value></data>
+  <data name="ActionRestart.Content" xml:space="preserve"><value>Restart</value></data>
+  <data name="ActionUpgrade.Content" xml:space="preserve"><value>Upgrade</value></data>
+
+  <!-- Processes -->
   <data name="ProcessesTitle.Text" xml:space="preserve"><value>Codex processes</value></data>
-  <data name="ProcessesDescription.Text" xml:space="preserve"><value>Identifies the desktop app, CLI, proxies, Relay, and their runtimes by parent-child relationship. Unrelated Node.js processes are excluded.</value></data>
+  <data name="ProcessesDescription.Text" xml:space="preserve"><value>Shows only ChatGPT desktop app and Codex CLI processes. Versions are read from each executable, so several different builds can be listed at once.</value></data>
+  <data name="ProcessQuickActionsTitle.Text" xml:space="preserve"><value>Quick process actions</value></data>
+  <data name="ProcessQuickActionsDescription.Text" xml:space="preserve"><value>Clear stale processes in one step, or restart the ChatGPT desktop app</value></data>
+  <data name="KillCodexProcesses.Content" xml:space="preserve"><value>Terminate all Codex processes</value></data>
+  <data name="RestartDesktopApp.Content" xml:space="preserve"><value>Restart ChatGPT desktop app</value></data>
+  <data name="ProcessPidHeader.Text" xml:space="preserve"><value>PID</value></data>
   <data name="ProcessRoleHeader.Text" xml:space="preserve"><value>Role / process</value></data>
   <data name="ProcessVersionHeader.Text" xml:space="preserve"><value>Version</value></data>
   <data name="ProcessStartedHeader.Text" xml:space="preserve"><value>Started</value></data>
   <data name="ProcessPathHeader.Text" xml:space="preserve"><value>Executable path</value></data>
-  <data name="RecoveryControlsHeading.Text" xml:space="preserve"><value>Recovery controls</value></data>
-  <data name="BulkRecoveryCard.Header" xml:space="preserve"><value>Recover optional services</value></data>
-  <data name="BulkRecoveryCard.Description" xml:space="preserve"><value>Only OpenCodex Proxy, Codex Relay, and explicitly matched service processes are affected. The Codex desktop app and Codex Beacon stay open.</value></data>
-  <data name="TerminateServices.Label" xml:space="preserve"><value>Terminate services</value></data>
-  <data name="RestartAll.Label" xml:space="preserve"><value>Restart all</value></data>
+
+  <!-- Network &amp; proxy -->
   <data name="NetworkTitle.Text" xml:space="preserve"><value>Network &amp; proxy</value></data>
-  <data name="NetworkDescription.Text" xml:space="preserve"><value>Builds the active request path from configuration, environment, listening ports, and observed processes. Sensitive credentials are never read or displayed.</value></data>
-  <data name="ProxyChainHeading.Text" xml:space="preserve"><value>Codex proxy chain</value></data>
-  <data name="PublicEgressHeading.Text" xml:space="preserve"><value>Public egress</value></data>
-  <data name="ExternalConnectionsHeading.Text" xml:space="preserve"><value>Current external connections</value></data>
-  <data name="CandidateEndpointsHeading.Text" xml:space="preserve"><value>Configured fallback endpoints</value></data>
+  <data name="NetworkDescription.Text" xml:space="preserve"><value>Check ChatGPT and Codex CLI connectivity and manage system proxy, TUN, or a custom HTTP proxy.</value></data>
+  <data name="EgressHeading.Text" xml:space="preserve"><value>Public egress · OpenAI perspective</value></data>
+  <data name="EgressIspLabel.Text" xml:space="preserve"><value>ISP</value></data>
+  <data name="EgressAsnLabel.Text" xml:space="preserve"><value>ASN</value></data>
+  <data name="EgressTrustLabel.Text" xml:space="preserve"><value>Trust score</value></data>
+  <data name="EgressCheckedLabel.Text" xml:space="preserve"><value>Checked</value></data>
+  <data name="EgressUnavailable.Text" xml:space="preserve"><value>No public egress information yet. Select “Refresh now”.</value></data>
+  <data name="OpenEgressCheck.Content" xml:space="preserve"><value>Open full IP check</value></data>
+  <data name="EgressWebsiteHint.Text" xml:space="preserve"><value>ip.net.coffee provides the ChatGPT / Codex egress and risk check.</value></data>
+  <data name="ProvidersHeading.Text" xml:space="preserve"><value>Model provider switching</value></data>
+  <data name="ProvidersDescription.Text" xml:space="preserve"><value>Select a target to make it the primary Codex provider. The change is written to config.toml immediately.</value></data>
+
+  <!-- Tailscale -->
+  <data name="TailscaleTitle.Text" xml:space="preserve"><value>Tailscale network</value></data>
+  <data name="TailscaleDescription.Text" xml:space="preserve"><value>Manage the local Tailscale node, the VPN service state, and the Tailnet device topology.</value></data>
+  <data name="TailscaleServiceTitle.Text" xml:space="preserve"><value>Local Tailscale service</value></data>
+  <data name="TailscaleServiceDescription.Text" xml:space="preserve"><value>Windows background network service (start, stop, and restart require administrator rights)</value></data>
+  <data name="TailscaleStart.Content" xml:space="preserve"><value>Start service</value></data>
+  <data name="TailscaleStop.Content" xml:space="preserve"><value>Stop service</value></data>
+  <data name="TailscaleRestart.Content" xml:space="preserve"><value>Restart service</value></data>
+  <data name="TailscaleLogin.Content" xml:space="preserve"><value>Sign in on the web</value></data>
+  <data name="TailscaleSelfNode.Text" xml:space="preserve"><value>This node</value></data>
+  <data name="TailscaleDeviceDetail.Text" xml:space="preserve"><value>Connection details</value></data>
+  <data name="ReadingTailnet.Text" xml:space="preserve"><value>Reading the Tailnet…</value></data>
+  <data name="DeviceStatusPlaceholder.Text" xml:space="preserve"><value>Device status will appear here</value></data>
   <data name="TailnetDevicesHeading.Text" xml:space="preserve"><value>Tailnet devices</value></data>
-  <data name="InstallationsTitle.Text" xml:space="preserve"><value>Installation management</value></data>
-  <data name="InstallationsDescription.Text" xml:space="preserve"><value>Reads versions from the official npm registry. Installation and upgrades preserve existing configuration and trigger a fresh check when complete.</value></data>
-  <data name="NvmExpander.Header" xml:space="preserve"><value>NVM · Node.js version control</value></data>
-  <data name="NvmExpander.Description" xml:space="preserve"><value>Manage locally installed Node.js versions. Codex Relay requires Node.js 22.14.0 or newer.</value></data>
-  <data name="CurrentEnvironmentCard.Header" xml:space="preserve"><value>Current environment</value></data>
-  <data name="CheckingNvm.Text" xml:space="preserve"><value>Checking NVM…</value></data>
-  <data name="SwitchNodeCard.Header" xml:space="preserve"><value>Switch Node.js</value></data>
-  <data name="SwitchNodeCard.Description" xml:space="preserve"><value>Select a version installed by NVM</value></data>
-  <data name="NodeVersionPickerText.PlaceholderText" xml:space="preserve"><value>Select an installed version</value></data>
-  <data name="ApplyNodeVersion.Content" xml:space="preserve"><value>Apply</value></data>
-  <data name="InstallNodeCard.Header" xml:space="preserve"><value>Install Node.js</value></data>
-  <data name="InstallNodeCard.Description" xml:space="preserve"><value>Enter a full version, for example 24.15.0</value></data>
-  <data name="InstallNodeButton.Content" xml:space="preserve"><value>Install</value></data>
-  <data name="PrerequisitesExpander.Header" xml:space="preserve"><value>Installation prerequisites</value></data>
-  <data name="PrerequisitesExpander.Description" xml:space="preserve"><value>Validate the runtime and package manager before installing or upgrading npm packages.</value></data>
-  <data name="CheckingVersionPath.Text" xml:space="preserve"><value>Checking version and path…</value></data>
+  <data name="TailnetDeviceHeader.Text" xml:space="preserve"><value>Device / host name</value></data>
+  <data name="TailnetOsHeader.Text" xml:space="preserve"><value>OS</value></data>
+  <data name="TailnetAddressHeader.Text" xml:space="preserve"><value>Tailscale IP</value></data>
+  <data name="TailnetOnlineHeader.Text" xml:space="preserve"><value>State</value></data>
+  <data name="TailnetLastSeenHeader.Text" xml:space="preserve"><value>Last seen</value></data>
+
+  <!-- Installations -->
+  <data name="InstallationsTitle.Text" xml:space="preserve"><value>Dependency management</value></data>
+  <data name="InstallationsDescription.Text" xml:space="preserve"><value>Manage App Installer → WinGet → Microsoft Store and NVM → Node.js → npm in dependency order.</value></data>
+  <data name="RuntimeHeading.Text" xml:space="preserve"><value>Runtime environment</value></data>
+  <data name="RuntimeNodeName.Text" xml:space="preserve"><value>Node.js runtime</value></data>
+  <data name="RuntimeNodeProbe.Text" xml:space="preserve"><value>Reads node.exe from PATH, its version, and where it is installed</value></data>
+  <data name="RuntimeNpmName.Text" xml:space="preserve"><value>npm package manager</value></data>
+  <data name="RuntimeNpmProbe.Text" xml:space="preserve"><value>Checks for npm.cmd next to the resolved Node.js runtime</value></data>
+  <data name="RuntimeNvmName.Text" xml:space="preserve"><value>NVM for Windows</value></data>
+  <data name="RuntimeNvmProbe.Text" xml:space="preserve"><value>Reads nvm.exe, the installed version list, and the active version</value></data>
+  <data name="NvmSectionHeading.Text" xml:space="preserve"><value>NVM · Node.js version control</value></data>
+  <data name="NvmSwitchTitle.Text" xml:space="preserve"><value>Switch Node.js version</value></data>
+  <data name="NodeVersionPicker.PlaceholderText" xml:space="preserve"><value>Select an installed version</value></data>
+  <data name="NvmApply.Content" xml:space="preserve"><value>Apply</value></data>
+  <data name="NvmInstallTitle.Text" xml:space="preserve"><value>Install a new Node.js version</value></data>
+  <data name="NewNodeVersionBox.PlaceholderText" xml:space="preserve"><value>For example 24.15.0</value></data>
+  <data name="NvmInstall.Content" xml:space="preserve"><value>Download and install</value></data>
+  <data name="NvmMirrorLabel.Text" xml:space="preserve"><value>Download mirror</value></data>
+  <data name="NvmMirrorHint.Text" xml:space="preserve"><value>nodejs.org is unreachable on some networks. Change the mirror below; the official host is used automatically when the mirror fails.</value></data>
+
+  <data name="ModulesHeading.Text" xml:space="preserve"><value>Install channels and base dependencies</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>Installed version</value></data>
   <data name="LatestVersionLabel.Text" xml:space="preserve"><value>Latest known version</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>Install</value></data>
   <data name="UpgradePackageButton.Content" xml:space="preserve"><value>Upgrade</value></data>
-  <data name="PermissionsInfo.Title" xml:space="preserve"><value>Permissions</value></data>
-  <data name="PermissionsInfo.Message" xml:space="preserve"><value>Global npm installation may need write access to the Node.js directory. Installing the Relay scheduled task may require administrator privileges. Codex Beacon reports explicit errors and never elevates silently.</value></data>
+
+  <!-- Settings -->
   <data name="SettingsTitle.Text" xml:space="preserve"><value>Settings</value></data>
-  <data name="SettingsDescription.Text" xml:space="preserve"><value>These values describe local services only and never contain credentials.</value></data>
+  <data name="SettingsDescription.Text" xml:space="preserve"><value>Configure general preferences and manage Codex Beacon's About and Updates.</value></data>
   <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>General</value></data>
-  <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>Refresh frequency, display language, and local scheduled-task mappings</value></data>
+  <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>Refresh frequency and display language</value></data>
+  <data name="ProviderEmptyText.Text" xml:space="preserve"><value>No providers have been added yet</value></data>
   <data name="LanguageCard.Header" xml:space="preserve"><value>Display language</value></data>
-  <data name="LanguageCard.Description" xml:space="preserve"><value>Follow Windows or switch instantly between English and Simplified Chinese.</value></data>
+  <data name="LanguageCard.Description" xml:space="preserve"><value>Follow Windows, or switch instantly between English and Simplified Chinese</value></data>
   <data name="LanguageSystem.Content" xml:space="preserve"><value>Follow Windows</value></data>
   <data name="RefreshIntervalCard.Header" xml:space="preserve"><value>Automatic refresh interval</value></data>
   <data name="RefreshIntervalCard.Description" xml:space="preserve"><value>5–300 seconds</value></data>
+  <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
+  <data name="MirrorCard.Description" xml:space="preserve"><value>Distribution mirror used by nvm install</value></data>
   <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
   <data name="ProxyTaskCard.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>Save changes</value></data>
-  <data name="SaveChangesCard.Description" xml:space="preserve"><value>Settings are stored locally and contain no credentials.</value></data>
-  <data name="SaveButton.Content" xml:space="preserve"><value>Save</value></data>
+  <data name="SaveChangesCard.Description" xml:space="preserve"><value>Applies immediately and stores locally</value></data>
+  <data name="SaveButton.Content" xml:space="preserve"><value>Save settings</value></data>
   <data name="ReferencesHeading.Text" xml:space="preserve"><value>Upstream projects and references</value></data>
-  <data name="OpenSourceProjectsExpander.Header" xml:space="preserve"><value>Open-source projects</value></data>
-  <data name="OpenSourceProjectsExpander.Description" xml:space="preserve"><value>Open component sources, version-management references, and network-domain data.</value></data>
-  <data name="OpenCodexReference.Description" xml:space="preserve"><value>Optional provider proxy extension</value></data>
-  <data name="AppManagerReference.Description" xml:space="preserve"><value>Reference for Codex desktop version management</value></data>
-  <data name="RelayReference.Description" xml:space="preserve"><value>Optional mobile bridge extension</value></data>
-  <data name="DomainListReference.Description" xml:space="preserve"><value>Network-domain classification reference; its data is not bundled in this release</value></data>
-  <data name="ReadyStatus.Text" xml:space="preserve"><value>Ready</value></data>
-  <data name="NotRefreshed.Text" xml:space="preserve"><value>Not refreshed</value></data>
-  <data name="CurrentInUse" xml:space="preserve"><value>in use</value></data>
-  <data name="ReadinessInstall" xml:space="preserve"><value>Next: install</value></data>
-  <data name="ReadinessLogin" xml:space="preserve"><value>Next: sign in</value></data>
-  <data name="ReadinessUnknownAccount" xml:space="preserve"><value>Sign-in status needs verification</value></data>
-  <data name="ReadinessPrerequisites" xml:space="preserve"><value>Complete runtime setup first</value></data>
-  <data name="ReadinessStart" xml:space="preserve"><value>Next: start service</value></data>
-  <data name="ReadinessUpgrade" xml:space="preserve"><value>Update available</value></data>
-  <data name="ReadinessReady" xml:space="preserve"><value>Ready</value></data>
-  <data name="VersionManagementReference" xml:space="preserve"><value>Version reference</value></data>
+  <data name="OpenSourceProjectsExpander.Header" xml:space="preserve"><value>Reference projects</value></data>
+  <data name="OpenSourceProjectsExpander.Description" xml:space="preserve"><value>Component sources and implementation references</value></data>
+
+  <!-- Status bar -->
+  <data name="StatusReady.Text" xml:space="preserve"><value>Ready</value></data>
+  <data name="StatusNotRefreshed.Text" xml:space="preserve"><value>Not refreshed</value></data>
+  <data name="CancelRunning.Content" xml:space="preserve"><value>Cancel</value></data>
+
+  <!-- Component names and kinds -->
+  <data name="CompNvmName" xml:space="preserve"><value>NVM for Windows</value></data>
+  <data name="CompNvmKind" xml:space="preserve"><value>Node.js version manager</value></data>
+  <data name="CompNodeName" xml:space="preserve"><value>Node.js</value></data>
+  <data name="CompNodeKind" xml:space="preserve"><value>Runtime prerequisite</value></data>
+  <data name="CompNpmName" xml:space="preserve"><value>npm</value></data>
+  <data name="CompNpmKind" xml:space="preserve"><value>Package manager prerequisite</value></data>
+  <data name="CompDesktopName" xml:space="preserve"><value>Codex desktop app</value></data>
+  <data name="CompDesktopKind" xml:space="preserve"><value>Official OpenAI Windows app</value></data>
+  <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
+  <data name="CompCodexKind" xml:space="preserve"><value>Command-line client</value></data>
+  <data name="CompProxyName" xml:space="preserve"><value>OpenCodex Proxy</value></data>
+  <data name="CompProxyKind" xml:space="preserve"><value>Optional extension · npm package</value></data>
+  <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
+  <data name="CompRelayKind" xml:space="preserve"><value>Optional extension · npm package</value></data>
+  <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
+  <data name="CompTailscaleKind" xml:space="preserve"><value>Windows network service</value></data>
+
+  <!-- Component details -->
+  <data name="DetailNvmReady" xml:space="preserve"><value>{0} installed Node.js version(s)</value></data>
+  <data name="DetailNvmMissing" xml:space="preserve"><value>nvm.exe was not found on PATH</value></data>
+  <data name="DetailNodeReady" xml:space="preserve"><value>Meets the Codex Relay minimum requirement ≥ {0}</value></data>
+  <data name="DetailNodeOld" xml:space="preserve"><value>Too old; upgrade to {0} or newer</value></data>
+  <data name="DetailNodeMissing" xml:space="preserve"><value>node.exe was not found on PATH</value></data>
+  <data name="DetailNpmReady" xml:space="preserve"><value>Package manager available</value></data>
+  <data name="DetailNpmMissing" xml:space="preserve"><value>npm.cmd was not found; components cannot be installed or upgraded</value></data>
+  <data name="DetailDesktopMissing" xml:space="preserve"><value>The OpenAI.Codex app package was not detected</value></data>
+  <data name="DetailDesktopSignedOut" xml:space="preserve"><value>Installed; the Codex account is signed out</value></data>
+  <data name="DetailDesktopRunning" xml:space="preserve"><value>Installed and running</value></data>
+  <data name="DetailDesktopStopped" xml:space="preserve"><value>Installed; currently stopped</value></data>
+  <data name="DetailCodexMissing" xml:space="preserve"><value>No Codex CLI was detected</value></data>
+  <data name="DetailCodexNpm" xml:space="preserve"><value>Global npm install · {0}</value></data>
+  <data name="DetailCodexOnPath" xml:space="preserve"><value>codex command on PATH · {0}</value></data>
+  <data name="DetailCodexBundled" xml:space="preserve"><value>Bundled with the desktop app · {0}</value></data>
+  <data name="DetailProxyListening" xml:space="preserve"><value>Listening on port {0} · scheduled task: {1}</value></data>
+  <data name="DetailProxyMissing" xml:space="preserve"><value>No global npm package was detected</value></data>
+  <data name="DetailProxyNoTask" xml:space="preserve"><value>Package installed; scheduled task not configured ({0})</value></data>
+  <data name="DetailProxyStopped" xml:space="preserve"><value>No listening port detected · scheduled task: {0}</value></data>
+  <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 is listening · scheduled task: {0}</value></data>
+  <data name="DetailRelayMissing" xml:space="preserve"><value>No Relay installation was detected</value></data>
+  <data name="DetailRelayNoTask" xml:space="preserve"><value>Package installed; select Start to use the official background mode ({0})</value></data>
+  <data name="DetailRelayStopped" xml:space="preserve"><value>Port 8787 is not listening · scheduled task: {0}</value></data>
+  <data name="DetailTailscaleMissing" xml:space="preserve"><value>Tailscale was not detected</value></data>
+  <data name="DetailTailscaleSignedOut" xml:space="preserve"><value>Installed, but signed out of the Tailnet</value></data>
+  <data name="DetailTailscaleReady" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="DetailTailscaleNoState" xml:space="preserve"><value>Tailnet status could not be read</value></data>
+
+  <!-- Scheduled task states -->
+  <data name="TaskStateRunning" xml:space="preserve"><value>Running</value></data>
+  <data name="TaskStateReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="TaskStateDisabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="TaskStateNotInstalled" xml:space="preserve"><value>Not installed</value></data>
+  <data name="TaskStateUnknown" xml:space="preserve"><value>Unknown</value></data>
+
+  <!-- Version sources -->
+  <data name="VersionEvidenceUnknown" xml:space="preserve"><value>Remote version not checked</value></data>
+  <data name="VersionEvidenceUnreachable" xml:space="preserve"><value>The remote version manifest is temporarily unavailable</value></data>
+  <data name="VersionEvidenceMirror" xml:space="preserve"><value>Source: Codex App Mirror manifest, synced with Microsoft Store product {0} · generated {1}</value></data>
+
+  <!-- Public egress -->
+  <data name="EgressSourceChatGpt" xml:space="preserve"><value>Address observed by the OpenAI service (chatgpt.com)</value></data>
+  <data name="EgressSourceIpEcho" xml:space="preserve"><value>Direct machine egress address (IPv4 echo)</value></data>
+  <data name="EgressSourceGeneric" xml:space="preserve"><value>Machine egress address</value></data>
+  <data name="EgressLocationUnknown" xml:space="preserve"><value>Location unknown</value></data>
+  <data name="LineTypeIDC" xml:space="preserve"><value>IDC / data center</value></data>
+  <data name="LineTypeResidential" xml:space="preserve"><value>Residential / ISP</value></data>
+
+  <!-- Process roles -->
+  <data name="RoleDesktopApp" xml:space="preserve"><value>Codex desktop app</value></data>
+  <data name="RoleCliAppBundled" xml:space="preserve"><value>Codex CLI · bundled with desktop app</value></data>
+  <data name="RoleCliVsCode" xml:space="preserve"><value>Codex CLI · VS Code extension</value></data>
+  <data name="RoleCliRelay" xml:space="preserve"><value>Codex CLI · bundled with Relay</value></data>
+  <data name="RoleCliOther" xml:space="preserve"><value>Codex CLI</value></data>
+  <data name="RoleSupportHost" xml:space="preserve"><value>Codex code mode host</value></data>
+  <data name="RoleUnknown" xml:space="preserve"><value>Codex-related process</value></data>
+
+  <!-- Overall state -->
+  <data name="OverallReady" xml:space="preserve"><value>Codex client management is ready; extension modules are optional.</value></data>
+  <data name="OverallNotInstalled" xml:space="preserve"><value>No Codex desktop app or Codex CLI was detected.</value></data>
+  <data name="OverallCollectFailed" xml:space="preserve"><value>This check did not finish; the previous result is still shown.</value></data>
+  <data name="OverallCollectCanceled" xml:space="preserve"><value>The check was cancelled.</value></data>
+  <data name="OverallCollectNoData" xml:space="preserve"><value>The check returned no data.</value></data>
+  <data name="OverallCollectParseFailed" xml:space="preserve"><value>The check result could not be parsed.</value></data>
+
+  <!-- Status and readiness -->
   <data name="StatusHealthy" xml:space="preserve"><value>Healthy</value></data>
   <data name="StatusStopped" xml:space="preserve"><value>Stopped</value></data>
   <data name="StatusWarning" xml:space="preserve"><value>Needs attention</value></data>
   <data name="StatusUnavailable" xml:space="preserve"><value>Not installed</value></data>
   <data name="StatusUnknown" xml:space="preserve"><value>Unknown</value></data>
-  <data name="Reachable" xml:space="preserve"><value>Reachable</value></data>
-  <data name="PendingVerification" xml:space="preserve"><value>Verify</value></data>
-  <data name="Unreachable" xml:space="preserve"><value>Unreachable</value></data>
+  <data name="StatusRunning" xml:space="preserve"><value>Running</value></data>
+  <data name="ReadinessInstall" xml:space="preserve"><value>Next: install</value></data>
+  <data name="ReadinessLogin" xml:space="preserve"><value>Next: sign in</value></data>
+  <data name="ReadinessUnknownAccount" xml:space="preserve"><value>Sign-in state needs verification</value></data>
+  <data name="ReadinessPrerequisites" xml:space="preserve"><value>Complete runtime setup first</value></data>
+  <data name="ReadinessStart" xml:space="preserve"><value>Next: start service</value></data>
+  <data name="ReadinessUpgrade" xml:space="preserve"><value>Update available</value></data>
+  <data name="ReadinessReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="CurrentInUse" xml:space="preserve"><value>in use</value></data>
   <data name="Online" xml:space="preserve"><value>Online</value></data>
   <data name="Offline" xml:space="preserve"><value>Offline</value></data>
   <data name="ThisDevice" xml:space="preserve"><value>This device</value></data>
-  <data name="CollectionIncomplete" xml:space="preserve"><value>Collection did not complete</value></data>
-  <data name="CollectionNoData" xml:space="preserve"><value>Collection returned no data</value></data>
-  <data name="CollectionParseFailed" xml:space="preserve"><value>Could not parse collection results</value></data>
-  <data name="ActionNoResult" xml:space="preserve"><value>The action returned no result</value></data>
-  <data name="ActionFailed" xml:space="preserve"><value>Action failed</value></data>
-  <data name="UnableToStart" xml:space="preserve"><value>Unable to start {0}</value></data>
-  <data name="NoMoreDiagnostics" xml:space="preserve"><value>No additional diagnostic information is available.</value></data>
+  <data name="LastSeenNow" xml:space="preserve"><value>Online now</value></data>
+  <data name="LastSeenUnknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="VersionManagementReference" xml:space="preserve"><value>Version reference</value></data>
+
+  <!-- Runtime messages -->
   <data name="CheckingLatest" xml:space="preserve"><value>Checking local components and latest versions…</value></data>
   <data name="RefreshingStatus" xml:space="preserve"><value>Refreshing runtime status…</value></data>
   <data name="CheckComplete" xml:space="preserve"><value>Check complete</value></data>
   <data name="RefreshFailed" xml:space="preserve"><value>Refresh failed: {0}</value></data>
+  <data name="RefreshCanceled" xml:space="preserve"><value>The check was cancelled.</value></data>
+  <data name="CollectionTimedOut" xml:space="preserve"><value>The check timed out and was aborted.</value></data>
   <data name="SampleFailed" xml:space="preserve"><value>Sample failed</value></data>
   <data name="SampleAt" xml:space="preserve"><value>Sampled {0:HH:mm:ss}</value></data>
   <data name="DataUnavailable" xml:space="preserve"><value>Data unavailable</value></data>
   <data name="UpdatedAt" xml:space="preserve"><value>Updated {0:HH:mm:ss}</value></data>
-  <data name="MissingNodeResult" xml:space="preserve"><value>No Node.js result returned</value></data>
-  <data name="MissingNpmResult" xml:space="preserve"><value>No npm result returned</value></data>
-  <data name="MissingNvmResult" xml:space="preserve"><value>No NVM result returned</value></data>
   <data name="TailscaleDisconnected" xml:space="preserve"><value>Not connected to Tailscale</value></data>
   <data name="TailnetConnected" xml:space="preserve"><value>{0} is connected to the Tailnet</value></data>
   <data name="TailscaleSignInHint" xml:space="preserve"><value>Confirm that Tailscale is installed and signed in</value></data>
   <data name="TailnetOnlineCount" xml:space="preserve"><value>{0} devices online · This device {1}</value></data>
   <data name="PrerequisiteHint" xml:space="preserve"><value>Install Node.js 22.14.0 or newer and make sure npm is available.</value></data>
-  <data name="RestartServicesTitle" xml:space="preserve"><value>Restart all Codex services?</value></data>
-  <data name="TerminateServicesTitle" xml:space="preserve"><value>Terminate all Codex services?</value></data>
-  <data name="RestartServicesBody" xml:space="preserve"><value>Stops the OpenCodex Proxy and Codex Relay scheduled tasks and their explicitly matched service processes, then starts the tasks again. The Codex desktop app and Codex Beacon stay open.</value></data>
-  <data name="TerminateServicesBody" xml:space="preserve"><value>Stops the OpenCodex Proxy and Codex Relay scheduled tasks and their explicitly matched service processes. The Codex desktop app, Codex Beacon, and unrelated Node.js processes stay open.</value></data>
-  <data name="RestartAllButton" xml:space="preserve"><value>Restart all</value></data>
-  <data name="TerminateServicesButton" xml:space="preserve"><value>Terminate services</value></data>
-  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="RestartingServices" xml:space="preserve"><value>Restarting services…</value></data>
-  <data name="TerminatingServices" xml:space="preserve"><value>Terminating services…</value></data>
+  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>Terminate all Codex / ChatGPT processes?</value></data>
+  <data name="KillCodexProcessesBody" xml:space="preserve"><value>Forces every ChatGPT.exe, codex.exe, code mode host, and child process to exit. Codex Beacon stays open.</value></data>
+  <data name="KillCodexProcessesButton" xml:space="preserve"><value>Terminate all</value></data>
+  <data name="KillCodexBusy" xml:space="preserve"><value>Terminating all Codex and ChatGPT processes…</value></data>
+  <data name="RestartDesktopBusy" xml:space="preserve"><value>Cleaning up and restarting the ChatGPT desktop app…</value></data>
   <data name="FullNodeVersionHint" xml:space="preserve"><value>Enter a complete Node.js version, for example 24.15.0.</value></data>
   <data name="InstallingNode" xml:space="preserve"><value>Installing Node.js {0} with NVM…</value></data>
   <data name="SelectNodeVersion" xml:space="preserve"><value>Select an installed Node.js version first.</value></data>
   <data name="SwitchingNode" xml:space="preserve"><value>Switching to Node.js {0}…</value></data>
-  <data name="SettingsSaved" xml:space="preserve"><value>Settings saved. They will take effect on the next refresh.</value></data>
-  <data name="SettingsSavedRestart" xml:space="preserve"><value>Settings saved. Restart Codex Beacon to apply the display language.</value></data>
-  <data name="RestartRequiredTitle" xml:space="preserve"><value>Restart to change language?</value></data>
-  <data name="RestartRequiredBody" xml:space="preserve"><value>The new display language is saved. Restart Codex Beacon now to apply it.</value></data>
-  <data name="RestartNowButton" xml:space="preserve"><value>Restart now</value></data>
-  <data name="LaterButton" xml:space="preserve"><value>Later</value></data>
+  <data name="SwitchingProvider" xml:space="preserve"><value>Switching provider: {0}…</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Settings saved. They take effect on the next refresh.</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Cancelling" xml:space="preserve"><value>Cancelling the current action…</value></data>
+  <data name="ActionAlreadyRunning" xml:space="preserve"><value>Another action is still running. Wait for it to finish or cancel it first.</value></data>
+
+  <!-- Action names -->
   <data name="ActionStartName" xml:space="preserve"><value>starting</value></data>
   <data name="ActionStopName" xml:space="preserve"><value>stopping</value></data>
   <data name="ActionRestartName" xml:space="preserve"><value>restarting</value></data>
@@ -160,15 +273,186 @@
   <data name="ActionLoginName" xml:space="preserve"><value>opening sign-in for</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>processing</value></data>
   <data name="RunningAction" xml:space="preserve"><value>{0} {1}…</value></data>
-  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
-  <data name="DataFlowHeading.Text" xml:space="preserve"><value>Live Data Flow Architecture</value></data>
-  <data name="ModelPipelineHeading.Text" xml:space="preserve"><value>Model Dispatch Pipeline</value></data>
-  <data name="NetworkPipelineHeading.Text" xml:space="preserve"><value>Network Transport &amp; Proxy</value></data>
-  <data name="LineTypeIDC" xml:space="preserve"><value>IDC / Hosting</value></data>
-  <data name="LineTypeResidential" xml:space="preserve"><value>Residential / ISP</value></data>
-  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>Terminate all Codex / ChatGPT processes?</value></data>
-  <data name="KillCodexProcessesBody" xml:space="preserve"><value>Forces all ChatGPT.exe, codex.exe, code mode hosts, and runtime worker processes to exit. Codex Beacon stays open.</value></data>
-  <data name="KillCodexProcessesButton" xml:space="preserve"><value>Terminate all</value></data>
-  <data name="KillCodexBusy" xml:space="preserve"><value>Terminating all Codex and ChatGPT processes…</value></data>
-  <data name="RestartDesktopBusy" xml:space="preserve"><value>Cleaning up and restarting ChatGPT desktop app…</value></data>
+
+  <!-- Action results -->
+  <data name="MessageWithDetails" xml:space="preserve"><value>{0} ({1})</value></data>
+  <data name="ActionNoResult" xml:space="preserve"><value>The action returned no result</value></data>
+  <data name="ActionFailed" xml:space="preserve"><value>The action did not complete</value></data>
+  <data name="ActionTimedOut" xml:space="preserve"><value>The action timed out and was aborted. Check the network or the download mirror.</value></data>
+  <data name="ActionCanceled" xml:space="preserve"><value>The action was cancelled.</value></data>
+  <data name="ActionNeedsAdmin" xml:space="preserve"><value>Permission denied. Run Codex Beacon as administrator and try again.</value></data>
+  <data name="ActionUnsupported" xml:space="preserve"><value>This component does not support that action.</value></data>
+  <data name="ActionNeedRuntime" xml:space="preserve"><value>Node.js or npm is missing. Complete the runtime setup first.</value></data>
+  <data name="ActionRuntimeTooOld" xml:space="preserve"><value>Node.js {0} is too old; version 22.14.0 or newer is required.</value></data>
+  <data name="ActionProviderSwitched" xml:space="preserve"><value>Switched to provider: {0}</value></data>
+  <data name="ActionNvmInstalled" xml:space="preserve"><value>NVM for Windows installation state updated</value></data>
+  <data name="ActionNvmNodeInstalled" xml:space="preserve"><value>Node.js {0} installed</value></data>
+  <data name="ActionNvmNodeSwitched" xml:space="preserve"><value>Switched to Node.js {0}</value></data>
+  <data name="ActionDesktopLoginOpened" xml:space="preserve"><value>Codex sign-in opened</value></data>
+  <data name="ActionDesktopLoginHint" xml:space="preserve"><value>Complete sign-in in the Codex desktop app, then return and refresh.</value></data>
+  <data name="ActionDesktopStarted" xml:space="preserve"><value>Codex desktop app started</value></data>
+  <data name="ActionDesktopStopped" xml:space="preserve"><value>Terminated {0} Codex / ChatGPT process(es)</value></data>
+  <data name="ActionDesktopRestarted" xml:space="preserve"><value>ChatGPT desktop app restarted ({0} stale processes cleared)</value></data>
+  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>Opened the Codex Microsoft Store product page</value></data>
+  <data name="ActionDesktopStoreHint" xml:space="preserve"><value>Product ID {0}. Installation and upgrades use the official app distribution channel.</value></data>
+  <data name="ActionTailscaleLoginOpened" xml:space="preserve"><value>Tailscale sign-in opened</value></data>
+  <data name="ActionTailscaleLoginHint" xml:space="preserve"><value>Complete browser authorization in the new window, then return and refresh.</value></data>
+  <data name="ActionTailscaleInstalled" xml:space="preserve"><value>Tailscale installation state updated</value></data>
+  <data name="ActionTailscaleStarted" xml:space="preserve"><value>Tailscale service started</value></data>
+  <data name="ActionTailscaleStopped" xml:space="preserve"><value>Tailscale service stopped</value></data>
+  <data name="ActionTailscaleRestarted" xml:space="preserve"><value>Tailscale service restarted</value></data>
+  <data name="ActionCodexLoginOpened" xml:space="preserve"><value>Codex sign-in opened</value></data>
+  <data name="ActionCodexLoginHint" xml:space="preserve"><value>Complete sign-in in the new window, then return and refresh.</value></data>
+  <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI is not installed. Complete installation first.</value></data>
+  <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI is not a persistent service. Manage running processes from the Processes page.</value></data>
+  <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} installed at the latest version</value></data>
+  <data name="ActionHintProxyStart" xml:space="preserve"><value>Select Start when you want to configure and use this extension.</value></data>
+  <data name="ActionHintRelayStart" xml:space="preserve"><value>Select Start to run Relay in its official background mode.</value></data>
+  <data name="ActionServicesRestarted" xml:space="preserve"><value>Optional services restarted (cleared {0} process(es); started: {1})</value></data>
+  <data name="ActionServicesTerminated" xml:space="preserve"><value>Terminated {0} optional service process(es); the desktop app and Codex Beacon were not affected</value></data>
+  <data name="ActionRelayStarted" xml:space="preserve"><value>Codex Relay started</value></data>
+  <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay stopped</value></data>
+  <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay restarted</value></data>
+  <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay is not installed. Complete installation first.</value></data>
+  <data name="ActionProxyStarted" xml:space="preserve"><value>OpenCodex service started</value></data>
+  <data name="ActionProxyStopped" xml:space="preserve"><value>OpenCodex service stopped</value></data>
+  <data name="ActionProxyRestarted" xml:space="preserve"><value>OpenCodex service restarted</value></data>
+  <data name="ActionProxyMissing" xml:space="preserve"><value>OpenCodex is not installed. Complete installation first.</value></data>
+  <data name="ActionTaskStarted" xml:space="preserve"><value>Scheduled task [{0}] started</value></data>
+  <data name="ActionTaskStopped" xml:space="preserve"><value>Scheduled task [{0}] stopped</value></data>
+  <data name="ActionTaskRestarted" xml:space="preserve"><value>Scheduled task [{0}] restarted</value></data>
+  <data name="ActionTaskMissing" xml:space="preserve"><value>Scheduled task [{0}] was not found. Install the corresponding service first.</value></data>
+  <data name="ActionNvmMissing" xml:space="preserve"><value>NVM for Windows was not detected. Install NVM and reopen Codex Beacon.</value></data>
+  <data name="ActionNvmVersionInvalid" xml:space="preserve"><value>Enter a complete Node.js version, for example 24.15.0.</value></data>
+  <data name="ActionNvmUnsupported" xml:space="preserve"><value>NVM does not support that action.</value></data>
+  <data name="ActionWingetMissingNvm" xml:space="preserve"><value>winget was not detected, so NVM for Windows cannot be installed or upgraded.</value></data>
+  <data name="ActionWingetMissingTailscale" xml:space="preserve"><value>winget was not detected, so Tailscale cannot be installed or upgraded.</value></data>
+  <data name="ActionBulkInstallUnsupported" xml:space="preserve"><value>Bulk installation is not supported. Install components individually.</value></data>
+  <data name="ActionConfigMissing" xml:space="preserve"><value>The provider could not be switched because %USERPROFILE%\.codex\config.toml was not found.</value></data>
+
+  <!-- Provider -->
+  <data name="ProviderActiveBtn" xml:space="preserve"><value>Active now</value></data>
+  <data name="ProviderSwitchBtn" xml:space="preserve"><value>Set as active provider</value></data>
+  <data name="ProviderActive" xml:space="preserve"><value>Active</value></data>
+  <data name="ProviderInactive" xml:space="preserve"><value>Inactive</value></data>
+
+  <!-- Infrastructure -->
+  <data name="UnableToStart" xml:space="preserve"><value>Unable to start {0}</value></data>
+  <data name="NoMoreDiagnostics" xml:space="preserve"><value>No additional diagnostic information is available.</value></data>
+
+  <!-- Application update -->
+  <data name="UpdateSectionHeading.Text" xml:space="preserve"><value>About &amp; update</value></data>
+  <data name="UpdateExpander.Header" xml:space="preserve"><value>Application update</value></data>
+  <data name="UpdateExpander.Description" xml:space="preserve"><value>Check the official GitHub release page, download, and restart in place</value></data>
+  <data name="VersionCard.Header" xml:space="preserve"><value>Current version</value></data>
+  <data name="VersionCard.Description" xml:space="preserve"><value>Codex Beacon's own build version and package type</value></data>
+  <data name="AutoUpdateCard.Header" xml:space="preserve"><value>Check for updates automatically</value></data>
+  <data name="AutoUpdateCard.Description" xml:space="preserve"><value>Query the latest release after startup and show a banner when one is available</value></data>
+  <data name="UpdateActionCard.Header" xml:space="preserve"><value>Check and install</value></data>
+  <data name="UpdateActionCard.Description" xml:space="preserve"><value>Always uses the official GitHub Releases channel, never a third-party mirror</value></data>
+  <data name="CheckUpdateButton.Content" xml:space="preserve"><value>Check for updates</value></data>
+  <data name="DownloadUpdateButton.Content" xml:space="preserve"><value>Download and update</value></data>
+  <data name="OpenReleaseButton.Content" xml:space="preserve"><value>Open release page</value></data>
+  <data name="SkipVersionButton.Content" xml:space="preserve"><value>Skip this version</value></data>
+  <data name="UpdateDetailHeading.Text" xml:space="preserve"><value>Update status</value></data>
+  <data name="UpdateNotesHeading.Text" xml:space="preserve"><value>Release notes</value></data>
+  <data name="AppPackagePortable" xml:space="preserve"><value>Portable · self-contained</value></data>
+  <data name="AppPackageSlim" xml:space="preserve"><value>Slim · runtime required</value></data>
+  <data name="AppPackageUnknown" xml:space="preserve"><value>Unknown package</value></data>
+  <data name="UpdateIdle" xml:space="preserve"><value>Updates have not been checked yet.</value></data>
+  <data name="UpdateChecking" xml:space="preserve"><value>Querying GitHub for the latest release…</value></data>
+  <data name="UpdateUpToDate" xml:space="preserve"><value>Version {0} is the latest.</value></data>
+  <data name="UpdateAvailableTitle" xml:space="preserve"><value>Version {0} is available</value></data>
+  <data name="UpdateAvailableMessage" xml:space="preserve"><value>You are on {0}; {1} can be installed.</value></data>
+  <data name="UpdateCheckFailed" xml:space="preserve"><value>Update check failed: {0}</value></data>
+  <data name="UpdateAssetMissing" xml:space="preserve"><value>That release has no package for this build type.</value></data>
+  <data name="UpdateDownloading" xml:space="preserve"><value>Downloading the update…</value></data>
+  <data name="UpdateDownloadProgress" xml:space="preserve"><value>{0} / {1} · {2}/s</value></data>
+  <data name="UpdateDownloadFailed" xml:space="preserve"><value>Download failed: {0}</value></data>
+  <data name="UpdateVerifyFailed" xml:space="preserve"><value>SHA-256 verification failed, so the downloaded {0} was discarded. Please try again.</value></data>
+  <data name="UpdateReady" xml:space="preserve"><value>The update was downloaded and passed SHA-256 verification.</value></data>
+  <data name="UpdateRestartTitle" xml:space="preserve"><value>Restart now to apply the update?</value></data>
+  <data name="UpdateRestartBody" xml:space="preserve"><value>Version {0} is ready. This window will close, the install package will be replaced in place, and the new version will start automatically.</value></data>
+  <data name="UpdateRestartButton" xml:space="preserve"><value>Restart now</value></data>
+  <data name="UpdateApplyButton" xml:space="preserve"><value>Restart to apply</value></data>
+  <data name="UpdateApplying" xml:space="preserve"><value>Replacing the install package and restarting…</value></data>
+  <data name="UpdateApplyFailed" xml:space="preserve"><value>Applying the update failed: {0}</value></data>
+  <data name="UpdateNoLauncherHint" xml:space="preserve"><value>This session was not started from a single-file package, so it cannot be replaced in place. Download the new version from the release page.</value></data>
+  <data name="UpdateSkipped" xml:space="preserve"><value>Version {0} is skipped; you can still update manually.</value></data>
+  <data name="UpdatePublishedAt" xml:space="preserve"><value>Published {0}</value></data>
+  <data name="NetworkConnected" xml:space="preserve"><value>Connected</value></data>
+  <data name="NetworkDisconnected" xml:space="preserve"><value>Not connected</value></data>
+  <data name="NetworkUnreachable" xml:space="preserve"><value>Unreachable</value></data>
+  <data name="ProviderKeyConfigured" xml:space="preserve"><value>Key configured · hidden by default</value></data>
+  <data name="ProviderKeyMissing" xml:space="preserve"><value>No key configured</value></data>
+  <data name="ProviderSaved" xml:space="preserve"><value>Provider saved in the current user's hidden configuration directory.</value></data>
+  <data name="ProviderDeleted" xml:space="preserve"><value>Provider deleted.</value></data>
+  <data name="ProviderTesting" xml:space="preserve"><value>Testing {0} with {1}…</value></data>
+  <data name="ProviderTestSucceeded" xml:space="preserve"><value>Provider connectivity test succeeded ({0}).</value></data>
+  <data name="ProviderTestFailed" xml:space="preserve"><value>Provider connectivity test failed: {0}</value></data>
+  <data name="DeleteProviderTitle" xml:space="preserve"><value>Delete provider?</value></data>
+  <data name="DeleteProviderBody" xml:space="preserve"><value>This removes “{0}” and its key from local configuration.</value></data>
+  <data name="Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Name" xml:space="preserve"><value>Name</value></data>
+  <data name="TestModel" xml:space="preserve"><value>Test model</value></data>
+  <data name="ProviderKeepExistingKey" xml:space="preserve"><value>Leave blank to keep the existing key</value></data>
+  <data name="AddProvider" xml:space="preserve"><value>Add provider</value></data>
+  <data name="EditProvider" xml:space="preserve"><value>Edit provider</value></data>
+  <data name="Save" xml:space="preserve"><value>Save</value></data>
+  <data name="ProviderInvalid" xml:space="preserve"><value>The provider ID or Base URL is invalid, or the ID already exists.</value></data>
+  <data name="CompAppInstallerName" xml:space="preserve"><value>App Installer</value></data>
+  <data name="CompAppInstallerKind" xml:space="preserve"><value>WinGet system dependency</value></data>
+  <data name="DetailAppInstallerReady" xml:space="preserve"><value>App Installer is installed</value></data>
+  <data name="DetailAppInstallerMissing" xml:space="preserve"><value>App Installer is missing; install it from Microsoft Store</value></data>
+  <data name="CompWingetName" xml:space="preserve"><value>WinGet</value></data>
+  <data name="CompWingetKind" xml:space="preserve"><value>Windows package manager</value></data>
+  <data name="DetailWingetReady" xml:space="preserve"><value>The WinGet command is available</value></data>
+  <data name="DetailWingetMissing" xml:space="preserve"><value>WinGet is unavailable; repair App Installer</value></data>
+  <data name="CompStoreName" xml:space="preserve"><value>Microsoft Store source</value></data>
+  <data name="CompStoreKind" xml:space="preserve"><value>ChatGPT install channel</value></data>
+  <data name="DetailStoreReady" xml:space="preserve"><value>The msstore source is available</value></data>
+  <data name="DetailStoreMissing" xml:space="preserve"><value>The msstore source is unavailable and needs repair</value></data>
+  <data name="ActionAppInstallerStoreOpened" xml:space="preserve"><value>Opened the App Installer page in Microsoft Store.</value></data>
+  <data name="ActionStoreSourceReady" xml:space="preserve"><value>The Microsoft Store source was updated.</value></data>
+  <data name="ActionOpenCodexIntegrated" xml:space="preserve"><value>Codex now routes through OpenCodex.</value></data>
+  <data name="ActionOpenCodexModelsRefreshed" xml:space="preserve"><value>The OpenCodex model catalog was refreshed.</value></data>
+  <data name="NavDependencies.Content" xml:space="preserve"><value>Dependencies</value></data>
+  <data name="DetectingStatus.Text" xml:space="preserve"><value>Detecting…</value></data>
+  <data name="DependencySettingsButton.Content" xml:space="preserve"><value>Dependency settings</value></data>
+  <data name="SettingsButton.Content" xml:space="preserve"><value>Settings</value></data>
+  <data name="ConnectivityHeading.Text" xml:space="preserve"><value>Connectivity</value></data>
+  <data name="CheckNetworkButton.Content" xml:space="preserve"><value>Check network now</value></data>
+  <data name="ProxyModeHeading.Text" xml:space="preserve"><value>Proxy mode</value></data>
+  <data name="ProxyModeSystem.Content" xml:space="preserve"><value>Use system proxy</value></data>
+  <data name="ProxyModeTun.Content" xml:space="preserve"><value>Use TUN</value></data>
+  <data name="ProxyModeCustom.Content" xml:space="preserve"><value>Custom HTTP proxy</value></data>
+  <data name="CustomHttpProxyBox.Header" xml:space="preserve"><value>HTTP proxy address</value></data>
+  <data name="SaveNetworkButton.Content" xml:space="preserve"><value>Save network settings</value></data>
+  <data name="ProvidersPageTitle.Text" xml:space="preserve"><value>Provider management</value></data>
+  <data name="ProvidersPageDescription.Text" xml:space="preserve"><value>Add, edit, and test providers. Keys stay in the current user's hidden folder and are never echoed or logged.</value></data>
+  <data name="AddProviderButton.Content" xml:space="preserve"><value>Add provider</value></data>
+  <data name="ConfiguredProvidersHeading.Text" xml:space="preserve"><value>Configured providers</value></data>
+  <data name="UseProviderButton.Content" xml:space="preserve"><value>Set current</value></data>
+  <data name="TestProviderButton.Content" xml:space="preserve"><value>Test</value></data>
+  <data name="EditProviderButton.Content" xml:space="preserve"><value>Edit</value></data>
+  <data name="DeleteProviderButton.Content" xml:space="preserve"><value>Delete</value></data>
+  <data name="ProviderTestHint.Text" xml:space="preserve"><value>The default connectivity-test model is gpt-5.4; gpt-5.5 is also available.</value></data>
+  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>Manage OpenCodex dependencies, version, service, providers, models, and Codex integration here.</value></data>
+  <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>Service and version</value></data>
+  <data name="AwaitingDetection.Text" xml:space="preserve"><value>Awaiting detection</value></data>
+  <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>Integration: —</value></data>
+  <data name="IntegrateCodexButton.Content" xml:space="preserve"><value>Use for Codex</value></data>
+  <data name="AvailableModelsHeading.Text" xml:space="preserve"><value>Available models</value></data>
+  <data name="RefreshModelsButton.Content" xml:space="preserve"><value>Refresh models</value></data>
+  <data name="TestModelButton.Content" xml:space="preserve"><value>Test model</value></data>
+  <data name="ServiceSettingsHeading.Text" xml:space="preserve"><value>Service settings</value></data>
+  <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
+  <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>Save</value></data>
+  <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>Download sources</value></data>
+  <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
+  <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>Save dependency settings</value></data>
+  <data name="RelayDescription.Text" xml:space="preserve"><value>Optional mobile bridge extension; manage installation, version, service, and scheduled task here.</value></data>
+  <data name="ServiceControlHeading.Text" xml:space="preserve"><value>Service control</value></data>
+  <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
+  <data name="SaveRelayButton.Content" xml:space="preserve"><value>Save Relay settings</value></data>
 </root>

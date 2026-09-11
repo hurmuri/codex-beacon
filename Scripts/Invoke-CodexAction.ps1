@@ -1,109 +1,182 @@
 ﻿param(
-    [Parameter(Mandatory=$true)][ValidateSet('nvm','desktop','codex','opencodex','relay','tailscale','all')][string]$Component,
-    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','opencodex','relay','tailscale','all','provider')][string]$Component,
+    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','models','test-model')][string]$Action,
     [string]$Version = '',
-    [string]$SettingsPath = '',
-    [ValidateSet('en-US','zh-CN')][string]$Language = 'en-US'
+    [string]$SettingsPath = ''
 )
+
+# ---------------------------------------------------------------------------
+# Codex Beacon action runner
+#
+# Stdout protocol
+#   * Any line that does not start with the marker is progress output produced
+#     by a native tool (nvm/npm/winget downloads and installs). The UI streams
+#     it so long operations never look frozen.
+#   * The last marker line carries the ActionResult as JSON:
+#       { Success, MessageKey, MessageArgs, HintKey, HintArgs, Details }
+#     Localization lives in resources.resw, never here.
+#
+# Exit code 0 means "a result was produced". Failure is expressed by
+# Success=false inside the payload.
+# ---------------------------------------------------------------------------
 
 $ErrorActionPreference = 'Stop'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $OutputEncoding = [Console]::OutputEncoding
-$settings = @{ RelayTaskName = 'Codex Relay'; ProxyTaskName = 'opencodex-proxy' }
+
+$script:Marker = '##RESULT##'
+$script:ProgressMarker = '##PROGRESS##'
+$script:Separator = [char]0x1F
+$script:ActionStarted = Get-Date
+
+$settings = @{
+    RelayTaskName = 'Codex Relay'
+    ProxyTaskName = 'opencodex-proxy'
+    NodeMirror    = 'https://cdn.npmmirror.com/binaries/node'
+    NpmRegistry   = 'https://registry.npmjs.org/'
+    NetworkMode   = 'system'
+    CustomHttpProxy = ''
+}
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     try {
         $saved = Get-Content -Raw -LiteralPath $SettingsPath -Encoding UTF8 | ConvertFrom-Json
-        if ($saved.RelayTaskName) { $settings.RelayTaskName = $saved.RelayTaskName }
-        if ($saved.ProxyTaskName) { $settings.ProxyTaskName = $saved.ProxyTaskName }
-    } catch {}
+        foreach ($name in @('RelayTaskName', 'ProxyTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
+            if ($saved.$name) { $settings[$name] = $saved.$name }
+        }
+    } catch { }
+}
+if ($settings.NetworkMode -eq 'custom' -and [string]$settings.CustomHttpProxy -match '^https?://') {
+    $env:HTTP_PROXY = [string]$settings.CustomHttpProxy
+    $env:HTTPS_PROXY = [string]$settings.CustomHttpProxy
 }
 
-function Convert-ActionText([string]$Text) {
-    if ($Language -ne 'en-US' -or [string]::IsNullOrEmpty($Text)) { return $Text }
-    $exact = @{
-        '缺少 Node.js 或 npm。请先安装 Node.js 22.14.0 或更高版本。' = 'Node.js or npm is missing. Install Node.js 22.14.0 or newer first.'
-        'Codex Relay 尚未安装。请先完成安装。' = 'Codex Relay is not installed. Complete installation first.'
-        '未检测到 winget，无法安装或升级 NVM for Windows。' = 'winget was not detected, so NVM for Windows cannot be installed or upgraded.'
-        'NVM for Windows 安装状态已更新' = 'NVM for Windows installation status updated'
-        '未检测到 NVM for Windows。请先安装 NVM 并重新打开 Codex Beacon。' = 'NVM for Windows was not detected. Install NVM and reopen Codex Beacon.'
-        '请输入完整 Node.js 版本号，例如 24.15.0。' = 'Enter a complete Node.js version, for example 24.15.0.'
-        'NVM 不支持此操作。' = 'NVM does not support this action.'
-        '已打开 Codex 登录流程' = 'Codex sign-in opened'
-        '请在 Codex 桌面客户端中完成登录，完成后返回并刷新。' = 'Complete sign-in in the Codex desktop app, then return and refresh.'
-        '已打开 Codex 的 Microsoft Store 产品页' = 'Opened the Codex Microsoft Store product page'
-        '产品 ID 9PLM9XGG6VKS；安装与升级由官方应用分发通道完成。' = 'Product ID 9PLM9XGG6VKS. Installation and upgrades use the official app distribution channel.'
-        'Codex 桌面客户端已启动' = 'Codex desktop app started'
-        'Codex 桌面客户端已关闭' = 'Codex desktop app closed'
-        'Codex 桌面客户端已重新启动' = 'Codex desktop app restarted'
-        '已打开 Tailscale 登录流程' = 'Tailscale sign-in opened'
-        '请在新窗口中完成浏览器授权，完成后返回并刷新。' = 'Complete browser authorization in the new window, then return and refresh.'
-        '未检测到 winget，无法安装或升级 Tailscale。' = 'winget was not detected, so Tailscale cannot be installed or upgraded.'
-        'Tailscale 安装状态已更新' = 'Tailscale installation status updated'
-        'Tailscale 服务已启动' = 'Tailscale service started'; 'Tailscale 服务已停止' = 'Tailscale service stopped'; 'Tailscale 服务已重新启动' = 'Tailscale service restarted'
-        'Tailscale 不支持此操作。' = 'Tailscale does not support this action.'
-        'Codex CLI 尚未安装。请先完成安装。' = 'Codex CLI is not installed. Complete installation first.'
-        '请在新窗口中完成登录，完成后返回并刷新。' = 'Complete sign-in in the new window, then return and refresh.'
-        '批量安装不受支持，请逐项执行。' = 'Bulk installation is not supported. Install components individually.'
-        '安装完成。需要使用该扩展时，再点击“启动”完成服务配置。' = 'Installation complete. Select Start when you want to configure and use this extension.'
-        '安装完成。点击“启动”会使用 Relay 官方后台模式运行。' = 'Installation complete. Select Start to use the official Relay background mode.'
-        'Codex 可选服务已重新启动' = 'Optional Codex services restarted'
-        'Codex 可选服务已终止' = 'Optional Codex services terminated'
-        'Codex CLI 不是常驻服务；请在进程页管理正在运行的代理与 Relay。' = 'Codex CLI is not a persistent service. Manage active proxies and Relay from the Processes page.'
-        'Codex Relay 已启动' = 'Codex Relay started'; 'Codex Relay 已停止' = 'Codex Relay stopped'; 'Codex Relay 已重新启动' = 'Codex Relay restarted'
-        'OpenCodex 尚未安装。请先完成安装。' = 'OpenCodex is not installed. Complete installation first.'
-        '操作未完成' = 'Action did not complete'
-        '所有 Codex / ChatGPT 进程已关闭' = 'All Codex and ChatGPT processes terminated'
-        'ChatGPT 桌面客户端已重新启动' = 'ChatGPT desktop app restarted'
-        '已清理旧进程并重新拉起应用。' = 'Cleaned up stale processes and restarted the app.'
+function Convert-Args([object[]]$Values) {
+    if (-not $Values) { return '' }
+    $flat = @()
+    foreach ($value in $Values) { $flat += [string]$value }
+    return ($flat -join $script:Separator)
+}
+
+function Protect-Output([string]$Text) {
+    if (-not $Text) { return '' }
+    return ($Text.Trim() -replace '(?i)(token|authorization|api[_-]?key|bearer)\s*[=:]\s*\S+', '$1=<redacted>')
+}
+
+# Writes a progress line straight to stdout. [Console] is used instead of
+# Write-Output/Write-Host because those are captured by the calling function's
+# return value (or the information stream) and would never reach the UI live.
+function Write-Progress-Line([string]$Text) {
+    if ([string]::IsNullOrWhiteSpace($Text)) { return }
+    [Console]::Out.WriteLine($Text)
+    [Console]::Out.Flush()
+}
+
+function Write-Progress-Event {
+    param(
+        [string]$Stage, [string]$Source = '', [string]$Message = '',
+        [Nullable[double]]$Percent = $null, [long]$BytesReceived = 0,
+        [Nullable[long]]$TotalBytes = $null
+    )
+    $elapsed = [Math]::Max(0.1, ((Get-Date) - $script:ActionStarted).TotalSeconds)
+    $speed = if ($BytesReceived -gt 0) { [double]$BytesReceived / $elapsed } else { $null }
+    $eta = if ($speed -and $TotalBytes -and $TotalBytes -gt $BytesReceived) { [double]($TotalBytes - $BytesReceived) / $speed } else { $null }
+    $payload = [ordered]@{
+        Stage = $Stage; BytesReceived = $BytesReceived; TotalBytes = $TotalBytes; Percent = $Percent
+        BytesPerSecond = $speed; EtaSeconds = $eta
+        ElapsedSeconds = [Math]::Round($elapsed, 1)
+        Source = $Source; Message = (Protect-Output $Message)
     }
-    if ($exact.ContainsKey($Text)) { return $exact[$Text] }
-    $Text = $Text -replace '^已终止 (\d+) 个相关进程。$', 'Terminated $1 related process(es).' 
-    $Text = $Text -replace '^Node\.js (.+) 版本过低；需要 22\.14\.0 或更高版本。$', 'Node.js $1 is too old; version 22.14.0 or newer is required.'
-    $Text = $Text -replace '^未找到计划任务 \[(.+)\]。请先完成对应服务安装。$', 'Scheduled task [$1] was not found. Install the corresponding service first.'
-    $Text = $Text -replace '^Node\.js (.+) 已安装$', 'Node.js $1 installed'
-    $Text = $Text -replace '^已切换到 Node\.js (.+)$', 'Switched to Node.js $1'
-    $Text = $Text -replace '^(.+) 已安装为最新版$', '$1 installed at the latest version'
-    $Text = $Text -replace '^终止了 (\d+) 个明确匹配的服务进程；已启动：(.+)。$', 'Terminated $1 explicitly matched service process(es); started: $2.'
-    $Text = $Text -replace '^终止了 (\d+) 个明确匹配的服务进程；Codex 桌面应用和本管理器未受影响。$', 'Terminated $1 explicitly matched service process(es). The Codex desktop app and Codex Beacon were not affected.'
-    $Text = $Text -replace '^不支持的操作：(.+)$', 'Unsupported action: $1'
-    $Text = $Text -replace '^OpenCodex 服务已启动$', 'OpenCodex service started'
-    $Text = $Text -replace '^OpenCodex 服务已停止$', 'OpenCodex service stopped'
-    $Text = $Text -replace '^OpenCodex 服务已重新启动$', 'OpenCodex service restarted'
-    $Text = $Text -replace '^(.+) 已启动$', '$1 started'
-    $Text = $Text -replace '^(.+) 已停止$', '$1 stopped'
-    $Text = $Text -replace '^(.+) 已重新启动$', '$1 restarted'
-    return ($Text -replace '已隐藏','redacted' -replace 'OpenCodex 计划任务','OpenCodex scheduled task' -replace 'Relay 计划任务','Relay scheduled task' -replace 'OpenCodex 服务','OpenCodex service' -replace 'Relay 后台模式','Relay background mode' -replace '、',', ')
+    [Console]::Out.WriteLine($script:ProgressMarker + ($payload | ConvertTo-Json -Compress))
+    [Console]::Out.Flush()
 }
 
-function Result([bool]$Success, [string]$Message, [string]$Details = '') {
-    [ordered]@{ Success = $Success; Message = (Convert-ActionText $Message); Details = (Convert-ActionText $Details) } | ConvertTo-Json -Compress
+function Convert-DownloadSize([double]$Value, [string]$Unit) {
+    switch ($Unit.ToUpperInvariant()) {
+        'KB' { return [long]($Value * 1KB) }
+        'MB' { return [long]($Value * 1MB) }
+        'GB' { return [long]($Value * 1GB) }
+        default { return [long]$Value }
+    }
+}
+
+function Invoke-TrackedCommand {
+    param([string]$File, [string[]]$Arguments, [string]$Stage, [string]$Source)
+    $lines = New-Object System.Collections.Generic.List[string]
+    & $File @Arguments 2>&1 | ForEach-Object {
+        $line = [string]$_
+        [void]$lines.Add($line)
+        $percent = $null
+        $received = 0L
+        $total = $null
+        if ($line -match '(\d+(?:\.\d+)?)\s*(KB|MB|GB)\s*/\s*(\d+(?:\.\d+)?)\s*(KB|MB|GB)') {
+            $received = Convert-DownloadSize ([double]$matches[1]) $matches[2]
+            $total = Convert-DownloadSize ([double]$matches[3]) $matches[4]
+            if ($total -gt 0) { $percent = [Math]::Min(100, ($received * 100.0 / $total)) }
+        } elseif ($line -match '(\d{1,3})(?:\.\d+)?\s*%') {
+            $percent = [double]$matches[1]
+        }
+        Write-Progress-Event -Stage $Stage -Source $Source -Percent $percent -BytesReceived $received -TotalBytes $total
+    }
+    return [pscustomobject]@{ ExitCode=$LASTEXITCODE; Output=($lines -join "`r`n") }
+}
+
+function Write-Result {
+    param(
+        [bool]$Success,
+        [string]$MessageKey,
+        [object[]]$MessageArgs,
+        [string]$HintKey = '',
+        [object[]]$HintArgs,
+        [string]$Details = ''
+    )
+    $payload = [ordered]@{
+        Success     = $Success
+        MessageKey  = $MessageKey
+        MessageArgs = (Convert-Args $MessageArgs)
+        HintKey     = $HintKey
+        HintArgs    = (Convert-Args $HintArgs)
+        Details     = (Protect-Output $Details)
+    }
+    Write-Output ($script:Marker + ($payload | ConvertTo-Json -Compress))
+    exit 0
 }
 
 function Assert-Prerequisites {
     $node = Get-Command node.exe -ErrorAction SilentlyContinue
     $script:NodeExecutable = if ($node) { $node.Source } else { '' }
     $script:NpmExecutable = if ($node) { Join-Path (Split-Path $node.Source -Parent) 'npm.cmd' } else { '' }
-    if (-not $node -or -not (Test-Path -LiteralPath $script:NpmExecutable)) { throw '缺少 Node.js 或 npm。请先安装 Node.js 22.14.0 或更高版本。' }
-    $versionText = (& node.exe --version).Trim() -replace '^v','' -replace '-.*$',''
-    if ([version]$versionText -lt [version]'22.14.0') { throw "Node.js $versionText 版本过低；需要 22.14.0 或更高版本。" }
+    if (-not $node -or -not (Test-Path -LiteralPath $script:NpmExecutable)) {
+        throw 'Node.js or npm is missing. Install Node.js 22.14.0 or newer first.'
+    }
+    $versionText = ((& node.exe --version) -replace '^v', '' -replace '-.*$', '').Trim()
+    if ([version]::TryParse($versionText, [ref]$null) -and [version]$versionText -lt [version]'22.14.0') {
+        throw "Node.js $versionText is too old; 22.14.0 or newer is required."
+    }
 }
 
 function Invoke-NpmInstall([string]$PackageName, [bool]$RelayLocal) {
     Assert-Prerequisites
+    $registryArgs = @()
+    if ($settings.NpmRegistry) { $registryArgs = @('--registry', [string]$settings.NpmRegistry) }
+    Write-Progress-Event -Stage 'Downloading' -Source ([string]$settings.NpmRegistry) -Message $PackageName
     if ($RelayLocal) {
         $relayApp = Join-Path $env:USERPROFILE '.codex-relay\app'
         New-Item -ItemType Directory -Path $relayApp -Force | Out-Null
-        $output = & $script:NpmExecutable install --prefix $relayApp "$PackageName@latest" --save-exact 2>&1 | Out-String
+        Write-Progress-Line "npm install $PackageName@latest --prefix $relayApp"
+        $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','--prefix',$relayApp,"$PackageName@latest",'--save-exact') + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
     } else {
-        $output = & $script:NpmExecutable install -g "$PackageName@latest" 2>&1 | Out-String
+        Write-Progress-Line "npm install -g $PackageName@latest"
+        $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','-g',"$PackageName@latest") + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
     }
-    if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-    return ($output.Trim() -replace '(?i)(token|authorization|api[_-]?key)\s*[=:]\s*\S+','$1=<已隐藏>')
+    $output = $run.Output
+    if ($run.ExitCode -ne 0) { throw $output.Trim() }
+    Write-Progress-Event -Stage 'Completed' -Source ([string]$settings.NpmRegistry) -Message $PackageName -Percent 100
+    return $output.Trim()
 }
 
 function Get-RelayCli {
     $path = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js'
-    if (-not (Test-Path -LiteralPath $path)) { throw 'Codex Relay 尚未安装。请先完成安装。' }
+    if (-not (Test-Path -LiteralPath $path)) { throw 'Codex Relay is not installed.' }
     return $path
 }
 
@@ -119,6 +192,35 @@ function Invoke-Relay([string[]]$Arguments) {
     } finally { Pop-Location }
 }
 
+# nvm-windows downloads from nodejs.org by default, which is unreachable on
+# many networks. Try the configured mirror first and fall back to the official
+# host only when the mirror fails, so this never hangs on a dead endpoint.
+function Invoke-Nvm {
+    param([string]$NvmExecutable, [string[]]$Arguments)
+    $attempts = @()
+    if ($settings.NodeMirror) { $attempts += $settings.NodeMirror }
+    $attempts += ''
+    $lastOutput = ''
+    $index = 0
+    foreach ($mirror in $attempts) {
+        $index++
+        if ($mirror) {
+            $env:NVM_NODEJS_ORG_MIRROR = $mirror
+            Write-Progress-Line "Using Node.js mirror: $mirror"
+        } else {
+            Remove-Item Env:\NVM_NODEJS_ORG_MIRROR -ErrorAction SilentlyContinue
+            Write-Progress-Line 'Falling back to the official Node.js distribution host.'
+        }
+        $source = if ($mirror) { $mirror } else { 'https://nodejs.org/dist/' }
+        $run = Invoke-TrackedCommand $NvmExecutable $Arguments 'Downloading' $source
+        $lastOutput = $run.Output.Trim()
+        if ($run.ExitCode -eq 0) { return $lastOutput }
+        Write-Progress-Line "nvm exited with code $($run.ExitCode)."
+        if ($index -lt $attempts.Count) { Write-Progress-Line 'Mirror attempt failed, retrying...' }
+    }
+    throw $lastOutput
+}
+
 function Stop-CodexDesktop {
     $count = 0
     foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
@@ -129,13 +231,6 @@ function Stop-CodexDesktop {
         $count++
     }
     return $count
-}
-
-function Set-Task([string]$Name, [string]$Mode) {
-    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
-    if (-not $task) { throw "未找到计划任务 [${Name}]。请先完成对应服务安装。" }
-    if ($Mode -eq 'start') { Start-ScheduledTask -TaskName $Name }
-    else { Stop-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue }
 }
 
 function Stop-ServiceProcesses([string]$Target = 'all') {
@@ -154,130 +249,325 @@ function Stop-ServiceProcesses([string]$Target = 'all') {
     return $count
 }
 
+function Set-Task([string]$Name, [string]$Mode) {
+    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
+    if (-not $task) { throw "TASK_MISSING::$Name" }
+    if ($Mode -eq 'start') { Start-ScheduledTask -TaskName $Name }
+    else { Stop-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue }
+}
+
 try {
+    # --- provider switching ------------------------------------------------
+    if ($Component -eq 'provider' -and $Action -eq 'use-stored') {
+        $providersPath = Join-Path $env:USERPROFILE '.CodexBeacon\providers.json'
+        if (-not (Test-Path -LiteralPath $providersPath)) { throw 'PROVIDER_STORE_MISSING' }
+        $providerId = $Version.Trim()
+        $savedProviders = @(Get-Content -Raw -LiteralPath $providersPath -Encoding UTF8 | ConvertFrom-Json)
+        $savedProvider = @($savedProviders | Where-Object { $_.Id -eq $providerId } | Select-Object -First 1)
+        if ($savedProvider.Count -eq 0) { throw 'PROVIDER_NOT_FOUND' }
+        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
+        $provider = $savedProvider[0]
+        $adapter = if ([string]$provider.WireApi -eq 'chat') { 'openai-chat' } else { 'openai-responses' }
+        Write-Progress-Event -Stage 'Configuring' -Source 'OpenCodex' -Message $providerId
+        $addOutput = & $opencodex.Source provider add $providerId --adapter $adapter --base-url ([string]$provider.BaseUrl) --default-model ([string]$provider.TestModel) --set-default --force --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $addOutput.Trim() }
+        if ([string]$provider.ApiKey) {
+            try {
+                $accountJson = & $opencodex.Source account list $providerId --json 2>$null | Out-String | ConvertFrom-Json
+                foreach ($account in @($accountJson.accounts | Where-Object { $_.label -eq 'Codex Beacon' })) {
+                    & $opencodex.Source account remove $providerId ([string]$account.id) --yes --json 2>$null | Out-Null
+                }
+            } catch { }
+            $keyOutput = ([string]$provider.ApiKey) | & $opencodex.Source account add-key $providerId --label 'Codex Beacon' --json 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) {
+                $safeKeyOutput = $keyOutput.Replace([string]$provider.ApiKey, '<redacted>')
+                throw (Protect-Output $safeKeyOutput.Trim())
+            }
+        }
+        $integrationOutput = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $integrationOutput.Trim() }
+        Write-Progress-Event -Stage 'Completed' -Source 'OpenCodex' -Message $providerId -Percent 100
+        Write-Result -Success $true -MessageKey 'ActionProviderSwitched' -MessageArgs @($providerId) -Details 'Provider configured through OpenCodex.'
+    }
+
+    if ($Component -eq 'provider' -and $Action -eq 'use') {
+        $configPath = Join-Path $env:USERPROFILE '.codex\config.toml'
+        if (-not (Test-Path -LiteralPath $configPath)) { throw 'CONFIG_MISSING' }
+        $providerToSet = $Version.Trim()
+        # Local proxy providers are only reachable through openai_base_url, so that
+        # key has to exist in the file, not merely be rewritten when present.
+        $isLocalProxy = $providerToSet -eq 'opencodex'
+        $proxyBaseUrl = 'http://127.0.0.1:10100/v1'
+        $keepsModelProvider = $providerToSet -notin @('custom', 'default', '')
+
+        $lines = @(Get-Content -LiteralPath $configPath -Encoding UTF8)
+        $newLines = @()
+        $modelProviderIndex = -1
+        $sawModelProvider = $false
+        $sawBaseUrl = $false
+        foreach ($line in $lines) {
+            $trimmed = $line.Trim()
+            if ($trimmed -match '^model_provider\s*=') {
+                $sawModelProvider = $true
+                if ($keepsModelProvider) {
+                    $modelProviderIndex = $newLines.Count
+                    $newLines += ('model_provider = "' + $providerToSet + '"')
+                }
+                continue
+            }
+            # openai_base_url is managed by whichever provider is selected, so
+            # drop stale local-proxy injections when switching away from them.
+            if ($trimmed -match '^openai_base_url\s*=') {
+                $sawBaseUrl = $true
+                if ($isLocalProxy) { $newLines += ('openai_base_url = "' + $proxyBaseUrl + '"') }
+                continue
+            }
+            $newLines += $line
+        }
+
+        if (-not $sawModelProvider -and $keepsModelProvider) {
+            $newLines = @('model_provider = "' + $providerToSet + '"') + $newLines
+            $modelProviderIndex = 0
+        }
+
+        if ($isLocalProxy -and -not $sawBaseUrl) {
+            # Insert directly below model_provider, but never past the first
+            # section header - a top-level key placed inside a table is invalid.
+            $limit = $newLines.Count
+            for ($i = 0; $i -lt $newLines.Count; $i++) {
+                if ($newLines[$i].Trim().StartsWith('[')) { $limit = $i; break }
+            }
+            $insertAt = 0
+            if ($modelProviderIndex -ge 0) { $insertAt = [Math]::Min($modelProviderIndex + 1, $limit) }
+            $rebuilt = @()
+            if ($insertAt -gt 0) { $rebuilt += $newLines[0..($insertAt - 1)] }
+            $rebuilt += ('openai_base_url = "' + $proxyBaseUrl + '"')
+            if ($insertAt -lt $newLines.Count) { $rebuilt += $newLines[$insertAt..($newLines.Count - 1)] }
+            $newLines = $rebuilt
+        }
+
+        [System.IO.File]::WriteAllText($configPath, ($newLines -join "`r`n"), (New-Object System.Text.UTF8Encoding($false)))
+        Write-Result -Success $true -MessageKey 'ActionProviderSwitched' -MessageArgs @($providerToSet) -Details 'config.toml updated'
+    }
+
+    # --- App Installer / WinGet / Microsoft Store -------------------------
+    if ($Component -in @('appinstaller','winget')) {
+        Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1'
+        Write-Result -Success $true -MessageKey 'ActionAppInstallerStoreOpened' -Details 'Microsoft Store App Installer page opened.'
+    }
+    if ($Component -eq 'msstore') {
+        $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+        if (-not $winget) { throw 'WINGET_MISSING_STORE' }
+        Write-Progress-Event -Stage 'Repairing' -Source 'winget / msstore' -Message 'Updating package sources'
+        $output = & $winget.Source source update --name msstore --disable-interactivity 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
+        Write-Progress-Event -Stage 'Completed' -Source 'winget / msstore' -Message 'Source available' -Percent 100
+        Write-Result -Success $true -MessageKey 'ActionStoreSourceReady' -Details $output
+    }
+
+    # --- nvm ---------------------------------------------------------------
     if ($Component -eq 'nvm') {
         $nvm = Get-Command nvm.exe -ErrorAction SilentlyContinue
-        if ($Action -in @('install','upgrade')) {
+        if ($Action -in @('install', 'upgrade')) {
             $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
-            if (-not $winget) { throw '未检测到 winget，无法安装或升级 NVM for Windows。' }
+            if (-not $winget) { throw 'WINGET_MISSING_NVM' }
             $verb = if ($Action -eq 'install') { 'install' } else { 'upgrade' }
-            $output = & $winget.Source $verb --id CoreyButler.NVMforWindows --exact --accept-package-agreements --accept-source-agreements 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-            Result $true 'NVM for Windows 安装状态已更新' $output.Trim()
-            exit 0
+            $run = Invoke-TrackedCommand $winget.Source @($verb,'--id','CoreyButler.NVMforWindows','--exact','--accept-package-agreements','--accept-source-agreements','--disable-interactivity') 'Downloading' 'winget'
+            $output = $run.Output
+            if ($run.ExitCode -ne 0) { throw $output.Trim() }
+            Write-Result -Success $true -MessageKey 'ActionNvmInstalled' -Details $output
         }
-        if (-not $nvm) { throw '未检测到 NVM for Windows。请先安装 NVM 并重新打开 Codex Beacon。' }
-        if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw '请输入完整 Node.js 版本号，例如 24.15.0。' }
+        if (-not $nvm) { throw 'NVM_MISSING' }
+        if ($Version -notmatch '^\d+\.\d+\.\d+$') { throw 'NVM_VERSION_INVALID' }
         if ($Action -eq 'install-node') {
-            $output = & $nvm.Source install $Version 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-            Result $true "Node.js $Version 已安装" $output.Trim()
+            Write-Progress-Event -Stage 'Downloading' -Source ([string]$settings.NodeMirror) -Message ("Node.js " + $Version)
+            $output = Invoke-Nvm -NvmExecutable $nvm.Source -Arguments @('install', $Version)
+            Write-Progress-Event -Stage 'Completed' -Source ([string]$settings.NodeMirror) -Message ("Node.js " + $Version) -Percent 100
+            Write-Result -Success $true -MessageKey 'ActionNvmNodeInstalled' -MessageArgs @($Version) -Details $output
         } elseif ($Action -eq 'use-node') {
-            $output = & $nvm.Source use $Version 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-            Result $true "已切换到 Node.js $Version" $output.Trim()
-        } else { throw 'NVM 不支持此操作。' }
-        exit 0
+            $output = Invoke-Nvm -NvmExecutable $nvm.Source -Arguments @('use', $Version)
+            Write-Result -Success $true -MessageKey 'ActionNvmNodeSwitched' -MessageArgs @($Version) -Details $output
+        } else { throw 'NVM_UNSUPPORTED' }
     }
+
+    if ($Component -eq 'opencodex' -and $Action -in @('integrate','models','test-model')) {
+        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
+        if ($Action -eq 'integrate') {
+            $details = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+            Write-Result -Success $true -MessageKey 'ActionOpenCodexIntegrated' -Details $details
+        }
+        if ($Action -eq 'models') {
+            $details = & $opencodex.Source models list --json 2>&1 | Out-String
+            if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+            Write-Result -Success $true -MessageKey 'ActionOpenCodexModelsRefreshed' -Details 'Model catalog refreshed.'
+        }
+        $parts = $Version -split ([string][char]0x1F), 2
+        $providerName = if ($parts.Count -gt 1) { $parts[0] } else { '' }
+        if (-not $providerName) { throw 'OPENCODEX_MODEL_REQUIRED' }
+        $details = & $opencodex.Source provider test $providerName --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+        Write-Result -Success $true -MessageKey 'ProviderTestSucceeded' -MessageArgs @($Version) -Details 'OpenCodex provider test succeeded.'
+    }
+
+    # --- desktop client ----------------------------------------------------
     if ($Component -eq 'desktop') {
-        if ($Action -eq 'login') {
-            Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
-            Result $true '已打开 Codex 登录流程' '请在 Codex 桌面客户端中完成登录，完成后返回并刷新。'
-        } elseif ($Action -in @('install','upgrade')) {
-            Start-Process 'ms-windows-store://pdp/?ProductId=9PLM9XGG6VKS'
-            Result $true '已打开 Codex 的 Microsoft Store 产品页' '产品 ID 9PLM9XGG6VKS；安装与升级由官方应用分发通道完成。'
-        } elseif ($Action -eq 'start') {
-            Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
-            Result $true 'Codex 桌面客户端已启动'
-        } elseif ($Action -in @('stop','kill')) {
+        $appUserModelId = 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
+        if ($Action -eq 'login' -or $Action -eq 'start') {
+            Start-Process $appUserModelId
+            if ($Action -eq 'login') {
+                Write-Result -Success $true -MessageKey 'ActionDesktopLoginOpened' -HintKey 'ActionDesktopLoginHint'
+            }
+            Write-Result -Success $true -MessageKey 'ActionDesktopStarted'
+        } elseif ($Action -in @('install', 'upgrade')) {
+            $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+            if (-not $winget) { throw 'WINGET_MISSING_DESKTOP' }
+            $verb = if ($Action -eq 'install') { 'install' } else { 'upgrade' }
+            $run = Invoke-TrackedCommand $winget.Source @($verb,'9PLM9XGG6VKS','--source','msstore','--accept-package-agreements','--accept-source-agreements','--disable-interactivity') 'Downloading' 'Microsoft Store / winget'
+            $output = $run.Output
+            if ($run.ExitCode -ne 0) { throw $output.Trim() }
+            Write-Progress-Event -Stage 'Completed' -Source 'Microsoft Store / winget' -Message 'ChatGPT' -Percent 100
+            Write-Result -Success $true -MessageKey 'ActionPackageInstalled' -MessageArgs @('ChatGPT') -Details $output
+        } elseif ($Action -in @('stop', 'kill')) {
             $count = Stop-CodexDesktop
-            Result $true '所有 Codex / ChatGPT 进程已关闭' "已终止 $count 个相关进程。"
+            Write-Result -Success $true -MessageKey 'ActionDesktopStopped' -MessageArgs @($count)
         } elseif ($Action -eq 'restart') {
             $count = Stop-CodexDesktop
             Start-Sleep -Milliseconds 800
-            Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
-            Result $true 'ChatGPT 桌面客户端已重新启动' "已清理旧进程并重新拉起应用。"
+            Start-Process $appUserModelId
+            Write-Result -Success $true -MessageKey 'ActionDesktopRestarted' -MessageArgs @($count)
         }
-        exit 0
-    }
-    if ($Component -eq 'tailscale') {
-        if ($Action -eq 'login') {
-            Start-Process powershell.exe -ArgumentList '-NoExit','-Command','tailscale login'
-            Result $true '已打开 Tailscale 登录流程' '请在新窗口中完成浏览器授权，完成后返回并刷新。'
-        } elseif ($Action -in @('install','upgrade')) {
-            $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
-            if (-not $winget) { throw '未检测到 winget，无法安装或升级 Tailscale。' }
-            $verb = if ($Action -eq 'install') { 'install' } else { 'upgrade' }
-            $output = & $winget.Source $verb --id Tailscale.Tailscale --exact --accept-package-agreements --accept-source-agreements 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-            Result $true 'Tailscale 安装状态已更新' $output.Trim()
-        } elseif ($Action -eq 'start') { Start-Service -Name Tailscale; Result $true 'Tailscale 服务已启动' }
-        elseif ($Action -eq 'stop') { Stop-Service -Name Tailscale; Result $true 'Tailscale 服务已停止' }
-        elseif ($Action -eq 'restart') { Restart-Service -Name Tailscale; Result $true 'Tailscale 服务已重新启动' }
-        else { throw 'Tailscale 不支持此操作。' }
-        exit 0
-    }
-    if ($Component -eq 'codex' -and $Action -eq 'login') {
-        if (-not (Get-Command codex -ErrorAction SilentlyContinue)) { throw 'Codex CLI 尚未安装。请先完成安装。' }
-        Start-Process powershell.exe -ArgumentList '-NoExit','-Command','codex login'
-        Result $true '已打开 Codex 登录流程' '请在新窗口中完成登录，完成后返回并刷新。'
-        exit 0
-    }
-    if ($Action -in @('install','upgrade')) {
-        $package = switch ($Component) { 'codex' { '@openai/codex' }; 'opencodex' { '@bitkyc08/opencodex' }; 'relay' { 'codex-relay' }; default { throw '批量安装不受支持，请逐项执行。' } }
-        $details = Invoke-NpmInstall $package ($Component -eq 'relay')
-        $next = if ($Component -eq 'opencodex') { '安装完成。需要使用该扩展时，再点击“启动”完成服务配置。' } elseif ($Component -eq 'relay') { '安装完成。点击“启动”会使用 Relay 官方后台模式运行。' } else { '' }
-        Result $true "$package 已安装为最新版" "$details`n$next"
-        exit 0
+        throw 'DESKTOP_UNSUPPORTED'
     }
 
+    # --- tailscale ---------------------------------------------------------
+    if ($Component -eq 'tailscale') {
+        if ($Action -eq 'login') {
+            Start-Process powershell.exe -ArgumentList '-NoExit', '-Command', 'tailscale login'
+            Write-Result -Success $true -MessageKey 'ActionTailscaleLoginOpened' -HintKey 'ActionTailscaleLoginHint'
+        } elseif ($Action -in @('install', 'upgrade')) {
+            $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+            if (-not $winget) { throw 'WINGET_MISSING_TAILSCALE' }
+            $verb = if ($Action -eq 'install') { 'install' } else { 'upgrade' }
+            $run = Invoke-TrackedCommand $winget.Source @($verb,'--id','Tailscale.Tailscale','--exact','--accept-package-agreements','--accept-source-agreements','--disable-interactivity') 'Downloading' 'winget'
+            $output = $run.Output
+            if ($run.ExitCode -ne 0) { throw $output.Trim() }
+            Write-Result -Success $true -MessageKey 'ActionTailscaleInstalled' -Details $output
+        } elseif ($Action -eq 'start') { Start-Service -Name Tailscale; Write-Result -Success $true -MessageKey 'ActionTailscaleStarted' }
+        elseif ($Action -eq 'stop') { Stop-Service -Name Tailscale; Write-Result -Success $true -MessageKey 'ActionTailscaleStopped' }
+        elseif ($Action -eq 'restart') { Restart-Service -Name Tailscale; Write-Result -Success $true -MessageKey 'ActionTailscaleRestarted' }
+        else { throw 'TAILSCALE_UNSUPPORTED' }
+    }
+
+    # --- codex CLI ---------------------------------------------------------
+    if ($Component -eq 'codex' -and $Action -eq 'login') {
+        if (-not (Get-Command codex -ErrorAction SilentlyContinue)) { throw 'CODEX_MISSING' }
+        Start-Process powershell.exe -ArgumentList '-NoExit', '-Command', 'codex login'
+        Write-Result -Success $true -MessageKey 'ActionCodexLoginOpened' -HintKey 'ActionCodexLoginHint'
+    }
+    # The CLI is not a long-running service, but install/upgrade still flow into
+    # the npm package branch below, so only the service verbs are rejected here.
+    if ($Component -eq 'codex' -and $Action -in @('start', 'stop', 'restart', 'kill')) {
+        throw 'CODEX_NOT_A_SERVICE'
+    }
+
+    # --- npm packages ------------------------------------------------------
+    if ($Action -in @('install', 'upgrade')) {
+        $package = switch ($Component) {
+            'codex' { '@openai/codex' }
+            'opencodex' { '@bitkyc08/opencodex' }
+            'relay' { 'codex-relay' }
+            default { throw 'BULK_INSTALL_UNSUPPORTED' }
+        }
+        $details = Invoke-NpmInstall $package ($Component -eq 'relay')
+        $hintKey = switch ($Component) {
+            'opencodex' { 'ActionHintProxyStart' }
+            'relay' { 'ActionHintRelayStart' }
+            default { '' }
+        }
+        Write-Result -Success $true -MessageKey 'ActionPackageInstalled' -MessageArgs @($package) -HintKey $hintKey -Details $details
+    }
+
+    # --- bulk recovery -----------------------------------------------------
     if ($Component -eq 'all') {
         $relayTask = Get-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue
         $proxyTask = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
         if ($relayTask) { Stop-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue }
-        elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { try { Invoke-Relay @('stop') | Out-Null } catch {} }
+        elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { try { Invoke-Relay @('stop') | Out-Null } catch { } }
         if ($proxyTask) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
-        elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { try { & opencodex service stop 2>$null | Out-Null } catch {} }
+        elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { try { & opencodex service stop 2>$null | Out-Null } catch { } }
         $count = Stop-ServiceProcesses
         if ($Action -eq 'restart') {
             $started = @()
-            if ($proxyTask) { Start-ScheduledTask -TaskName $settings.ProxyTaskName; $started += 'OpenCodex 计划任务' }
-            elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { & opencodex service start 2>$null | Out-Null; if ($LASTEXITCODE -eq 0) { $started += 'OpenCodex 服务' } }
-            if ($relayTask) { Start-ScheduledTask -TaskName $settings.RelayTaskName; $started += 'Relay 计划任务' }
-            elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { Invoke-Relay @('--bg') | Out-Null; $started += 'Relay 后台模式' }
-            Result $true 'Codex 可选服务已重新启动' "终止了 $count 个明确匹配的服务进程；已启动：$($started -join '、')。"
-        } else {
-            Result $true 'Codex 可选服务已终止' "终止了 $count 个明确匹配的服务进程；Codex 桌面应用和本管理器未受影响。"
+            if ($proxyTask) { Start-ScheduledTask -TaskName $settings.ProxyTaskName; $started += 'OpenCodex' }
+            elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { & opencodex service start 2>$null | Out-Null; if ($LASTEXITCODE -eq 0) { $started += 'OpenCodex' } }
+            if ($relayTask) { Start-ScheduledTask -TaskName $settings.RelayTaskName; $started += 'Relay' }
+            elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { Invoke-Relay @('--bg') | Out-Null; $started += 'Relay' }
+            $startedLabel = if ($started.Count -gt 0) { $started -join ', ' } else { 'none' }
+            Write-Result -Success $true -MessageKey 'ActionServicesRestarted' -MessageArgs @($count, $startedLabel)
         }
-        exit 0
+        Write-Result -Success $true -MessageKey 'ActionServicesTerminated' -MessageArgs @($count)
     }
 
-    if ($Component -eq 'codex') { throw 'Codex CLI 不是常驻服务；请在进程页管理正在运行的代理与 Relay。' }
+    # --- opencodex / relay service control ---------------------------------
     $taskName = if ($Component -eq 'relay') { $settings.RelayTaskName } else { $settings.ProxyTaskName }
     $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
+
     if ($Component -eq 'relay' -and -not $task) {
-        if ($Action -eq 'start') { $details = Invoke-Relay @('--bg'); Result $true 'Codex Relay 已启动' $details }
-        elseif ($Action -eq 'stop') { $details = Invoke-Relay @('stop'); Result $true 'Codex Relay 已停止' $details }
-        elseif ($Action -eq 'restart') { Invoke-Relay @('stop') | Out-Null; Start-Sleep -Milliseconds 500; $details = Invoke-Relay @('--bg'); Result $true 'Codex Relay 已重新启动' $details }
-        else { throw "不支持的操作：$Action" }
-        exit 0
+        if ($Action -eq 'start') { $details = Invoke-Relay @('--bg'); Write-Result -Success $true -MessageKey 'ActionRelayStarted' -Details $details }
+        elseif ($Action -eq 'stop') { $details = Invoke-Relay @('stop'); Write-Result -Success $true -MessageKey 'ActionRelayStopped' -Details $details }
+        elseif ($Action -eq 'restart') { Invoke-Relay @('stop') | Out-Null; Start-Sleep -Milliseconds 500; $details = Invoke-Relay @('--bg'); Write-Result -Success $true -MessageKey 'ActionRelayRestarted' -Details $details }
+        else { throw 'RELAY_UNSUPPORTED' }
     }
+
     if ($Component -eq 'opencodex' -and -not $task) {
         $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'OpenCodex 尚未安装。请先完成安装。' }
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
         $subcommand = if ($Action -eq 'restart') { 'restart' } else { $Action }
         $details = & $opencodex.Source service $subcommand 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        Result $true "OpenCodex 服务已$(@{start='启动';stop='停止';restart='重新启动'}[$Action])" $details.Trim()
-        exit 0
+        $messageKey = switch ($Action) { 'start' { 'ActionProxyStarted' } 'stop' { 'ActionProxyStopped' } default { 'ActionProxyRestarted' } }
+        Write-Result -Success $true -MessageKey $messageKey -Details $details
     }
-    if ($Action -eq 'start') { Set-Task $taskName 'start'; Result $true "$taskName 已启动" }
-    elseif ($Action -eq 'stop') { Set-Task $taskName 'stop'; Stop-ServiceProcesses $Component | Out-Null; Result $true "$taskName 已停止" }
-    elseif ($Action -eq 'restart') { Set-Task $taskName 'stop'; Stop-ServiceProcesses $Component | Out-Null; Start-Sleep -Milliseconds 800; Set-Task $taskName 'start'; Result $true "$taskName 已重新启动" }
-    else { throw "不支持的操作：$Action" }
+
+    if ($Action -eq 'start') { Set-Task $taskName 'start'; Write-Result -Success $true -MessageKey 'ActionTaskStarted' -MessageArgs @($taskName) }
+    elseif ($Action -eq 'stop') { Set-Task $taskName 'stop'; Stop-ServiceProcesses $Component | Out-Null; Write-Result -Success $true -MessageKey 'ActionTaskStopped' -MessageArgs @($taskName) }
+    elseif ($Action -eq 'restart') {
+        Set-Task $taskName 'stop'
+        Stop-ServiceProcesses $Component | Out-Null
+        Start-Sleep -Milliseconds 800
+        Set-Task $taskName 'start'
+        Write-Result -Success $true -MessageKey 'ActionTaskRestarted' -MessageArgs @($taskName)
+    } else { throw 'ACTION_UNSUPPORTED' }
 }
 catch {
-    $safeMessage = $_.Exception.Message -replace '(?i)(token|authorization|api[_-]?key)\s*[=:]\s*\S+','$1=<已隐藏>'
-    Result $false '操作未完成' ($safeMessage.Substring(0, [Math]::Min(1200, $safeMessage.Length)))
-    exit 1
+    $reason = $_.Exception.Message
+    # Known sentinels map to localized sentences; anything else is raw tool
+    # output and is only shown in the details pane.
+    switch -Regex ($reason) {
+        '^TASK_MISSING::(.+)$' { Write-Result -Success $false -MessageKey 'ActionTaskMissing' -MessageArgs @($matches[1]) -Details $reason }
+        '^Node\.js or npm is missing' { Write-Result -Success $false -MessageKey 'ActionNeedRuntime' -Details $reason }
+        '^Node\.js (.+) is too old' { Write-Result -Success $false -MessageKey 'ActionRuntimeTooOld' -MessageArgs @($matches[1]) -Details $reason }
+        '^Codex Relay is not installed' { Write-Result -Success $false -MessageKey 'ActionRelayMissing' -Details $reason }
+        '^NVM_MISSING$' { Write-Result -Success $false -MessageKey 'ActionNvmMissing' -Details $reason }
+        '^NVM_VERSION_INVALID$' { Write-Result -Success $false -MessageKey 'ActionNvmVersionInvalid' -Details $reason }
+        '^NVM_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionNvmUnsupported' -Details $reason }
+        '^WINGET_MISSING_NVM$' { Write-Result -Success $false -MessageKey 'ActionWingetMissingNvm' -Details $reason }
+        '^WINGET_MISSING_TAILSCALE$' { Write-Result -Success $false -MessageKey 'ActionWingetMissingTailscale' -Details $reason }
+        '^CODEX_MISSING$' { Write-Result -Success $false -MessageKey 'ActionCodexMissing' -Details $reason }
+        '^CODEX_NOT_A_SERVICE$' { Write-Result -Success $false -MessageKey 'ActionCodexNotAService' -Details $reason }
+        '^PROXY_MISSING$' { Write-Result -Success $false -MessageKey 'ActionProxyMissing' -Details $reason }
+        '^BULK_INSTALL_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionBulkInstallUnsupported' -Details $reason }
+        '^CONFIG_MISSING$' { Write-Result -Success $false -MessageKey 'ActionConfigMissing' -Details $reason }
+        '^RELAY_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
+        '^TAILSCALE_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
+        '^DESKTOP_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
+        '^ACTION_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
+        'denied|administrator|privilege|elevation|EPERM|EACCES' {
+            Write-Result -Success $false -MessageKey 'ActionNeedsAdmin' -Details $reason
+        }
+        default { Write-Result -Success $false -MessageKey 'ActionFailed' -Details $reason }
+    }
 }

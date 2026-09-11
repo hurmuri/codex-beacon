@@ -4,93 +4,219 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- 导航 -->
   <data name="NavDashboard.Content" xml:space="preserve"><value>总览</value></data>
   <data name="NavProcesses.Content" xml:space="preserve"><value>进程</value></data>
   <data name="NavNetwork.Content" xml:space="preserve"><value>网络与代理</value></data>
+  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
   <data name="NavInstallations.Content" xml:space="preserve"><value>安装管理</value></data>
   <data name="NavSettings.Content" xml:space="preserve"><value>设置</value></data>
-  <data name="DashboardTitle.Text" xml:space="preserve"><value>系统脉冲</value></data>
+
+  <!-- 总览 -->
+  <data name="DashboardTitle.Text" xml:space="preserve"><value>Codex 总览</value></data>
   <data name="OverallMessage.Text" xml:space="preserve"><value>正在读取本机 Codex 工具链…</value></data>
-  <data name="RefreshNow.Text" xml:space="preserve"><value>立即刷新</value></data>
-  <data name="CurrentDataPath.Title" xml:space="preserve"><value>当前数据路径</value></data>
   <data name="AwaitingFirstSample.Text" xml:space="preserve"><value>等待首次采样</value></data>
-  <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>服务状态</value></data>
+  <data name="RefreshNow.Text" xml:space="preserve"><value>立即刷新</value></data>
+  <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>ChatGPT 客户端与 Codex CLI</value></data>
   <data name="VersionLabel.Text" xml:space="preserve"><value>版本</value></data>
-  <data name="ActionInstall.Label" xml:space="preserve"><value>安装</value></data>
-  <data name="ActionLogin.Label" xml:space="preserve"><value>登录</value></data>
-  <data name="ActionStart.Label" xml:space="preserve"><value>启动</value></data>
-  <data name="ActionStop.Label" xml:space="preserve"><value>停止</value></data>
-  <data name="ActionRestart.Label" xml:space="preserve"><value>重启</value></data>
-  <data name="ActionUpgrade.Label" xml:space="preserve"><value>升级</value></data>
-  <data name="TailscaleOverviewHeading.Text" xml:space="preserve"><value>Tailscale 概况</value></data>
-  <data name="TailscaleNetworkCard.Header" xml:space="preserve"><value>Tailscale 网络</value></data>
-  <data name="ReadingTailnet.Text" xml:space="preserve"><value>正在读取 Tailnet…</value></data>
-  <data name="DeviceStatusPlaceholder.Text" xml:space="preserve"><value>设备状态将在这里显示</value></data>
-  <data name="ViewDevices.Content" xml:space="preserve"><value>查看设备</value></data>
+  <data name="ActionInstall.Content" xml:space="preserve"><value>安装</value></data>
+  <data name="ActionLogin.Content" xml:space="preserve"><value>登录</value></data>
+  <data name="ActionStart.Content" xml:space="preserve"><value>启动</value></data>
+  <data name="ActionStop.Content" xml:space="preserve"><value>停止</value></data>
+  <data name="ActionRestart.Content" xml:space="preserve"><value>重启</value></data>
+  <data name="ActionUpgrade.Content" xml:space="preserve"><value>升级</value></data>
+
+  <!-- 进程 -->
   <data name="ProcessesTitle.Text" xml:space="preserve"><value>Codex 进程</value></data>
-  <data name="ProcessesDescription.Text" xml:space="preserve"><value>按父子关系识别桌面应用、CLI、代理、Relay 及其运行时；普通 Node 进程不会被纳入。</value></data>
+  <data name="ProcessesDescription.Text" xml:space="preserve"><value>仅展示 ChatGPT 桌面应用与 Codex CLI 相关进程。版本按各可执行文件的实际来源单独读取，同一台机器上可以同时存在多个不同版本。</value></data>
+  <data name="ProcessQuickActionsTitle.Text" xml:space="preserve"><value>进程快捷操作</value></data>
+  <data name="ProcessQuickActionsDescription.Text" xml:space="preserve"><value>一键清理残留进程，或重新启动 ChatGPT 桌面应用</value></data>
+  <data name="KillCodexProcesses.Content" xml:space="preserve"><value>终止所有 Codex 进程</value></data>
+  <data name="RestartDesktopApp.Content" xml:space="preserve"><value>重启 ChatGPT 桌面客户端</value></data>
+  <data name="ProcessPidHeader.Text" xml:space="preserve"><value>PID</value></data>
   <data name="ProcessRoleHeader.Text" xml:space="preserve"><value>角色 / 进程</value></data>
   <data name="ProcessVersionHeader.Text" xml:space="preserve"><value>版本</value></data>
   <data name="ProcessStartedHeader.Text" xml:space="preserve"><value>启动时间</value></data>
   <data name="ProcessPathHeader.Text" xml:space="preserve"><value>可执行路径</value></data>
-  <data name="RecoveryControlsHeading.Text" xml:space="preserve"><value>恢复控制</value></data>
-  <data name="BulkRecoveryCard.Header" xml:space="preserve"><value>批量恢复可选服务</value></data>
-  <data name="BulkRecoveryCard.Description" xml:space="preserve"><value>仅处理 OpenCodex Proxy、Codex Relay 与明确匹配的服务进程；不会关闭 Codex 桌面应用或本管理器。</value></data>
-  <data name="TerminateServices.Label" xml:space="preserve"><value>终止服务</value></data>
-  <data name="RestartAll.Label" xml:space="preserve"><value>全部重启</value></data>
+
+  <!-- 网络与代理 -->
   <data name="NetworkTitle.Text" xml:space="preserve"><value>网络与代理</value></data>
-  <data name="NetworkDescription.Text" xml:space="preserve"><value>根据配置文件、环境变量、监听端口和实际进程拼出当前请求路径。敏感凭据不会读取或展示。</value></data>
-  <data name="ProxyChainHeading.Text" xml:space="preserve"><value>Codex 代理链</value></data>
-  <data name="PublicEgressHeading.Text" xml:space="preserve"><value>公网出口</value></data>
-  <data name="ExternalConnectionsHeading.Text" xml:space="preserve"><value>当前外网连接</value></data>
-  <data name="CandidateEndpointsHeading.Text" xml:space="preserve"><value>已配置的备用端点</value></data>
-  <data name="TailnetDevicesHeading.Text" xml:space="preserve"><value>Tailnet 设备</value></data>
-  <data name="InstallationsTitle.Text" xml:space="preserve"><value>安装管理</value></data>
-  <data name="InstallationsDescription.Text" xml:space="preserve"><value>从 npm 官方注册表获取版本信息。安装与升级会保留现有配置，并在完成后重新检测。</value></data>
-  <data name="NvmExpander.Header" xml:space="preserve"><value>NVM · Node.js 版本控制</value></data>
-  <data name="NvmExpander.Description" xml:space="preserve"><value>管理本机已安装的 Node.js 版本；Codex Relay 需要 Node.js 22.14.0 或更高版本。</value></data>
-  <data name="CurrentEnvironmentCard.Header" xml:space="preserve"><value>当前环境</value></data>
-  <data name="CheckingNvm.Text" xml:space="preserve"><value>正在检测 NVM…</value></data>
-  <data name="SwitchNodeCard.Header" xml:space="preserve"><value>切换 Node.js</value></data>
-  <data name="SwitchNodeCard.Description" xml:space="preserve"><value>选择 NVM 已安装的版本</value></data>
-  <data name="NodeVersionPickerText.PlaceholderText" xml:space="preserve"><value>选择已安装版本</value></data>
-  <data name="ApplyNodeVersion.Content" xml:space="preserve"><value>应用</value></data>
-  <data name="InstallNodeCard.Header" xml:space="preserve"><value>安装 Node.js</value></data>
-  <data name="InstallNodeCard.Description" xml:space="preserve"><value>输入完整版本号，例如 24.15.0</value></data>
-  <data name="InstallNodeButton.Content" xml:space="preserve"><value>安装</value></data>
-  <data name="PrerequisitesExpander.Header" xml:space="preserve"><value>安装前置条件</value></data>
-  <data name="PrerequisitesExpander.Description" xml:space="preserve"><value>在安装或升级 npm 包前验证运行时与包管理器。</value></data>
-  <data name="CheckingVersionPath.Text" xml:space="preserve"><value>正在检测版本与路径…</value></data>
+  <data name="NetworkDescription.Text" xml:space="preserve"><value>检测 ChatGPT 与 Codex CLI 的网络连通性，并管理系统代理、TUN 或自定义 HTTP 代理。</value></data>
+  <data name="EgressHeading.Text" xml:space="preserve"><value>公网出口 · OpenAI 视角</value></data>
+  <data name="EgressIspLabel.Text" xml:space="preserve"><value>运营商</value></data>
+  <data name="EgressAsnLabel.Text" xml:space="preserve"><value>ASN</value></data>
+  <data name="EgressTrustLabel.Text" xml:space="preserve"><value>信任分</value></data>
+  <data name="EgressCheckedLabel.Text" xml:space="preserve"><value>检测时间</value></data>
+  <data name="EgressUnavailable.Text" xml:space="preserve"><value>尚未取得公网出口信息，请点击“立即刷新”。</value></data>
+  <data name="OpenEgressCheck.Content" xml:space="preserve"><value>打开完整 IP 检测</value></data>
+  <data name="EgressWebsiteHint.Text" xml:space="preserve"><value>由 ip.net.coffee 提供 ChatGPT / Codex 出口 IP 与风险检测。</value></data>
+  <data name="ProvidersHeading.Text" xml:space="preserve"><value>模型 Provider 切换</value></data>
+  <data name="ProvidersDescription.Text" xml:space="preserve"><value>点击即可把 Codex 的主 Provider 切换为指定目标，结果会即时写入 config.toml。</value></data>
+
+  <!-- Tailscale -->
+  <data name="TailscaleTitle.Text" xml:space="preserve"><value>Tailscale 网络</value></data>
+  <data name="TailscaleDescription.Text" xml:space="preserve"><value>管理本机 Tailscale 节点、虚拟专用网络状态与 Tailnet 设备拓扑。</value></data>
+  <data name="TailscaleServiceTitle.Text" xml:space="preserve"><value>Tailscale 本机服务</value></data>
+  <data name="TailscaleServiceDescription.Text" xml:space="preserve"><value>Windows 后台网络服务控制（启动、停止与重启需要管理员权限）</value></data>
+  <data name="TailscaleStart.Content" xml:space="preserve"><value>启动服务</value></data>
+  <data name="TailscaleStop.Content" xml:space="preserve"><value>停止服务</value></data>
+  <data name="TailscaleRestart.Content" xml:space="preserve"><value>重启服务</value></data>
+  <data name="TailscaleLogin.Content" xml:space="preserve"><value>网页登录</value></data>
+  <data name="TailscaleSelfNode.Text" xml:space="preserve"><value>本机节点</value></data>
+  <data name="TailscaleDeviceDetail.Text" xml:space="preserve"><value>设备连接详情</value></data>
+  <data name="ReadingTailnet.Text" xml:space="preserve"><value>正在读取 Tailnet…</value></data>
+  <data name="DeviceStatusPlaceholder.Text" xml:space="preserve"><value>设备状态将在这里显示</value></data>
+  <data name="TailnetDevicesHeading.Text" xml:space="preserve"><value>Tailnet 设备列表</value></data>
+  <data name="TailnetDeviceHeader.Text" xml:space="preserve"><value>设备 / 主机名</value></data>
+  <data name="TailnetOsHeader.Text" xml:space="preserve"><value>系统</value></data>
+  <data name="TailnetAddressHeader.Text" xml:space="preserve"><value>Tailscale IP</value></data>
+  <data name="TailnetOnlineHeader.Text" xml:space="preserve"><value>状态</value></data>
+  <data name="TailnetLastSeenHeader.Text" xml:space="preserve"><value>最后活跃</value></data>
+
+  <!-- 安装管理 -->
+  <data name="InstallationsTitle.Text" xml:space="preserve"><value>依赖管理</value></data>
+  <data name="InstallationsDescription.Text" xml:space="preserve"><value>按 App Installer → WinGet → Microsoft Store，以及 NVM → Node.js → npm 的顺序管理依赖。</value></data>
+  <data name="RuntimeHeading.Text" xml:space="preserve"><value>运行环境</value></data>
+  <data name="RuntimeNodeName.Text" xml:space="preserve"><value>Node.js 运行时</value></data>
+  <data name="RuntimeNodeProbe.Text" xml:space="preserve"><value>检测 PATH 上的 node.exe、版本号与安装位置</value></data>
+  <data name="RuntimeNpmName.Text" xml:space="preserve"><value>npm 包管理器</value></data>
+  <data name="RuntimeNpmProbe.Text" xml:space="preserve"><value>检测与当前 Node.js 同目录的 npm.cmd 是否可用</value></data>
+  <data name="RuntimeNvmName.Text" xml:space="preserve"><value>NVM for Windows</value></data>
+  <data name="RuntimeNvmProbe.Text" xml:space="preserve"><value>检测 nvm.exe、已安装版本清单与当前启用版本</value></data>
+  <data name="NvmSectionHeading.Text" xml:space="preserve"><value>NVM · Node.js 版本管理</value></data>
+  <data name="NvmSwitchTitle.Text" xml:space="preserve"><value>切换 Node.js 版本</value></data>
+  <data name="NodeVersionPicker.PlaceholderText" xml:space="preserve"><value>选择已安装版本</value></data>
+  <data name="NvmApply.Content" xml:space="preserve"><value>应用切换</value></data>
+  <data name="NvmInstallTitle.Text" xml:space="preserve"><value>安装新 Node.js 版本</value></data>
+  <data name="NewNodeVersionBox.PlaceholderText" xml:space="preserve"><value>例如 24.15.0</value></data>
+  <data name="NvmInstall.Content" xml:space="preserve"><value>下载安装</value></data>
+  <data name="NvmMirrorLabel.Text" xml:space="preserve"><value>下载镜像</value></data>
+  <data name="NvmMirrorHint.Text" xml:space="preserve"><value>nodejs.org 在部分网络下不可达。镜像可在本页下方修改，失败时会自动回退到官方源。</value></data>
+  <data name="ModulesHeading.Text" xml:space="preserve"><value>安装渠道与基础依赖</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>当前版本</value></data>
   <data name="LatestVersionLabel.Text" xml:space="preserve"><value>已知最新版本</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>安装</value></data>
   <data name="UpgradePackageButton.Content" xml:space="preserve"><value>升级</value></data>
-  <data name="PermissionsInfo.Title" xml:space="preserve"><value>权限说明</value></data>
-  <data name="PermissionsInfo.Message" xml:space="preserve"><value>全局 npm 安装可能需要对 Node.js 安装目录的写权限；Relay 服务的计划任务安装可能需要管理员权限。Codex Beacon 会显示明确错误，不会静默提权。</value></data>
+
+  <!-- 设置 -->
   <data name="SettingsTitle.Text" xml:space="preserve"><value>设置</value></data>
-  <data name="SettingsDescription.Text" xml:space="preserve"><value>这些值只描述本机服务，不包含任何密钥。</value></data>
-  <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>常规</value></data>
-  <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>刷新频率、显示语言与本机计划任务映射</value></data>
+  <data name="SettingsDescription.Text" xml:space="preserve"><value>配置通用偏好，并管理 Codex Beacon 自身的关于与更新。</value></data>
+  <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>常规设置</value></data>
+  <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>刷新频率与显示语言</value></data>
+  <data name="ProviderEmptyText.Text" xml:space="preserve"><value>尚未添加 Provider</value></data>
   <data name="LanguageCard.Header" xml:space="preserve"><value>显示语言</value></data>
-  <data name="LanguageCard.Description" xml:space="preserve"><value>跟随 Windows，或在 English / 简体中文之间即时切换。</value></data>
+  <data name="LanguageCard.Description" xml:space="preserve"><value>跟随 Windows，或在 English / 简体中文之间即时切换</value></data>
   <data name="LanguageSystem.Content" xml:space="preserve"><value>跟随 Windows</value></data>
   <data name="RefreshIntervalCard.Header" xml:space="preserve"><value>自动刷新间隔</value></data>
   <data name="RefreshIntervalCard.Description" xml:space="preserve"><value>5–300 秒</value></data>
+  <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
+  <data name="MirrorCard.Description" xml:space="preserve"><value>nvm install 使用的发行版镜像地址</value></data>
   <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
   <data name="ProxyTaskCard.Header" xml:space="preserve"><value>OpenCodex Proxy 计划任务</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>保存更改</value></data>
-  <data name="SaveChangesCard.Description" xml:space="preserve"><value>设置仅存储在本机，不包含凭据。</value></data>
-  <data name="SaveButton.Content" xml:space="preserve"><value>保存</value></data>
-  <data name="ReferencesHeading.Text" xml:space="preserve"><value>上游与实现参考</value></data>
-  <data name="OpenSourceProjectsExpander.Header" xml:space="preserve"><value>开源项目</value></data>
-  <data name="OpenSourceProjectsExpander.Description" xml:space="preserve"><value>查看组件源码、版本管理方案与网络域名分类数据。</value></data>
-  <data name="OpenCodexReference.Description" xml:space="preserve"><value>可选 Provider 代理扩展</value></data>
-  <data name="AppManagerReference.Description" xml:space="preserve"><value>Codex 桌面版本管理实现参考</value></data>
-  <data name="RelayReference.Description" xml:space="preserve"><value>可选移动端桥接扩展</value></data>
-  <data name="DomainListReference.Description" xml:space="preserve"><value>网络域名分类实现参考；当前版本未内置其数据</value></data>
-  <data name="ReadyStatus.Text" xml:space="preserve"><value>准备就绪</value></data>
-  <data name="NotRefreshed.Text" xml:space="preserve"><value>尚未刷新</value></data>
-  <data name="CurrentInUse" xml:space="preserve"><value>当前使用</value></data>
+  <data name="SaveChangesCard.Description" xml:space="preserve"><value>立即生效并存储在本机</value></data>
+  <data name="SaveButton.Content" xml:space="preserve"><value>保存设置</value></data>
+  <data name="ReferencesHeading.Text" xml:space="preserve"><value>上游与开源参考</value></data>
+  <data name="OpenSourceProjectsExpander.Header" xml:space="preserve"><value>参考项目</value></data>
+  <data name="OpenSourceProjectsExpander.Description" xml:space="preserve"><value>组件源码与实现参考</value></data>
+
+  <!-- 状态栏 -->
+  <data name="StatusReady.Text" xml:space="preserve"><value>准备就绪</value></data>
+  <data name="StatusNotRefreshed.Text" xml:space="preserve"><value>尚未刷新</value></data>
+  <data name="CancelRunning.Content" xml:space="preserve"><value>取消</value></data>
+
+  <!-- 组件名称与类型 -->
+  <data name="CompNvmName" xml:space="preserve"><value>NVM for Windows</value></data>
+  <data name="CompNvmKind" xml:space="preserve"><value>Node.js 版本管理器</value></data>
+  <data name="CompNodeName" xml:space="preserve"><value>Node.js</value></data>
+  <data name="CompNodeKind" xml:space="preserve"><value>运行环境前置条件</value></data>
+  <data name="CompNpmName" xml:space="preserve"><value>npm</value></data>
+  <data name="CompNpmKind" xml:space="preserve"><value>包管理器前置条件</value></data>
+  <data name="CompDesktopName" xml:space="preserve"><value>Codex 桌面客户端</value></data>
+  <data name="CompDesktopKind" xml:space="preserve"><value>OpenAI 官方 Windows 应用</value></data>
+  <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
+  <data name="CompCodexKind" xml:space="preserve"><value>命令行客户端</value></data>
+  <data name="CompProxyName" xml:space="preserve"><value>OpenCodex Proxy</value></data>
+  <data name="CompProxyKind" xml:space="preserve"><value>可选扩展 · npm 包</value></data>
+  <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
+  <data name="CompRelayKind" xml:space="preserve"><value>可选扩展 · npm 包</value></data>
+  <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
+  <data name="CompTailscaleKind" xml:space="preserve"><value>Windows 网络服务</value></data>
+
+  <!-- 组件说明 -->
+  <data name="DetailNvmReady" xml:space="preserve"><value>{0} 个已安装的 Node.js 版本</value></data>
+  <data name="DetailNvmMissing" xml:space="preserve"><value>未在 PATH 中检测到 nvm.exe</value></data>
+  <data name="DetailNodeReady" xml:space="preserve"><value>满足 Codex Relay 的最低要求 ≥ {0}</value></data>
+  <data name="DetailNodeOld" xml:space="preserve"><value>版本过低，请升级到 {0} 或更高版本</value></data>
+  <data name="DetailNodeMissing" xml:space="preserve"><value>未在 PATH 中检测到 node.exe</value></data>
+  <data name="DetailNpmReady" xml:space="preserve"><value>包管理器可用</value></data>
+  <data name="DetailNpmMissing" xml:space="preserve"><value>未检测到 npm.cmd，无法安装或升级组件</value></data>
+  <data name="DetailDesktopMissing" xml:space="preserve"><value>未检测到 OpenAI.Codex 应用包</value></data>
+  <data name="DetailDesktopSignedOut" xml:space="preserve"><value>已安装，Codex 账号尚未登录</value></data>
+  <data name="DetailDesktopRunning" xml:space="preserve"><value>已安装并正在运行</value></data>
+  <data name="DetailDesktopStopped" xml:space="preserve"><value>已安装，当前未运行</value></data>
+  <data name="DetailCodexMissing" xml:space="preserve"><value>未检测到 Codex CLI</value></data>
+  <data name="DetailCodexNpm" xml:space="preserve"><value>npm 全局安装 · {0}</value></data>
+  <data name="DetailCodexOnPath" xml:space="preserve"><value>PATH 上的 codex 命令 · {0}</value></data>
+  <data name="DetailCodexBundled" xml:space="preserve"><value>随桌面客户端内置 · {0}</value></data>
+  <data name="DetailProxyListening" xml:space="preserve"><value>监听端口 {0} · 计划任务：{1}</value></data>
+  <data name="DetailProxyMissing" xml:space="preserve"><value>未检测到 npm 全局包</value></data>
+  <data name="DetailProxyNoTask" xml:space="preserve"><value>包已安装，但计划任务尚未配置（{0}）</value></data>
+  <data name="DetailProxyStopped" xml:space="preserve"><value>未检测到监听端口 · 计划任务：{0}</value></data>
+  <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 正在监听 · 计划任务：{0}</value></data>
+  <data name="DetailRelayMissing" xml:space="preserve"><value>未检测到 Relay 安装</value></data>
+  <data name="DetailRelayNoTask" xml:space="preserve"><value>包已安装；点击“启动”可用官方后台模式运行（{0}）</value></data>
+  <data name="DetailRelayStopped" xml:space="preserve"><value>端口 8787 未监听 · 计划任务：{0}</value></data>
+  <data name="DetailTailscaleMissing" xml:space="preserve"><value>未检测到 Tailscale</value></data>
+  <data name="DetailTailscaleSignedOut" xml:space="preserve"><value>已安装，但尚未登录 Tailnet</value></data>
+  <data name="DetailTailscaleReady" xml:space="preserve"><value>{0} · {1}</value></data>
+  <data name="DetailTailscaleNoState" xml:space="preserve"><value>未读取到 Tailnet 状态</value></data>
+
+  <!-- 计划任务状态 -->
+  <data name="TaskStateRunning" xml:space="preserve"><value>运行中</value></data>
+  <data name="TaskStateReady" xml:space="preserve"><value>已就绪</value></data>
+  <data name="TaskStateDisabled" xml:space="preserve"><value>已禁用</value></data>
+  <data name="TaskStateNotInstalled" xml:space="preserve"><value>未安装</value></data>
+  <data name="TaskStateUnknown" xml:space="preserve"><value>状态未知</value></data>
+
+  <!-- 版本来源 -->
+  <data name="VersionEvidenceUnknown" xml:space="preserve"><value>尚未查询远端版本</value></data>
+  <data name="VersionEvidenceUnreachable" xml:space="preserve"><value>远端版本清单暂时不可达</value></data>
+  <data name="VersionEvidenceMirror" xml:space="preserve"><value>来源：Codex App Mirror 清单，同步 Microsoft Store 产品 {0} · 生成于 {1}</value></data>
+
+  <!-- 公网出口 -->
+  <data name="EgressSourceChatGpt" xml:space="preserve"><value>OpenAI 服务观测到的来源地址（chatgpt.com）</value></data>
+  <data name="EgressSourceIpEcho" xml:space="preserve"><value>本机直连出口地址（IPv4 回显）</value></data>
+  <data name="EgressSourceGeneric" xml:space="preserve"><value>本机出口地址</value></data>
+  <data name="EgressLocationUnknown" xml:space="preserve"><value>归属地未知</value></data>
+  <data name="LineTypeIDC" xml:space="preserve"><value>机房 / 数据中心</value></data>
+  <data name="LineTypeResidential" xml:space="preserve"><value>家庭宽带 / 住宅</value></data>
+
+  <!-- 进程角色 -->
+  <data name="RoleDesktopApp" xml:space="preserve"><value>Codex 桌面客户端</value></data>
+  <data name="RoleCliAppBundled" xml:space="preserve"><value>Codex CLI · 桌面客户端内置</value></data>
+  <data name="RoleCliVsCode" xml:space="preserve"><value>Codex CLI · VS Code 扩展</value></data>
+  <data name="RoleCliRelay" xml:space="preserve"><value>Codex CLI · Relay 内置</value></data>
+  <data name="RoleCliOther" xml:space="preserve"><value>Codex CLI</value></data>
+  <data name="RoleSupportHost" xml:space="preserve"><value>Codex 代码执行宿主</value></data>
+  <data name="RoleUnknown" xml:space="preserve"><value>Codex 相关进程</value></data>
+
+  <!-- 总体状态 -->
+  <data name="OverallReady" xml:space="preserve"><value>Codex 客户端管理已就绪；扩展模块为可选项。</value></data>
+  <data name="OverallNotInstalled" xml:space="preserve"><value>未检测到 Codex 桌面客户端或 Codex CLI。</value></data>
+  <data name="OverallCollectFailed" xml:space="preserve"><value>本次检测未完成，界面保留上一次结果。</value></data>
+  <data name="OverallCollectCanceled" xml:space="preserve"><value>检测已取消。</value></data>
+  <data name="OverallCollectNoData" xml:space="preserve"><value>检测没有返回数据。</value></data>
+  <data name="OverallCollectParseFailed" xml:space="preserve"><value>无法解析检测结果。</value></data>
+
+  <!-- 状态与就绪度 -->
+  <data name="StatusHealthy" xml:space="preserve"><value>运行正常</value></data>
+  <data name="StatusStopped" xml:space="preserve"><value>已停止</value></data>
+  <data name="StatusWarning" xml:space="preserve"><value>需要关注</value></data>
+  <data name="StatusUnavailable" xml:space="preserve"><value>未安装</value></data>
+  <data name="StatusUnknown" xml:space="preserve"><value>状态未知</value></data>
+  <data name="StatusRunning" xml:space="preserve"><value>运行中</value></data>
   <data name="ReadinessInstall" xml:space="preserve"><value>下一步：安装</value></data>
   <data name="ReadinessLogin" xml:space="preserve"><value>下一步：登录账号</value></data>
   <data name="ReadinessUnknownAccount" xml:space="preserve"><value>登录状态待确认</value></data>
@@ -98,60 +224,46 @@
   <data name="ReadinessStart" xml:space="preserve"><value>下一步：启动服务</value></data>
   <data name="ReadinessUpgrade" xml:space="preserve"><value>有可用更新</value></data>
   <data name="ReadinessReady" xml:space="preserve"><value>已就绪</value></data>
-  <data name="VersionManagementReference" xml:space="preserve"><value>版本管理参考</value></data>
-  <data name="StatusHealthy" xml:space="preserve"><value>运行正常</value></data>
-  <data name="StatusStopped" xml:space="preserve"><value>已停止</value></data>
-  <data name="StatusWarning" xml:space="preserve"><value>需要关注</value></data>
-  <data name="StatusUnavailable" xml:space="preserve"><value>未安装</value></data>
-  <data name="StatusUnknown" xml:space="preserve"><value>状态未知</value></data>
-  <data name="Reachable" xml:space="preserve"><value>可达</value></data>
-  <data name="PendingVerification" xml:space="preserve"><value>待确认</value></data>
-  <data name="Unreachable" xml:space="preserve"><value>不可达</value></data>
+  <data name="CurrentInUse" xml:space="preserve"><value>当前使用</value></data>
   <data name="Online" xml:space="preserve"><value>在线</value></data>
   <data name="Offline" xml:space="preserve"><value>离线</value></data>
   <data name="ThisDevice" xml:space="preserve"><value>本机</value></data>
-  <data name="CollectionIncomplete" xml:space="preserve"><value>检测未完成</value></data>
-  <data name="CollectionNoData" xml:space="preserve"><value>检测没有返回数据</value></data>
-  <data name="CollectionParseFailed" xml:space="preserve"><value>无法解析检测结果</value></data>
-  <data name="ActionNoResult" xml:space="preserve"><value>操作没有返回结果</value></data>
-  <data name="ActionFailed" xml:space="preserve"><value>操作执行失败</value></data>
-  <data name="UnableToStart" xml:space="preserve"><value>无法启动 {0}</value></data>
-  <data name="NoMoreDiagnostics" xml:space="preserve"><value>没有更多诊断信息。</value></data>
+  <data name="LastSeenNow" xml:space="preserve"><value>当前在线</value></data>
+  <data name="LastSeenUnknown" xml:space="preserve"><value>未知</value></data>
+  <data name="VersionManagementReference" xml:space="preserve"><value>版本管理参考</value></data>
+
+  <!-- 运行提示 -->
   <data name="CheckingLatest" xml:space="preserve"><value>正在检测本机组件并查询最新版本…</value></data>
   <data name="RefreshingStatus" xml:space="preserve"><value>正在刷新运行状态…</value></data>
   <data name="CheckComplete" xml:space="preserve"><value>检测完成</value></data>
   <data name="RefreshFailed" xml:space="preserve"><value>刷新失败：{0}</value></data>
+  <data name="RefreshCanceled" xml:space="preserve"><value>检测已取消。</value></data>
+  <data name="CollectionTimedOut" xml:space="preserve"><value>检测超时，已中止。</value></data>
   <data name="SampleFailed" xml:space="preserve"><value>采样失败</value></data>
   <data name="SampleAt" xml:space="preserve"><value>采样 {0:HH:mm:ss}</value></data>
   <data name="DataUnavailable" xml:space="preserve"><value>数据不可用</value></data>
   <data name="UpdatedAt" xml:space="preserve"><value>更新于 {0:HH:mm:ss}</value></data>
-  <data name="MissingNodeResult" xml:space="preserve"><value>未返回 Node.js 检测结果</value></data>
-  <data name="MissingNpmResult" xml:space="preserve"><value>未返回 npm 检测结果</value></data>
-  <data name="MissingNvmResult" xml:space="preserve"><value>未返回 NVM 检测结果</value></data>
   <data name="TailscaleDisconnected" xml:space="preserve"><value>未连接 Tailscale</value></data>
   <data name="TailnetConnected" xml:space="preserve"><value>{0} 已连接 Tailnet</value></data>
   <data name="TailscaleSignInHint" xml:space="preserve"><value>请确认 Tailscale 已安装并登录</value></data>
   <data name="TailnetOnlineCount" xml:space="preserve"><value>{0} 台设备在线 · 本机 {1}</value></data>
   <data name="PrerequisiteHint" xml:space="preserve"><value>请先安装 Node.js 22.14.0 或更高版本，并确认 npm 可用。</value></data>
-  <data name="RestartServicesTitle" xml:space="preserve"><value>重新启动所有 Codex 服务？</value></data>
-  <data name="TerminateServicesTitle" xml:space="preserve"><value>终止所有 Codex 服务？</value></data>
-  <data name="RestartServicesBody" xml:space="preserve"><value>将停止 OpenCodex Proxy 与 Codex Relay 的计划任务及其明确匹配的服务进程，然后重新启动计划任务。Codex 桌面客户端和 Codex Beacon 不会关闭。</value></data>
-  <data name="TerminateServicesBody" xml:space="preserve"><value>将停止 OpenCodex Proxy 与 Codex Relay 的计划任务及其明确匹配的服务进程。Codex 桌面客户端、Codex Beacon 和无关 Node 进程不会关闭。</value></data>
-  <data name="RestartAllButton" xml:space="preserve"><value>全部重启</value></data>
-  <data name="TerminateServicesButton" xml:space="preserve"><value>终止服务</value></data>
-  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
-  <data name="RestartingServices" xml:space="preserve"><value>正在重新启动服务…</value></data>
-  <data name="TerminatingServices" xml:space="preserve"><value>正在终止服务…</value></data>
+  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>终止所有 Codex / ChatGPT 进程？</value></data>
+  <data name="KillCodexProcessesBody" xml:space="preserve"><value>将强制结束所有 ChatGPT.exe、codex.exe、代码执行宿主及其子进程。Codex Beacon 控制台不会关闭。</value></data>
+  <data name="KillCodexProcessesButton" xml:space="preserve"><value>立即终止</value></data>
+  <data name="KillCodexBusy" xml:space="preserve"><value>正在终止所有 Codex 与 ChatGPT 进程…</value></data>
+  <data name="RestartDesktopBusy" xml:space="preserve"><value>正在清理并重新启动 ChatGPT 桌面应用…</value></data>
   <data name="FullNodeVersionHint" xml:space="preserve"><value>请输入完整 Node.js 版本号，例如 24.15.0。</value></data>
   <data name="InstallingNode" xml:space="preserve"><value>正在通过 NVM 安装 Node.js {0}…</value></data>
   <data name="SelectNodeVersion" xml:space="preserve"><value>请先选择一个已安装的 Node.js 版本。</value></data>
   <data name="SwitchingNode" xml:space="preserve"><value>正在切换到 Node.js {0}…</value></data>
+  <data name="SwitchingProvider" xml:space="preserve"><value>正在切换 Provider：{0}…</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>设置已保存，将在下次刷新时生效。</value></data>
-  <data name="SettingsSavedRestart" xml:space="preserve"><value>设置已保存。重启 Codex Beacon 后应用新的显示语言。</value></data>
-  <data name="RestartRequiredTitle" xml:space="preserve"><value>重启以更改语言？</value></data>
-  <data name="RestartRequiredBody" xml:space="preserve"><value>新的显示语言已经保存。是否立即重启 Codex Beacon 并应用？</value></data>
-  <data name="RestartNowButton" xml:space="preserve"><value>立即重启</value></data>
-  <data name="LaterButton" xml:space="preserve"><value>稍后</value></data>
+  <data name="Cancel" xml:space="preserve"><value>取消</value></data>
+  <data name="Cancelling" xml:space="preserve"><value>正在取消当前操作…</value></data>
+  <data name="ActionAlreadyRunning" xml:space="preserve"><value>已有操作正在执行，请等待完成或先取消。</value></data>
+
+  <!-- 动作名称 -->
   <data name="ActionStartName" xml:space="preserve"><value>启动</value></data>
   <data name="ActionStopName" xml:space="preserve"><value>停止</value></data>
   <data name="ActionRestartName" xml:space="preserve"><value>重启</value></data>
@@ -160,15 +272,186 @@
   <data name="ActionLoginName" xml:space="preserve"><value>登录</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>处理</value></data>
   <data name="RunningAction" xml:space="preserve"><value>正在{0} {1}…</value></data>
-  <data name="NavTailscale.Content" xml:space="preserve"><value>Tailscale</value></data>
-  <data name="DataFlowHeading.Text" xml:space="preserve"><value>实时数据链路架构</value></data>
-  <data name="ModelPipelineHeading.Text" xml:space="preserve"><value>模型调度路由 (Model Dispatch Pipeline)</value></data>
-  <data name="NetworkPipelineHeading.Text" xml:space="preserve"><value>网络传输通道 (Network Transport &amp; Proxy)</value></data>
-  <data name="LineTypeIDC" xml:space="preserve"><value>机房 / 数据中心</value></data>
-  <data name="LineTypeResidential" xml:space="preserve"><value>家庭宽带 / 住宅</value></data>
-  <data name="KillCodexProcessesTitle" xml:space="preserve"><value>终止所有 Codex / ChatGPT 进程？</value></data>
-  <data name="KillCodexProcessesBody" xml:space="preserve"><value>将强制结束所有 ChatGPT.exe、codex.exe、代码执行宿主及其实时子进程。Codex Beacon 控制台不会关闭。</value></data>
-  <data name="KillCodexProcessesButton" xml:space="preserve"><value>立即终止</value></data>
-  <data name="KillCodexBusy" xml:space="preserve"><value>正在终止所有 Codex 与 ChatGPT 进程…</value></data>
-  <data name="RestartDesktopBusy" xml:space="preserve"><value>正在清理并重新启动 ChatGPT 桌面应用…</value></data>
+
+  <!-- 动作结果 -->
+  <data name="MessageWithDetails" xml:space="preserve"><value>{0}（{1}）</value></data>
+  <data name="ActionNoResult" xml:space="preserve"><value>操作没有返回结果</value></data>
+  <data name="ActionFailed" xml:space="preserve"><value>操作未完成</value></data>
+  <data name="ActionTimedOut" xml:space="preserve"><value>操作超时，已中止。请检查网络或下载镜像。</value></data>
+  <data name="ActionCanceled" xml:space="preserve"><value>操作已取消。</value></data>
+  <data name="ActionNeedsAdmin" xml:space="preserve"><value>权限不足，请以管理员身份运行后重试。</value></data>
+  <data name="ActionUnsupported" xml:space="preserve"><value>该组件不支持此操作。</value></data>
+  <data name="ActionNeedRuntime" xml:space="preserve"><value>缺少 Node.js 或 npm，请先完成运行环境配置。</value></data>
+  <data name="ActionRuntimeTooOld" xml:space="preserve"><value>Node.js {0} 版本过低，需要 22.14.0 或更高版本。</value></data>
+  <data name="ActionProviderSwitched" xml:space="preserve"><value>已切换到 Provider：{0}</value></data>
+  <data name="ActionNvmInstalled" xml:space="preserve"><value>NVM for Windows 安装状态已更新</value></data>
+  <data name="ActionNvmNodeInstalled" xml:space="preserve"><value>Node.js {0} 已安装</value></data>
+  <data name="ActionNvmNodeSwitched" xml:space="preserve"><value>已切换到 Node.js {0}</value></data>
+  <data name="ActionDesktopLoginOpened" xml:space="preserve"><value>已打开 Codex 登录流程</value></data>
+  <data name="ActionDesktopLoginHint" xml:space="preserve"><value>请在 Codex 桌面客户端中完成登录，然后返回刷新。</value></data>
+  <data name="ActionDesktopStarted" xml:space="preserve"><value>Codex 桌面客户端已启动</value></data>
+  <data name="ActionDesktopStopped" xml:space="preserve"><value>已终止 {0} 个 Codex / ChatGPT 进程</value></data>
+  <data name="ActionDesktopRestarted" xml:space="preserve"><value>ChatGPT 桌面客户端已重新启动（清理 {0} 个旧进程）</value></data>
+  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>已打开 Codex 的 Microsoft Store 产品页</value></data>
+  <data name="ActionDesktopStoreHint" xml:space="preserve"><value>产品 ID {0}；安装与升级由官方应用分发通道完成。</value></data>
+  <data name="ActionTailscaleLoginOpened" xml:space="preserve"><value>已打开 Tailscale 登录流程</value></data>
+  <data name="ActionTailscaleLoginHint" xml:space="preserve"><value>请在新窗口中完成浏览器授权，然后返回刷新。</value></data>
+  <data name="ActionTailscaleInstalled" xml:space="preserve"><value>Tailscale 安装状态已更新</value></data>
+  <data name="ActionTailscaleStarted" xml:space="preserve"><value>Tailscale 服务已启动</value></data>
+  <data name="ActionTailscaleStopped" xml:space="preserve"><value>Tailscale 服务已停止</value></data>
+  <data name="ActionTailscaleRestarted" xml:space="preserve"><value>Tailscale 服务已重新启动</value></data>
+  <data name="ActionCodexLoginOpened" xml:space="preserve"><value>已打开 Codex 登录流程</value></data>
+  <data name="ActionCodexLoginHint" xml:space="preserve"><value>请在新窗口中完成登录，然后返回刷新。</value></data>
+  <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI 尚未安装，请先完成安装。</value></data>
+  <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI 不是常驻服务，请在进程页管理正在运行的进程。</value></data>
+  <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} 已安装为最新版</value></data>
+  <data name="ActionHintProxyStart" xml:space="preserve"><value>需要使用时请点击“启动”完成服务配置。</value></data>
+  <data name="ActionHintRelayStart" xml:space="preserve"><value>点击“启动”会使用 Relay 官方后台模式运行。</value></data>
+  <data name="ActionServicesRestarted" xml:space="preserve"><value>已重新启动可选服务（清理 {0} 个进程，已启动：{1}）</value></data>
+  <data name="ActionServicesTerminated" xml:space="preserve"><value>已终止 {0} 个可选服务进程；桌面客户端与本管理器未受影响</value></data>
+  <data name="ActionRelayStarted" xml:space="preserve"><value>Codex Relay 已启动</value></data>
+  <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay 已停止</value></data>
+  <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay 已重新启动</value></data>
+  <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay 尚未安装，请先完成安装。</value></data>
+  <data name="ActionProxyStarted" xml:space="preserve"><value>OpenCodex 服务已启动</value></data>
+  <data name="ActionProxyStopped" xml:space="preserve"><value>OpenCodex 服务已停止</value></data>
+  <data name="ActionProxyRestarted" xml:space="preserve"><value>OpenCodex 服务已重新启动</value></data>
+  <data name="ActionProxyMissing" xml:space="preserve"><value>OpenCodex 尚未安装，请先完成安装。</value></data>
+  <data name="ActionTaskStarted" xml:space="preserve"><value>计划任务 [{0}] 已启动</value></data>
+  <data name="ActionTaskStopped" xml:space="preserve"><value>计划任务 [{0}] 已停止</value></data>
+  <data name="ActionTaskRestarted" xml:space="preserve"><value>计划任务 [{0}] 已重新启动</value></data>
+  <data name="ActionTaskMissing" xml:space="preserve"><value>未找到计划任务 [{0}]，请先完成对应服务安装。</value></data>
+  <data name="ActionNvmMissing" xml:space="preserve"><value>未检测到 NVM for Windows，请先安装 NVM 并重新打开 Codex Beacon。</value></data>
+  <data name="ActionNvmVersionInvalid" xml:space="preserve"><value>请输入完整 Node.js 版本号，例如 24.15.0。</value></data>
+  <data name="ActionNvmUnsupported" xml:space="preserve"><value>NVM 不支持此操作。</value></data>
+  <data name="ActionWingetMissingNvm" xml:space="preserve"><value>未检测到 winget，无法安装或升级 NVM for Windows。</value></data>
+  <data name="ActionWingetMissingTailscale" xml:space="preserve"><value>未检测到 winget，无法安装或升级 Tailscale。</value></data>
+  <data name="ActionBulkInstallUnsupported" xml:space="preserve"><value>批量安装不受支持，请逐项执行。</value></data>
+  <data name="ActionConfigMissing" xml:space="preserve"><value>未找到 %USERPROFILE%\.codex\config.toml，无法切换 Provider。</value></data>
+
+  <!-- Provider -->
+  <data name="ProviderActiveBtn" xml:space="preserve"><value>当前使用中</value></data>
+  <data name="ProviderSwitchBtn" xml:space="preserve"><value>设为当前 Provider</value></data>
+  <data name="ProviderActive" xml:space="preserve"><value>当前激活</value></data>
+  <data name="ProviderInactive" xml:space="preserve"><value>未激活</value></data>
+
+  <!-- 基础设施 -->
+  <data name="UnableToStart" xml:space="preserve"><value>无法启动 {0}</value></data>
+  <data name="NoMoreDiagnostics" xml:space="preserve"><value>没有更多诊断信息。</value></data>
+
+  <!-- 应用更新 -->
+  <data name="UpdateSectionHeading.Text" xml:space="preserve"><value>关于与更新</value></data>
+  <data name="UpdateExpander.Header" xml:space="preserve"><value>应用更新</value></data>
+  <data name="UpdateExpander.Description" xml:space="preserve"><value>从官方 GitHub 发布页检测、下载并原地重启到新版本</value></data>
+  <data name="VersionCard.Header" xml:space="preserve"><value>当前版本</value></data>
+  <data name="VersionCard.Description" xml:space="preserve"><value>Codex Beacon 自身的构建版本与安装包类型</value></data>
+  <data name="AutoUpdateCard.Header" xml:space="preserve"><value>自动检查更新</value></data>
+  <data name="AutoUpdateCard.Description" xml:space="preserve"><value>启动后自动查询最新版本，发现新版本时在窗口顶部提示</value></data>
+  <data name="UpdateActionCard.Header" xml:space="preserve"><value>检查与安装</value></data>
+  <data name="UpdateActionCard.Description" xml:space="preserve"><value>始终使用官方 GitHub Releases 渠道，不使用任何第三方镜像</value></data>
+  <data name="CheckUpdateButton.Content" xml:space="preserve"><value>检查更新</value></data>
+  <data name="DownloadUpdateButton.Content" xml:space="preserve"><value>下载并更新</value></data>
+  <data name="OpenReleaseButton.Content" xml:space="preserve"><value>打开发布页</value></data>
+  <data name="SkipVersionButton.Content" xml:space="preserve"><value>跳过此版本</value></data>
+  <data name="UpdateDetailHeading.Text" xml:space="preserve"><value>更新状态</value></data>
+  <data name="UpdateNotesHeading.Text" xml:space="preserve"><value>版本说明</value></data>
+  <data name="AppPackagePortable" xml:space="preserve"><value>完整版 · 便携</value></data>
+  <data name="AppPackageSlim" xml:space="preserve"><value>精简版 · 依赖运行时</value></data>
+  <data name="AppPackageUnknown" xml:space="preserve"><value>未知安装包</value></data>
+  <data name="UpdateIdle" xml:space="preserve"><value>尚未检查更新。</value></data>
+  <data name="UpdateChecking" xml:space="preserve"><value>正在查询 GitHub 最新版本…</value></data>
+  <data name="UpdateUpToDate" xml:space="preserve"><value>已是最新版本 {0}。</value></data>
+  <data name="UpdateAvailableTitle" xml:space="preserve"><value>发现新版本 {0}</value></data>
+  <data name="UpdateAvailableMessage" xml:space="preserve"><value>当前 {0}，可更新到 {1}。</value></data>
+  <data name="UpdateCheckFailed" xml:space="preserve"><value>检查更新失败：{0}</value></data>
+  <data name="UpdateAssetMissing" xml:space="preserve"><value>该版本没有提供适用于当前安装包的下载文件。</value></data>
+  <data name="UpdateDownloading" xml:space="preserve"><value>正在下载更新…</value></data>
+  <data name="UpdateDownloadProgress" xml:space="preserve"><value>{0} / {1} · {2}/s</value></data>
+  <data name="UpdateDownloadFailed" xml:space="preserve"><value>下载失败：{0}</value></data>
+  <data name="UpdateVerifyFailed" xml:space="preserve"><value>SHA-256 校验未通过，已丢弃下载的 {0}。请重试。</value></data>
+  <data name="UpdateReady" xml:space="preserve"><value>更新已下载并通过 SHA-256 校验。</value></data>
+  <data name="UpdateRestartTitle" xml:space="preserve"><value>立即重启并应用更新？</value></data>
+  <data name="UpdateRestartBody" xml:space="preserve"><value>版本 {0} 已准备就绪。确认后将关闭本窗口、原地替换安装包并自动重新启动。</value></data>
+  <data name="UpdateRestartButton" xml:space="preserve"><value>立即重启</value></data>
+  <data name="UpdateApplyButton" xml:space="preserve"><value>重启以应用更新</value></data>
+  <data name="UpdateApplying" xml:space="preserve"><value>正在替换安装包并重新启动…</value></data>
+  <data name="UpdateApplyFailed" xml:space="preserve"><value>应用更新失败：{0}</value></data>
+  <data name="UpdateNoLauncherHint" xml:space="preserve"><value>当前不是通过单文件安装包启动，无法原地替换。请前往发布页手动下载新版本。</value></data>
+  <data name="UpdateSkipped" xml:space="preserve"><value>已跳过版本 {0}，仍可手动更新。</value></data>
+  <data name="UpdatePublishedAt" xml:space="preserve"><value>发布于 {0}</value></data>
+  <data name="NetworkConnected" xml:space="preserve"><value>网络连接成功</value></data>
+  <data name="NetworkDisconnected" xml:space="preserve"><value>网络未连接</value></data>
+  <data name="NetworkUnreachable" xml:space="preserve"><value>目标不可达</value></data>
+  <data name="ProviderKeyConfigured" xml:space="preserve"><value>密钥已配置 · 默认隐藏</value></data>
+  <data name="ProviderKeyMissing" xml:space="preserve"><value>尚未配置密钥</value></data>
+  <data name="ProviderSaved" xml:space="preserve"><value>Provider 已保存到当前用户隐藏配置目录。</value></data>
+  <data name="ProviderDeleted" xml:space="preserve"><value>Provider 已删除。</value></data>
+  <data name="ProviderTesting" xml:space="preserve"><value>正在使用 {1} 测试 {0}…</value></data>
+  <data name="ProviderTestSucceeded" xml:space="preserve"><value>Provider 联通测试成功（{0}）。</value></data>
+  <data name="ProviderTestFailed" xml:space="preserve"><value>Provider 联通测试失败：{0}</value></data>
+  <data name="DeleteProviderTitle" xml:space="preserve"><value>删除 Provider？</value></data>
+  <data name="DeleteProviderBody" xml:space="preserve"><value>将从本机配置中删除“{0}”及其密钥。</value></data>
+  <data name="Delete" xml:space="preserve"><value>删除</value></data>
+  <data name="Name" xml:space="preserve"><value>名称</value></data>
+  <data name="TestModel" xml:space="preserve"><value>测试模型</value></data>
+  <data name="ProviderKeepExistingKey" xml:space="preserve"><value>留空以保留现有密钥</value></data>
+  <data name="AddProvider" xml:space="preserve"><value>添加 Provider</value></data>
+  <data name="EditProvider" xml:space="preserve"><value>编辑 Provider</value></data>
+  <data name="Save" xml:space="preserve"><value>保存</value></data>
+  <data name="ProviderInvalid" xml:space="preserve"><value>Provider ID、Base URL 无效，或 ID 已存在。</value></data>
+  <data name="CompAppInstallerName" xml:space="preserve"><value>应用安装程序</value></data>
+  <data name="CompAppInstallerKind" xml:space="preserve"><value>WinGet 系统依赖</value></data>
+  <data name="DetailAppInstallerReady" xml:space="preserve"><value>应用安装程序已安装</value></data>
+  <data name="DetailAppInstallerMissing" xml:space="preserve"><value>缺少应用安装程序，请从 Microsoft Store 安装</value></data>
+  <data name="CompWingetName" xml:space="preserve"><value>WinGet</value></data>
+  <data name="CompWingetKind" xml:space="preserve"><value>Windows 包管理器</value></data>
+  <data name="DetailWingetReady" xml:space="preserve"><value>WinGet 命令可用</value></data>
+  <data name="DetailWingetMissing" xml:space="preserve"><value>WinGet 不可用，请修复应用安装程序</value></data>
+  <data name="CompStoreName" xml:space="preserve"><value>Microsoft Store 源</value></data>
+  <data name="CompStoreKind" xml:space="preserve"><value>ChatGPT 安装渠道</value></data>
+  <data name="DetailStoreReady" xml:space="preserve"><value>msstore 源可用</value></data>
+  <data name="DetailStoreMissing" xml:space="preserve"><value>msstore 源不可用，需要修复</value></data>
+  <data name="ActionAppInstallerStoreOpened" xml:space="preserve"><value>已打开 Microsoft Store 的应用安装程序页面。</value></data>
+  <data name="ActionStoreSourceReady" xml:space="preserve"><value>Microsoft Store 软件源已更新。</value></data>
+  <data name="ActionOpenCodexIntegrated" xml:space="preserve"><value>Codex 已设置为通过 OpenCodex 路由。</value></data>
+  <data name="ActionOpenCodexModelsRefreshed" xml:space="preserve"><value>OpenCodex 模型目录已刷新。</value></data>
+  <data name="NavDependencies.Content" xml:space="preserve"><value>依赖管理</value></data>
+  <data name="DetectingStatus.Text" xml:space="preserve"><value>正在检测…</value></data>
+  <data name="DependencySettingsButton.Content" xml:space="preserve"><value>依赖设置</value></data>
+  <data name="SettingsButton.Content" xml:space="preserve"><value>设置</value></data>
+  <data name="ConnectivityHeading.Text" xml:space="preserve"><value>网络连通性</value></data>
+  <data name="CheckNetworkButton.Content" xml:space="preserve"><value>立即检测网络</value></data>
+  <data name="ProxyModeHeading.Text" xml:space="preserve"><value>代理模式</value></data>
+  <data name="ProxyModeSystem.Content" xml:space="preserve"><value>使用系统代理</value></data>
+  <data name="ProxyModeTun.Content" xml:space="preserve"><value>使用 TUN</value></data>
+  <data name="ProxyModeCustom.Content" xml:space="preserve"><value>自定义 HTTP 代理</value></data>
+  <data name="CustomHttpProxyBox.Header" xml:space="preserve"><value>HTTP 代理地址</value></data>
+  <data name="SaveNetworkButton.Content" xml:space="preserve"><value>保存网络设置</value></data>
+  <data name="ProvidersPageTitle.Text" xml:space="preserve"><value>Provider 管理</value></data>
+  <data name="ProvidersPageDescription.Text" xml:space="preserve"><value>手动添加、编辑并测试 Provider。密钥保存在当前用户隐藏目录，不会回显或写入日志。</value></data>
+  <data name="AddProviderButton.Content" xml:space="preserve"><value>添加 Provider</value></data>
+  <data name="ConfiguredProvidersHeading.Text" xml:space="preserve"><value>已配置 Provider</value></data>
+  <data name="UseProviderButton.Content" xml:space="preserve"><value>设为当前</value></data>
+  <data name="TestProviderButton.Content" xml:space="preserve"><value>测试</value></data>
+  <data name="EditProviderButton.Content" xml:space="preserve"><value>编辑</value></data>
+  <data name="DeleteProviderButton.Content" xml:space="preserve"><value>删除</value></data>
+  <data name="ProviderTestHint.Text" xml:space="preserve"><value>默认联通测试模型为 gpt-5.4，也可选择 gpt-5.5。</value></data>
+  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>独立管理 OpenCodex 的依赖、版本、服务、Provider、模型和 Codex 集成。</value></data>
+  <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>服务与版本</value></data>
+  <data name="AwaitingDetection.Text" xml:space="preserve"><value>等待检测</value></data>
+  <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>集成状态：—</value></data>
+  <data name="IntegrateCodexButton.Content" xml:space="preserve"><value>设为 Codex Provider</value></data>
+  <data name="AvailableModelsHeading.Text" xml:space="preserve"><value>可用模型</value></data>
+  <data name="RefreshModelsButton.Content" xml:space="preserve"><value>刷新模型</value></data>
+  <data name="TestModelButton.Content" xml:space="preserve"><value>测试模型</value></data>
+  <data name="ServiceSettingsHeading.Text" xml:space="preserve"><value>服务设置</value></data>
+  <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy 计划任务</value></data>
+  <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>保存</value></data>
+  <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>下载源</value></data>
+  <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
+  <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>保存依赖设置</value></data>
+  <data name="RelayDescription.Text" xml:space="preserve"><value>可选的移动端桥接扩展；安装、版本、服务和计划任务均在此页管理。</value></data>
+  <data name="ServiceControlHeading.Text" xml:space="preserve"><value>服务控制</value></data>
+  <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
+  <data name="SaveRelayButton.Content" xml:space="preserve"><value>保存 Relay 设置</value></data>
 </root>

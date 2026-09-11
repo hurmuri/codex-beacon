@@ -6,13 +6,19 @@ Codex Beacon should feel like a focused Windows 11 Settings page for local Codex
 
 ## Information architecture
 
-- **Overview** — current route, service readiness, version gaps, and Tailnet summary.
-- **Processes** — Codex-related processes, executable versions, paths, and guarded recovery controls.
-- **Network & proxy** — active provider route, machine public egress, observed remote service IPs, inactive configured endpoints, and Tailnet devices.
-- **Installation** — Node.js/npm prerequisites, NVM version switching, core clients, and optional modules.
-- **Settings** — refresh interval and local scheduled-task mappings.
+- **Codex overview** — ChatGPT desktop and the active user-managed Codex CLI, including version gaps and the next valid action.
+- **Dependencies** — App Installer/WinGet/Store and NVM/Node.js/npm/Registry prerequisite chains.
+- **Codex processes** — Codex-related processes, executable versions, paths, ownership, and guarded recovery controls.
+- **Network** — ChatGPT and CLI reachability, system/TUN/HTTP proxy state, evidence-backed active routes, and machine public egress.
+- **Providers** — provider CRUD, activation, default model, protected key entry, and layered connectivity tests.
+- **OpenCodex** — independent installation, service health, providers, static/live models, tests, synchronization, and Codex integration state.
+- **Tailscale** — independent service, sign-in, local-node, and Tailnet inventory.
+- **Codex Relay** — independent optional install, service, listener, login, and pairing state.
+- **Settings / About & updates** — application-wide preferences plus the preserved Codex Beacon version, release notes, update check, download, verification, and restart surface.
 
-The overview uses three service cards per row at the default desktop width. Dense inventories remain native list rows rather than nested cards.
+This order is canonical in `NavigationView`. Network is a dedicated page. The overview is not a generic dashboard and contains only the two core products. Dense inventories remain native list rows rather than nested cards. See [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) for the functional contract.
+
+Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, provider configuration under Providers, and scheduled-task/service names under OpenCodex or Codex Relay. The global Settings page does not duplicate those controls.
 
 ## Native component policy
 
@@ -21,6 +27,7 @@ The overview uses three service cards per row at the default desktop width. Dens
 - `InfoBar` owns persistent context, warnings, and source disclosures.
 - `CommandBar` and `AppBarButton` own grouped service actions.
 - `ListView`, `ComboBox`, `TextBox`, `NumberBox`, `ContentDialog`, `ProgressRing`, and `ProgressBar` retain platform behavior and focus visuals.
+- Provider secrets use a password-style control, hidden by default, with an explicitly labelled reveal interaction. A saved key may repopulate the masked control, while lists show only `Key saved`. The raw value never appears in status text, logs, diagnostics, errors, or command lines.
 - Custom borders are limited to status pills and table containment. Do not build a parallel card component library.
 
 ## State-driven workflow
@@ -49,6 +56,25 @@ Codex client → selected model_provider → active base_url owner → observed 
 ```
 
 OpenCodex Proxy or Codex Relay enters this route only when the selected provider and listener evidence prove that it is active. Installing an extension alone never changes the route. Configured-but-inactive endpoints are listed separately. The machine public egress address is never conflated with remote service IPs.
+
+## Self-update
+
+Codex Beacon's own update flow is a separate track from the components it manages:
+
+```text
+Up to date → Newer release found → Prompted (banner) → Download → Verified
+→ Replace install package → Restart into new version
+```
+
+- Version checks read the official GitHub Releases feed for this repository. No third-party mirror or aggregator is consulted.
+- A newer release raises a window-top `InfoBar`; the Settings page owns the durable surface with the current version, package type, release notes, and manual controls.
+- Download progress, transfer speed, and the SHA-256 result are always shown as text, never colour alone.
+- The update never installs silently: the window restarts only after the user confirms, and the release page stays one click away.
+- A build that was not started from a single-file package cannot be replaced in place; the surface states that plainly and points at the release page instead of pretending to install.
+
+## Download progress
+
+Every download, not only Codex Beacon self-update, uses the same native progress vocabulary: resolving, connecting, downloading, verifying, installing, and finalizing. When the source provides a total, show transferred/total bytes, percentage, speed, elapsed time, and a reliable ETA. When the total is unknown, use an indeterminate progress bar and never fabricate a percentage. Keep safe cancellation and retry visible, and identify the official source or labelled mirror.
 
 ## Visual language
 

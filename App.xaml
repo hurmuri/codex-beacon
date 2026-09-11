@@ -9,6 +9,8 @@
             <ResourceDictionary.MergedDictionaries>
                 <controls:XamlControlsResources />
             </ResourceDictionary.MergedDictionaries>
+
+            <!-- Palette -->
             <Color x:Key="InkColor">#17202A</Color>
             <Color x:Key="MutedColor">#5D6A78</Color>
             <Color x:Key="SignalColor">#087F5B</Color>
@@ -19,41 +21,153 @@
             <SolidColorBrush x:Key="InkBrush" Color="{StaticResource InkColor}" />
             <SolidColorBrush x:Key="MutedBrush" Color="{StaticResource MutedColor}" />
             <SolidColorBrush x:Key="SignalBrush" Color="{StaticResource SignalColor}" />
-            <SolidColorBrush x:Key="SignalSoftBrush" Color="{StaticResource SignalSoftColor}" />
             <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource DangerColor}" />
             <SolidColorBrush x:Key="CanvasBrush" Color="{StaticResource CanvasColor}" />
+            <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F8FAFC" />
+            <SolidColorBrush x:Key="BarBrush" Color="#EEF3F6" />
             <SolidColorBrush x:Key="HairlineBrush" Color="#D8E0E7" />
 
-            <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
-                <Setter Property="FontSize" Value="22" />
-                <Setter Property="FontWeight" Value="SemiBold" />
+            <!--
+                One font family for prose, one for data. Every size in the app
+                comes from this table; nothing sets FontSize locally.
+            -->
+            <FontFamily x:Key="UiFontFamily">Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI</FontFamily>
+            <FontFamily x:Key="DisplayFontFamily">Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI</FontFamily>
+            <FontFamily x:Key="MonoFontFamily">Cascadia Mono, Consolas, Microsoft YaHei UI</FontFamily>
+
+            <!-- Default for every TextBlock that does not opt into a style below. -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
                 <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
-                <Setter Property="Margin" Value="0,28,0,12" />
             </Style>
+
+            <!-- Type ramp: 26 / 17 / 14 / 13 / 12 / mono 13 -->
             <Style x:Key="PageTitleStyle" TargetType="TextBlock">
-                <Setter Property="FontFamily" Value="Segoe UI Variable Display" />
-                <Setter Property="FontSize" Value="34" />
+                <Setter Property="FontFamily" Value="{StaticResource DisplayFontFamily}" />
+                <Setter Property="FontSize" Value="26" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="17" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                <Setter Property="Margin" Value="0,20,0,10" />
+            </Style>
+
+            <Style x:Key="CardTitleStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="CaptionTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="MonoTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource MonoFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            </Style>
+
+            <Style x:Key="MonoCaptionStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource MonoFontFamily}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{StaticResource MutedBrush}" />
+                <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            </Style>
+
+            <Style x:Key="MonoStrongStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource MonoFontFamily}" />
+                <Setter Property="FontSize" Value="20" />
                 <Setter Property="FontWeight" Value="SemiBold" />
                 <Setter Property="Foreground" Value="{StaticResource InkBrush}" />
             </Style>
+
+            <Style x:Key="PillTextStyle" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+
+            <!-- Containers -->
             <Style x:Key="PanelStyle" TargetType="Border">
-                <Setter Property="Background" Value="White" />
-                <Setter Property="CornerRadius" Value="14" />
-                <Setter Property="Padding" Value="20" />
+                <Setter Property="Background" Value="{StaticResource SurfaceBrush}" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="18" />
                 <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
                 <Setter Property="BorderThickness" Value="1" />
             </Style>
-            <Style x:Key="QuietButtonStyle" TargetType="Button">
-                <Setter Property="MinHeight" Value="40" />
-                <Setter Property="Padding" Value="14,8" />
+
+            <Style x:Key="CardStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource SurfaceMutedBrush}" />
                 <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16" />
+                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
             </Style>
+
+            <Style x:Key="TableHeaderBorderStyle" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource BarBrush}" />
+                <Setter Property="BorderBrush" Value="{StaticResource HairlineBrush}" />
+                <Setter Property="BorderThickness" Value="0,0,0,1" />
+            </Style>
+
+            <!-- Actions -->
+            <Style x:Key="QuietButtonStyle" TargetType="Button">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="MinHeight" Value="34" />
+                <Setter Property="Padding" Value="14,6" />
+                <Setter Property="CornerRadius" Value="6" />
+            </Style>
+
+            <Style x:Key="ActionButtonStyle" TargetType="Button" BasedOn="{StaticResource QuietButtonStyle}">
+                <Setter Property="MinWidth" Value="56" />
+                <Setter Property="Padding" Value="10,5" />
+            </Style>
+
             <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource QuietButtonStyle}">
                 <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
                 <Setter Property="BorderBrush" Value="#E7AAA4" />
                 <Setter Property="BorderThickness" Value="1" />
                 <Setter Property="Background" Value="#FFF8F7" />
+            </Style>
+
+            <Style x:Key="InputTextBoxStyle" TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="MinHeight" Value="34" />
+            </Style>
+
+            <Style x:Key="InputComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="MinHeight" Value="34" />
+            </Style>
+
+            <Style x:Key="InputNumberBoxStyle" TargetType="NumberBox">
+                <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="MinHeight" Value="34" />
             </Style>
         </ResourceDictionary>
     </Application.Resources>

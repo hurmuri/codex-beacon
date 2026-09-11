@@ -63,6 +63,14 @@ Working product name: Codex Beacon. The interface is bright, calm, technical, an
 - Treat secrets and unrelated processes as out of bounds.
 - Leave an actionable audit trail for every management operation.
 
+## vNext product direction
+
+The approved vNext structure is defined in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Its canonical navigation is Codex overview, Dependencies, Codex processes, Network, Providers, OpenCodex, Tailscale, Codex Relay, and Settings / About & updates.
+
+The overview narrows to ChatGPT desktop and the user-managed Codex CLI. Dependency repair, network transport, generic provider management, and each optional module move to dedicated pages. OpenCodex owns its supported client integrations and is consumed through its declared structured capabilities.
+
+All byte-download operations must show an honest native progress experience including stage, transferred and total bytes when known, percentage, speed, elapsed time, and safe cancellation. Provider keys use a password field hidden by default and may be saved in the current user's `%USERPROFILE%\.CodexBeacon\providers.json`; the `.CodexBeacon` directory has the Windows `Hidden` attribute, the file is restricted to that user, and keys never enter uploads, logs, diagnostics, command lines, errors, status text, or default exports. Existing About and application-update features remain, while each component's task names and settings move to that component's management page.
+
 ## Accessibility & Inclusion
 
 Target WCAG 2.2 AA-equivalent desktop behavior: keyboard navigation, visible focus, accessible names, non-color status cues, scalable text, and reduced-motion compatibility.

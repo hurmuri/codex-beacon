@@ -4,6 +4,52 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Added
+
+- Canonical 9-page information architecture: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Providers, OpenCodex, Tailscale, Codex Relay, and Settings.
+- Pipeline asynchronous streaming refresh: local machine snapshot loads sub-second on startup, while network probes, public egress, latest remote version lookups, and OpenCodex model catalogs update concurrently in the background without UI freeze.
+- Step-by-step Dependency management combining NVM, Node.js, and npm with in-card version switching, new version installation, and mirror configuration, alongside the Windows Store dependency chain (App Installer → WinGet → Store source).
+- Seamless Network & Proxy workflow: configure proxy mode (System / TUN / Custom HTTP), run immediate connectivity tests with latency feedback, apply system environment proxy variables, and verify OpenAI public egress.
+- Unified Providers management: highlights active Codex router, restores detection of system providers (OpenAI direct, local OpenCodex proxy on port 10100, and config.toml entries) with one-click activation and connectivity testing, alongside a secure custom provider vault supporting hidden-by-default password fields and local ACL-restricted storage.
+- Enhanced software version management for OpenCodex, Tailscale, and Codex Relay: includes install status, current vs latest version summary, update checks, service start/stop/restart, and model testing.
+- Project open-source metadata on the Settings page: repository URL, version badge, and MIT license details.
+
+### Added
+
+- Build version stamping: every real build increments `build/version.txt` and applies the result to the assembly metadata, so each artifact carries a distinct version. The launcher reads the same value instead of bumping it, keeping its payload stamp tied to the app it embeds.
+- A configurable Node.js download mirror for `nvm install` (`NvmMirror` setting), with an automatic fallback to the official distribution host when the mirror fails.
+- Per-component version evidence in the UI, such as the Codex App Mirror manifest that tracks Microsoft Store product `9PLM9XGG6VKS`.
+- Streamed native tool progress plus a cancel button for long-running actions, and hard timeouts on both collection and actions so the window never appears frozen.
+- Richer public egress details: country, region, city, ISP, AS number, hosting/proxy classification, and a trust score, sourced from `ip.net.coffee`.
+- A "open full IP check" entry point on the Network page.
+- In-app self-update against the official GitHub Releases channel: startup check with a window-top banner, manual check, streamed download with progress and transfer speed, SHA-256 verification against the release's `SHA256SUMS.txt`, skip-this-version, and an in-place replace-and-restart. The package type is detected at runtime (a self-contained build ships `coreclr.dll` next to the app), so portable installs fetch `CodexBeacon-portable.exe` and slim installs fetch `CodexBeacon-slim.exe`.
+- A new "About & update" section on the Settings page showing the current version, detected package type, an auto-check toggle, and the full update status surface with release notes.
+- The single-file launcher now hands its own path to the application (`--launcher`). The application runs from the extracted `app-portable` copy and cannot infer that path, but the updater needs it to replace the install package in place. Because the launcher exits before the app starts, that file is never locked, so the swap needs neither elevation nor a reboot.
+
+### Changed
+
+- Status collection now uses a semantic-key contract: the PowerShell scripts emit only resource keys and arguments joined by U+001F, and every user-visible sentence lives in `Strings/*/Resources.resw`.
+- Codex CLI and desktop versions are detected per install source (npm global, `PATH`, or the copy bundled with the desktop app) rather than assuming a single installation.
+- The Network page now shows only the OpenAI-view public egress and provider switching; the ambiguous proxy-chain, candidate-endpoint, and remote-connection views were removed, along with the Dashboard's "live data pipeline" block.
+- Typography is centralised in `App.xaml` through a named type ramp; no control sets `FontSize` locally.
+- `Localization.GetXUid` resolves strings that are normally bound through `x:Uid`. A dotted resw name such as `Foo.Content` compiles into the hierarchy `Resources/Foo/Content`, so the flat `Get` path can never reach it; code that needs a label whose text also changes at runtime now shares the very same entry instead of duplicating the string.
+- Both READMEs described ZIP downloads that the release workflow has not produced since the move to single-file executables; the download tables now list the actual assets and explain the expand-on-first-run layout the updater relies on.
+
+### Fixed
+
+- Settings page right-side component clipping caused by unrestricted horizontal scroll measurement.
+- Provider list omission of local OpenCodex proxy and existing config.toml providers.
+- Slow blocking status collections by caching npm package resolution directly from local package manifests rather than invoking heavy node processes.
+- `nvm install` could hang indefinitely on networks where `nodejs.org` is unreachable.
+- Switching to the OpenCodex provider did not write `openai_base_url`, so traffic was never routed through the local proxy; the key is now injected when absent and removed when switching away.
+- Provider switching could place `openai_base_url` inside a TOML table when `model_provider` appeared after a section header.
+- Codex CLI install/upgrade was rejected with "Codex CLI is not a service" before it could reach the npm package step.
+- The six per-component action buttons used `.Label` resource keys while rendering as `Button`, which resolves `.Content`, leaving them untranslated in English.
+- `GeneralSettingsExpander` had no `x:Uid`, so the general settings header stayed Chinese in English.
+- Sign-in state was always reported as unknown because `$ErrorActionPreference = 'SilentlyContinue'` swallowed the native `codex login status` output.
+- The collector emitted non-ASCII sentinel characters that corrupted its JSON under a non-UTF-8 console code page.
+- Language switching now genuinely changes the UI. Previously both the `ResourceLoader` and XAML `x:Uid` resolution followed the system language, so the language picker only persisted a setting. The app now drives `Microsoft.Windows.Globalization.ApplicationLanguages.PrimaryLanguageOverride`, which works without package identity and is honoured by MRT Core - the same path XAML `x:Uid` uses - plus an explicit `language` qualifier on its own resource context.
+
 ## [0.3.0] - 2026-09-11
 
 ### Added

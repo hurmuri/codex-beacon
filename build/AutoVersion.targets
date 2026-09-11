@@ -1,0 +1,64 @@
+<Project>
+
+  <!--
+    Build version stamping.
+
+    Reads build/version.txt and applies the value to assembly metadata so every
+    compiled artifact carries a distinct, monotonic version.
+
+    Two modes, selected by AutoVersionIncrement:
+
+      true  (default) - bump the patch component and persist it. Used once per
+                        real application build.
+      false           - read the current value only. Used by the launcher so its
+                        extraction stamp matches the payload it embeds instead of
+                        inflating the shared version counter.
+
+    Design-time builds are skipped. If the helper script fails, the build
+    continues with the version declared in the project file, so a machine
+    without PowerShell never breaks compilation.
+  -->
+
+  <PropertyGroup>
+    <AutoVersionFile Condition="'$(AutoVersionFile)' == ''">$(MSBuildThisFileDirectory)version.txt</AutoVersionFile>
+    <AutoVersionIncrement Condition="'$(AutoVersionIncrement)' == ''">true</AutoVersionIncrement>
+  </PropertyGroup>
+
+  <!--
+    The resolved version has to be in place before the SDK reads it. The SDK
+    builds the assembly-attribute list in GetAssemblyAttributes, and that target
+    is a dependency of CoreGenerateAssemblyInfo, so it runs first. Hooking only
+    CoreGenerateAssemblyInfo therefore stamped the project's declared <Version>
+    (0.3.0) on every artifact even though this target reported the incremented
+    value. Hook the dependency as well; both names are kept so the stamp still
+    resolves when assembly-info generation is disabled.
+  -->
+  <Target Name="ApplyAutoVersion"
+          BeforeTargets="GetAssemblyAttributes;CoreGenerateAssemblyInfo"
+          Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'">
+    <PropertyGroup>
+      <_AutoVersionSwitch Condition="'$(AutoVersionIncrement)' == 'true'">-Increment</_AutoVersionSwitch>
+    </PropertyGroup>
+
+    <Exec Command="powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)next-version.ps1&quot; -Path &quot;$(AutoVersionFile)&quot; $(_AutoVersionSwitch)"
+          ConsoleToMSBuild="true"
+          StandardOutputImportance="low"
+          ContinueOnError="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="_AutoVersionOutput" />
+    </Exec>
+
+    <PropertyGroup>
+      <_AutoVersion>$([System.Text.RegularExpressions.Regex]::Match('$(_AutoVersionOutput)', '\d+\.\d+\.\d+').Value)</_AutoVersion>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(_AutoVersion)' != ''">
+      <Version>$(_AutoVersion)</Version>
+      <AssemblyVersion>$(_AutoVersion).0</AssemblyVersion>
+      <FileVersion>$(_AutoVersion).0</FileVersion>
+      <InformationalVersion>$(_AutoVersion)</InformationalVersion>
+    </PropertyGroup>
+
+    <Message Importance="high" Condition="'$(_AutoVersion)' != ''" Text="Codex Beacon build version: $(_AutoVersion)" />
+  </Target>
+
+</Project>
