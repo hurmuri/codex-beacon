@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://hurmuri.com"><img src="Assets/codex-beacon-hero-zh.png" alt="Codex Beacon：专为 Windows 打造的 OpenAI Codex 原生服务与代理生态管控中心" width="100%"></a>
+  <a href="https://hurmuri.github.io/codex-beacon/"><img src="Assets/codex-beacon-hero-zh.png" alt="Codex Beacon：专为 Windows 打造的 OpenAI Codex 原生服务与代理生态管控中心" width="100%"></a>
 </p>
 
 <h1 align="center">Codex Beacon</h1>
@@ -9,13 +9,13 @@
 </p>
 
 <p align="center">
-  <a href="https://hurmuri.com"><strong>🌐 官方主页 hurmuri.com</strong></a> · 
+  <a href="https://hurmuri.github.io/codex-beacon/"><strong>🌐 官方主页 GitHub Pages</strong></a> · 
   <a href="#下载与直接运行"><strong>⚡ 下载免安装便携版</strong></a> · 
   <a href="README.md">English Documentation</a>
 </p>
 
 <p align="center">
-  <a href="https://hurmuri.com"><img src="https://img.shields.io/badge/Website-hurmuri.com-087F5B?style=flat&logo=safari&logoColor=white" alt="Official Website"></a>
+  <a href="https://hurmuri.github.io/codex-beacon/"><img src="https://img.shields.io/badge/Website-GitHub%20Pages-087F5B?style=flat&logo=github&logoColor=white" alt="Official Website"></a>
   <a href="https://github.com/hurmuri/codex-beacon/releases"><img src="https://img.shields.io/github/v/release/hurmuri/codex-beacon?style=flat&label=release&color=10B981" alt="Latest Release"></a>
   <a href="https://github.com/hurmuri/codex-beacon"><img src="https://img.shields.io/badge/Windows-10%201809%2B%20%7C%2011-0078D4?style=flat&logo=windows&logoColor=white" alt="Supported OS"></a>
   <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>

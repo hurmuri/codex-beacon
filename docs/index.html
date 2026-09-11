@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codex Beacon · 专为 Windows 打造的 OpenAI Codex 原生服务与代理管控中心</title>
+  <meta name="description" content="Codex Beacon 是专为 Windows 打造的轻量原生 WinUI 3 控制中心，全生命周期掌控 OpenAI Codex 桌面客户端、CLI、OpenCodex 代理网关、Codex Relay 隧道以及 Tailscale 私网。">
+  <meta name="keywords" content="OpenAI Codex, Codex Beacon, WinUI 3, Windows 11, OpenCodex, Codex Relay, Tailscale, AI Agent, AI Toolchain">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="assets/app-icon.png">
+  <link rel="shortcut icon" href="assets/app-icon.ico">
+  
+  <!-- Open Graph / Meta -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Codex Beacon · Windows 原生 OpenAI Codex 管控中心">
+  <meta property="og:description" content="零凭据原则 · 真实双层数据管线探测 · 状态驱动服务操作 · WinUI 3 原生 Fluent 体验">
+  <meta property="og:image" content="assets/codex-beacon-hero-zh.png">
+  <meta property="og:url" content="https://hurmuri.github.io/codex-beacon/">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --bg-alt: #F1F5F9;
+      --card-bg: #FFFFFF;
+      --card-border: #E2E8F0;
+      --card-hover-border: #CBD5E1;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-subtle: #64748B;
+      --primary: #0284C7;
+      --primary-hover: #0369A1;
+      --primary-light: #E0F2FE;
+      --emerald: #087F5B;
+      --emerald-light: #E6FCF5;
+      --blue: #2563EB;
+      --blue-light: #EFF6FF;
+      --indigo: #4F46E5;
+      --indigo-light: #EEF2FF;
+      --slate: #334155;
+      --code-bg: #0F172A;
+      --code-text: #F8FAFC;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      font-weight: 700;
+      line-height: 1.25;
+      color: var(--text-main);
+    }
+
+    code, pre, .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+
+    a:hover {
+      color: var(--primary-hover);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    header.navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      transition: all 0.2s ease;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-lang {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
+      background: #FFFFFF;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-lang:hover {
+      border-color: var(--card-hover-border);
+      color: var(--text-main);
+      background: var(--bg-alt);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: var(--radius-md);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(2, 132, 199, 0.4);
+    }
+
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text-main);
+      border-color: var(--card-border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-alt);
+      border-color: var(--card-hover-border);
+      transform: translateY(-1px);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    .badge-primary {
+      background: var(--primary-light);
+      color: #0369A1;
+      border: 1px solid #BAE6FD;
+    }
+
+    .badge-emerald {
+      background: var(--emerald-light);
+      color: var(--emerald);
+      border: 1px solid #B2F2BB;
+    }
+
+    section.hero {
+      padding: 80px 0 60px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-pretitle {
+      margin-bottom: 18px;
+    }
+
+    .hero-title {
+      font-size: 3.4rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      color: var(--text-main);
+    }
+
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, #0284C7 0%, #2563EB 50%, #4F46E5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-desc {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+
+    .hero-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta {
+      font-size: 0.9rem;
+      color: var(--text-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hero-preview {
+      margin-top: 50px;
+      position: relative;
+      border-radius: var(--radius-xl);
+      padding: 12px;
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-xl), 0 0 0 1px rgba(0,0,0,0.02);
+      transition: transform 0.3s ease;
+    }
+
+    .hero-preview img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+      display: block;
+      border: 1px solid #E2E8F0;
+    }
+
+    .preview-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px 6px;
+      font-size: 0.88rem;
+      color: var(--text-subtle);
+    }
+
+    .badges-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 30px 0;
+      border-bottom: 1px solid var(--card-border);
+      margin-bottom: 70px;
+    }
+
+    .badges-bar img {
+      height: 24px;
+    }
+
+    section {
+      padding: 60px 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 50px;
+    }
+
+    .section-tag {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--primary);
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: var(--card-hover-border);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .card-icon.blue { background: var(--primary-light); color: var(--primary); }
+    .card-icon.emerald { background: var(--emerald-light); color: var(--emerald); }
+    .card-icon.indigo { background: var(--indigo-light); color: var(--indigo); }
+    .card-icon.slate { background: #F1F5F9; color: var(--slate); }
+
+    .card-title {
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .card-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+    }
+
+    .pipeline-container {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .pipeline-layer {
+      margin-bottom: 36px;
+    }
+
+    .pipeline-layer:last-child {
+      margin-bottom: 0;
+    }
+
+    .layer-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .layer-header h4 {
+      font-size: 1.15rem;
+      color: var(--text-main);
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      position: relative;
+    }
+
+    .flow-card {
+      background: var(--bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      position: relative;
+    }
+
+    .flow-step-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-subtle);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .flow-card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-main);
+    }
+
+    .flow-card-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .flow-pill {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: #E2E8F0;
+      color: #334155;
+    }
+
+    .flow-pill.active {
+      background: var(--emerald-light);
+      color: var(--emerald);
+    }
+
+    .table-container {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table.comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    table.comp-table th, 
+    table.comp-table td {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.95rem;
+    }
+
+    table.comp-table th {
+      background: var(--bg-alt);
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    table.comp-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.comp-table tr:hover td {
+      background: rgba(248, 250, 252, 0.7);
+    }
+
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      margin-bottom: 40px;
+    }
+
+    .download-card {
+      background: #FFFFFF;
+      border: 2px solid var(--card-border);
+      border-radius: var(--radius-xl);
+      padding: 36px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .download-card.recommended {
+      border-color: var(--primary);
+      background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
+    }
+
+    .recommended-badge {
+      position: absolute;
+      top: -12px;
+      right: 28px;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    }
+
+    .download-name {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .download-specs {
+      list-style: none;
+      margin: 20px 0 28px;
+    }
+
+    .download-specs li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    .download-specs li svg {
+      flex-shrink: 0;
+      color: var(--emerald);
+    }
+
+    .download-checksum {
+      background: var(--code-bg);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      color: var(--code-text);
+    }
+
+    .checksum-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .checksum-header h4 {
+      color: #94A3B8;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    pre.checksum-box {
+      font-size: 0.82rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #E2E8F0;
+    }
+
+    .faq-list {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    details.faq-item {
+      background: #FFFFFF;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    details.faq-item[open] {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    summary.faq-q {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-main);
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+    }
+
+    summary.faq-q::-webkit-details-marker {
+      display: none;
+    }
+
+    summary.faq-q::after {
+      content: '+';
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--text-subtle);
+      transition: transform 0.2s ease;
+    }
+
+    details[open] summary.faq-q::after {
+      content: '−';
+    }
+
+    .faq-a {
+      margin-top: 14px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    footer {
+      background: #FFFFFF;
+      border-top: 1px solid var(--card-border);
+      padding: 60px 0 30px;
+      margin-top: 80px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 50px;
+    }
+
+    .footer-desc {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 14px;
+      max-width: 320px;
+    }
+
+    .footer-col h5 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 18px;
+      color: var(--text-main);
+    }
+
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 30px;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.88rem;
+      color: var(--text-subtle);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    @media (max-width: 992px) {
+      .grid-3 { grid-template-columns: repeat(2, 1fr); }
+      .hero-title { font-size: 2.8rem; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .grid-3, .download-grid { grid-template-columns: 1fr; }
+      .hero-title { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-cta { flex-direction: column; width: 100%; }
+      .hero-cta .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <img src="assets/app-icon.png" alt="Codex Beacon Logo" class="brand-logo">
+        <span>Codex Beacon</span>
+      </a>
+      
+      <ul class="nav-links">
+        <li><a href="#features" data-i18n="nav.features">核心特性</a></li>
+        <li><a href="#architecture" data-i18n="nav.architecture">双层管线架构</a></li>
+        <li><a href="#gallery" data-i18n="nav.gallery">原生界面</a></li>
+        <li><a href="#downloads" data-i18n="nav.downloads">版本下载</a></li>
+        <li><a href="#faq" data-i18n="nav.faq">常见问题</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="langToggle" class="btn-lang" onclick="toggleLanguage()">
+          🌐 <span id="langText">English</span>
+        </button>
+        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.88rem;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-pretitle">
+        <span class="badge badge-emerald" data-i18n="hero.badge">v0.3.0 最新稳定版现已发布 · 专为 Windows 打造</span>
+      </div>
+      
+      <h1 class="hero-title">
+        OpenAI Codex 工具链的<br>
+        <span class="gradient-text" data-i18n="hero.titleGradient">Windows 原生控制中心</span>
+      </h1>
+      
+      <p class="hero-desc" data-i18n="hero.desc">
+        统一纳管 Windows 上的 Codex 桌面客户端、CLI、OpenCodex 模型分发代理、Codex Relay 移动端中继与 Tailscale 网状拓扑。告别繁杂的控制台命令，在 Windows 11 Fluent 原生面板中纵览全局。
+      </p>
+
+      <div class="hero-cta">
+        <a href="#downloads" class="btn btn-primary" style="padding: 14px 28px; font-size: 1.05rem;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span data-i18n="hero.downloadBtn">立即下载便携版 (免安装)</span>
+        </a>
+        <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn btn-secondary" style="padding: 14px 24px; font-size: 1.05rem;">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+          <span data-i18n="hero.githubBtn">GitHub 开源仓库</span>
+        </a>
+      </div>
+
+      <div class="hero-meta">
+        <span class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          <span data-i18n="hero.metaWin">兼容 Windows 10 1809+ / Windows 11</span>
+        </span>
+        <span class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          <span data-i18n="hero.metaZero">零凭据存储 · 保护 API 密钥安全</span>
+        </span>
+        <span class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          <span data-i18n="hero.metaWinui">WinUI 3 原生明亮 Fluent 体验</span>
+        </span>
+      </div>
+
+      <!-- App Banner Display -->
+      <div class="hero-preview" id="heroPreview">
+        <img id="heroImg" src="assets/codex-beacon-hero-zh.png" alt="Codex Beacon 原生界面全览">
+        <div class="preview-caption">
+          <span data-i18n="hero.captionLeft">🖥️ 真实 Windows 桌面运行截图 · 浅色 Fluent 原生设计</span>
+          <span class="mono">WinUI 3 · Windows App SDK 1.8</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Badges Ribbon -->
+  <div class="container">
+    <div class="badges-bar">
+      <a href="https://github.com/hurmuri/codex-beacon/releases"><img src="https://img.shields.io/github/v/release/hurmuri/codex-beacon?style=flat&label=release&color=10B981" alt="Release"></a>
+      <a href="https://github.com/hurmuri/codex-beacon"><img src="https://img.shields.io/badge/Windows-10%201809%2B%20%7C%2011-0078D4?style=flat&logo=windows&logoColor=white" alt="Windows OS"></a>
+      <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>
+      <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/OpenAI-Codex%20Ecosystem-17202A?style=flat&logo=openai&logoColor=white" alt="Codex"></a>
+      <a href="https://github.com/lidge-jun/opencodex"><img src="https://img.shields.io/badge/Extension-OpenCodex%20Proxy-4F46E5?style=flat" alt="OpenCodex"></a>
+      <a href="https://github.com/gronxb/codex-relay"><img src="https://img.shields.io/badge/Extension-Codex%20Relay-059669?style=flat" alt="Codex Relay"></a>
+      <a href="https://tailscale.com"><img src="https://img.shields.io/badge/Mesh-Tailscale-2B3137?style=flat&logo=tailscale&logoColor=white" alt="Tailscale"></a>
+      <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="License"></a>
+    </div>
+  </div>
+
+  <!-- Core Features Section -->
+  <section id="features">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="features.tag">CORE CAPABILITIES</span>
+        <h2 class="section-title" data-i18n="features.title">为何需要专用的管控中心？</h2>
+        <p class="section-desc" data-i18n="features.desc">
+          AI 研发工具链的扩展让开发者需要在桌面客户端、CLI、代理服务和 VPN 隧道间反复横跳。Codex Beacon 让一切生命周期在单一窗口内透明受控。
+        </p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon blue">⚡</div>
+          <h3 class="card-title" data-i18n="features.c1Title">WinUI 3 原生 Fluent 质感</h3>
+          <p class="card-text" data-i18n="features.c1Text">
+            基于 Windows App SDK 与 C# 构建，坚持明亮主题与 Windows 11 设计语言规范。无 Chromium/Electron 内存膨胀，冷启动毫秒级响应，与 Windows 系统体验严丝合缝。
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon emerald">🔒</div>
+          <h3 class="card-title" data-i18n="features.c2Title">零凭据原则 · 绝不触碰密钥</h3>
+          <p class="card-text" data-i18n="features.c2Text">
+            坚持最严格的安全隐私底线：系统仅通过进程树、端口监听与 TCP 状态判断服务健康，绝不读取、存储或上传任何 API Token、登录凭据或会话载荷。
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon indigo">📡</div>
+          <h3 class="card-title" data-i18n="features.c3Title">真实双层数据管线</h3>
+          <p class="card-text" data-i18n="features.c3Text">
+            行业首创将“模型分发管线”与“底层网络代理路径”解耦观测。一眼看清当前请求是直连官方、走 OpenCodex 智能分流，还是被系统代理转发。
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon slate">🎮</div>
+          <h3 class="card-title" data-i18n="features.c4Title">状态驱动的全生命周期操作</h3>
+          <p class="card-text" data-i18n="features.c4Text">
+            安装、登录、启动、停止、重启或升级均受服务状态前置约束。支持 Node.js/NVM 运行时切换、npm 模块依赖校验，管理员特权操作标注 🛡️ 盾牌提示。
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon blue">🌍</div>
+          <h3 class="card-title" data-i18n="features.c5Title">精细公网出口 IP 诊断</h3>
+          <p class="card-text" data-i18n="features.c5Text">
+            直观展现 ChatGPT 真实外网出口 IP，配合国家国旗 Emoji、城市、运营商/AS 归属，并智能标注家庭宽带 (Residential) 或机房节点 (IDC)，告别被拒风险。
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-icon emerald">🌐</div>
+          <h3 class="card-title" data-i18n="features.c6Title">即时双语无缝切换</h3>
+          <p class="card-text" data-i18n="features.c6Text">
+            内置完整 English 与 简体中文 双语系统。不仅默认智能跟随 Windows 显示语言，更支持在设置中免重启即时热切换所有诊断文本与控制面板。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture Section -->
+  <section id="architecture" style="background-color: var(--bg-alt); padding: 80px 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="arch.tag">DATA PIPELINE ARCHITECTURE</span>
+        <h2 class="section-title" data-i18n="arch.title">双层链路观测：彻底弄清流量去向</h2>
+        <p class="section-desc" data-i18n="arch.desc">
+          AI 客户端与代理的故障 80% 出在路径错位上。Codex Beacon 将逻辑模型转发与底层物理通信分离开来，让问题无处遁形。
+        </p>
+      </div>
+
+      <div class="pipeline-container">
+        <!-- Layer 1 -->
+        <div class="pipeline-layer">
+          <div class="layer-header">
+            <span class="badge badge-primary">LAYER 1</span>
+            <h4 data-i18n="arch.l1Title">模型请求发起与分发管线 (Model Dispatch Pipeline)</h4>
+          </div>
+          <div class="flow-steps">
+            <div class="flow-card">
+              <div class="flow-step-badge">STEP 1 · CLIENT</div>
+              <div class="flow-card-title">Codex 客户端</div>
+              <div class="flow-card-sub">ChatGPT.exe / CLI</div>
+              <span class="flow-pill active">● 运行中</span>
+            </div>
+            <div class="flow-card">
+              <div class="flow-step-badge">STEP 2 · DISPATCH</div>
+              <div class="flow-card-title">本地分发代理</div>
+              <div class="flow-card-sub">OpenCodex · 127.0.0.1:10100</div>
+              <span class="flow-pill active">● 已监听</span>
+            </div>
+            <div class="flow-card">
+              <div class="flow-step-badge">STEP 3 · ROUTING</div>
+              <div class="flow-card-title">当前模型通道</div>
+              <div class="flow-card-sub">google-antigravity / deepseek</div>
+              <span class="flow-pill active">● 已激活</span>
+            </div>
+            <div class="flow-card">
+              <div class="flow-step-badge">STEP 4 · UPSTREAM</div>
+              <div class="flow-card-title">上游模型端点</div>
+              <div class="flow-card-sub">Upstream API Endpoint</div>
+              <span class="flow-pill active">● 正常连通</span>
+            </div>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed var(--card-border); margin: 32px 0;">
+
+        <!-- Layer 2 -->
+        <div class="pipeline-layer">
+          <div class="layer-header">
+            <span class="badge badge-emerald">LAYER 2</span>
+            <h4 data-i18n="arch.l2Title">底层网络通信与公网出口链路 (Network Proxy & Public Egress)</h4>
+          </div>
+          <div class="flow-steps">
+            <div class="flow-card">
+              <div class="flow-step-badge">NODE 1 · PROCESS</div>
+              <div class="flow-card-title">本机网络协议栈</div>
+              <div class="flow-card-sub">Windows TCP/IP Stack</div>
+              <span class="flow-pill active">● 正常</span>
+            </div>
+            <div class="flow-card">
+              <div class="flow-step-badge">NODE 2 · PROXY</div>
+              <div class="flow-card-title">系统/网络代理</div>
+              <div class="flow-card-sub">127.0.0.1:7890 (Clash / Tun)</div>
+              <span class="flow-pill active">● 端口畅通</span>
+            </div>
+            <div class="flow-card">
+              <div class="flow-step-badge">NODE 3 · EGRESS</div>
+              <div class="flow-card-title">ChatGPT 真实外网出口</div>
+              <div class="flow-card-sub">🇺🇸 104.28.x.x · Los Angeles</div>
+              <span class="flow-pill active">● IDC / Residential</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Desktop UI Gallery -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="gallery.tag">INTERFACE SHOWCASE</span>
+        <h2 class="section-title" data-i18n="gallery.title">精雕细琢的原生 Windows 11 交互</h2>
+        <p class="section-desc" data-i18n="gallery.desc">
+          完全遵循微软 Fluent Design System 规范，卡片化布局、清爽排版与直观的状态色谱。
+        </p>
+      </div>
+
+      <div style="background: #FFFFFF; border-radius: var(--radius-xl); border: 1px solid var(--card-border); overflow: hidden; box-shadow: var(--shadow-lg);">
+        <img src="assets/desktop-screenshot.png" alt="Codex Beacon 实际运行截图" style="width: 100%; display: block;">
+        <div style="padding: 24px 32px; background: #FFFFFF; border-top: 1px solid var(--card-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <h4 style="font-size: 1.1rem; margin-bottom: 4px;" data-i18n="gallery.capTitle">Codex Beacon 运行实况（浅色 Fluent 主题）</h4>
+            <p style="color: var(--text-muted); font-size: 0.9rem;" data-i18n="gallery.capDesc">左侧紧凑导航栏，右侧实时双层数据流卡片与服务状态网格，信息密度精准舒适。</p>
+          </div>
+          <span class="badge badge-primary">Windows App SDK 1.8</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ecosystem Matrix Comparison -->
+  <section style="background: var(--bg-alt); padding: 80px 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="matrix.tag">TOOLCHAIN INVENTORY</span>
+        <h2 class="section-title" data-i18n="matrix.title">受控生态组件一览</h2>
+        <p class="section-desc" data-i18n="matrix.desc">
+          核心官方工具链与社区可选扩展严格隔离，互不干扰，组件状态一目了然。
+        </p>
+      </div>
+
+      <div class="table-container">
+        <table class="comp-table">
+          <thead>
+            <tr>
+              <th data-i18n="matrix.thComp">组件名称</th>
+              <th data-i18n="matrix.thRole">角色定位</th>
+              <th data-i18n="matrix.thType">包体 / 宿主类型</th>
+              <th data-i18n="matrix.thAction">支持的管理动作</th>
+              <th data-i18n="matrix.thDep">依赖关系</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>OpenAI Codex Desktop</strong></td>
+              <td>Codex 官方桌面客户端 (ChatGPT.exe)</td>
+              <td>MSIX / Appx 本地安装</td>
+              <td>检测、启动、杀死守护进程、查看版本与账号</td>
+              <td><span class="badge badge-primary">产品核心</span></td>
+            </tr>
+            <tr>
+              <td><strong>Codex CLI</strong></td>
+              <td>OpenAI 官方命令行编码助手</td>
+              <td>npm: <code>@openai/codex</code></td>
+              <td>安装、升级到最新版、启动、更新检查</td>
+              <td>Node.js ≥ 22.14.0</td>
+            </tr>
+            <tr>
+              <td><strong>OpenCodex Proxy</strong></td>
+              <td>多模型提供商智能分流代理网关</td>
+              <td>npm: <code>@bitkyc08/opencodex</code></td>
+              <td>安装、升级、启动 10100 服务、重启、安全停止</td>
+              <td><span class="badge">可选扩展</span></td>
+            </tr>
+            <tr>
+              <td><strong>Codex Relay</strong></td>
+              <td>移动端与远程设备配对中继隧道</td>
+              <td>npm: <code>codex-relay</code></td>
+              <td>安装、升级、启动中继服务、登录与配对认证</td>
+              <td><span class="badge">可选扩展</span></td>
+            </tr>
+            <tr>
+              <td><strong>NVM & Node.js</strong></td>
+              <td>本地 Node 运行时版本管理环境</td>
+              <td>Windows 命令行工具</td>
+              <td>已安装版本列表、一键切换当前版本、安装指定 LTS</td>
+              <td>系统环境</td>
+            </tr>
+            <tr>
+              <td><strong>Tailscale</strong></td>
+              <td>跨设备安全网状虚拟私网 (Mesh VPN)</td>
+              <td>Windows 网络服务</td>
+              <td>读取在线节点列表、多虚拟 IP 展示、网络健康监测</td>
+              <td><span class="badge">网络支撑</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download Section -->
+  <section id="downloads">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="download.tag">DOWNLOAD & GET STARTED</span>
+        <h2 class="section-title" data-i18n="download.title">获取 Codex Beacon</h2>
+        <p class="section-desc" data-i18n="download.desc">
+          所有构建均已通过 Windows 10/11 本地测试，提供便携免安装版与精简依赖版两种选择。
+        </p>
+      </div>
+
+      <div class="download-grid">
+        <!-- Portable -->
+        <div class="download-card recommended">
+          <span class="recommended-badge" data-i18n="download.recBadge">推荐绝大多数用户</span>
+          <div>
+            <h3 class="download-name" data-i18n="download.pTitle">便携免安装版 (Portable)</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="download.pDesc">
+              开箱即用。已完整内嵌 .NET 10 运行时及 Windows App SDK，解压即可直接运行。
+            </p>
+            <ul class="download-specs">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.p1">无需在系统上单独安装任何运行库</span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.p2">自包含独立运行目录，绿色不留垃圾</span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.p3">体积约 87 MB (ZIP 压缩包)</span>
+              </li>
+            </ul>
+          </div>
+          <a href="https://github.com/hurmuri/codex-beacon/releases/latest" target="_blank" rel="noopener" class="btn btn-primary" style="width: 100%; padding: 14px;">
+            <svg width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span data-i18n="download.pBtn">下载 CodexBeacon-portable-win-x64.zip</span>
+          </a>
+        </div>
+
+        <!-- Runtime Dependent -->
+        <div class="download-card">
+          <div>
+            <h3 class="download-name" data-i18n="download.rTitle">依赖运行库版 (Slim)</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="download.rDesc">
+              极小体积包。适合已有 .NET 10 与 Windows App SDK 基础运行库的开发者。
+            </p>
+            <ul class="download-specs">
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.r1">需系统预装 .NET 10 Desktop Runtime x64</span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.r2">需系统预装 Windows App Runtime 1.8 x64</span>
+              </li>
+              <li>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+                <span data-i18n="download.r3">体积轻巧，仅约 11 MB</span>
+              </li>
+            </ul>
+          </div>
+          <a href="https://github.com/hurmuri/codex-beacon/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary" style="width: 100%; padding: 14px;">
+            <svg width="18" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span data-i18n="download.rBtn">下载 CodexBeacon-runtime-dependent-win-x64.zip</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- SHA256 Checksum -->
+      <div class="download-checksum">
+        <div class="checksum-header">
+          <h4 data-i18n="download.shaTitle">🔒 官方发布构建 SHA-256 校验值 (最新构建)</h4>
+          <span class="mono" style="font-size: 0.8rem; color: #94A3B8;">SHA256SUMS.txt</span>
+        </div>
+        <pre class="checksum-box"><code>e5b0ecffdf55850450534241e06573c004a2ea2e39ea7fe9f9f8fba3d5267be4 *CodexBeacon-0.3.0-portable-win-x64.zip
+e4e3b7b252cefb67c6da99859fbb34e9e4f52988185c6dfbf4ae3b8110b93867 *CodexBeacon-0.3.0-runtime-dependent-win-x64.zip</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section id="faq" style="background: var(--bg-alt); padding: 80px 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag" data-i18n="faq.tag">FREQUENTLY ASKED QUESTIONS</span>
+        <h2 class="section-title" data-i18n="faq.title">常见问题解答</h2>
+        <p class="section-desc" data-i18n="faq.desc">
+          关于系统要求、安全性、权限与运行机制的解答。
+        </p>
+      </div>
+
+      <div class="faq-list">
+        <details class="faq-item" open>
+          <summary class="faq-q" data-i18n="faq.q1">运行 Codex Beacon 的最低系统要求是什么？</summary>
+          <div class="faq-a" data-i18n="faq.a1">
+            操作系统要求 Windows 10 1809 (Build 17763) 或更高版本（推荐 Windows 11 最新版），仅支持 x64 架构。使用“便携免安装版 (Portable)”无需额外安装环境，解压即可运行。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q" data-i18n="faq.q2">运行此软件会读取或泄露我的 OpenAI API Key 吗？</summary>
+          <div class="faq-a" data-i18n="faq.a2">
+            <strong>绝对不会。</strong>Codex Beacon 在代码和架构层面实行零凭据保护（Zero-Credential Policy）。诊断程序仅探测进程命令行中的服务标识、已监听端口和网络 IP 归属，严格禁止读取、打印、记录或上传任何 API 密钥、Token 或模型交互文本。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q" data-i18n="faq.q3">启动时出现 Windows SmartScreen 提示如何处理？</summary>
+          <div class="faq-a" data-i18n="faq.a3">
+            由于本项目是社区开源项目且未购买昂贵的商业代码签名证书，Windows SmartScreen 可能会提示“已保护你的电脑”。点击“更多信息”，确认发布者信息后点击“仍要运行”即可。所有源代码均在 GitHub 开放审计。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q" data-i18n="faq.q4">为什么某些按钮带有 🛡️ 盾牌图标？</summary>
+          <div class="faq-a" data-i18n="faq.a4">
+            带有 🛡️ 图标的操作（如安装 Windows 服务、修改系统计划任务等）需要 Windows 管理员特权 (UAC Elevation)。点击后会弹出标准的 Windows 用户账户控制授权对话框，属于正常安全机制。
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary class="faq-q" data-i18n="faq.q5">安装 OpenCodex 或 Codex Relay 会影响原本的 Codex 配置吗？</summary>
+          <div class="faq-a" data-i18n="faq.a5">
+            不会。扩展组件与核心客户端是严格解耦的，安装可选扩展仅是部署该工具本身，不会私自覆写你的 <code>config.toml</code> 或修改原本指向官方的 <code>model_provider</code>。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="brand" style="margin-bottom: 12px;">
+            <img src="assets/app-icon.png" alt="Codex Beacon" class="brand-logo" style="width: 30px; height: 30px;">
+            <span>Codex Beacon</span>
+          </div>
+          <p class="footer-desc" data-i18n="footer.desc">
+            专为 Windows 打造的 OpenAI Codex 原生服务、CLI、代理与网络生态管控看板。
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h5 data-i18n="footer.col1">开源生态</h5>
+          <ul class="footer-links">
+            <li><a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener">GitHub 仓库</a></li>
+            <li><a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener">发布日志</a></li>
+            <li><a href="https://github.com/hurmuri/codex-beacon/blob/main/LICENSE" target="_blank" rel="noopener">MIT 开源许可</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5 data-i18n="footer.col2">上游与参考</h5>
+          <ul class="footer-links">
+            <li><a href="https://github.com/openai/codex" target="_blank" rel="noopener">OpenAI Codex</a></li>
+            <li><a href="https://github.com/lidge-jun/opencodex" target="_blank" rel="noopener">OpenCodex</a></li>
+            <li><a href="https://github.com/gronxb/codex-relay" target="_blank" rel="noopener">Codex Relay</a></li>
+            <li><a href="https://tailscale.com" target="_blank" rel="noopener">Tailscale</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h5 data-i18n="footer.col3">文档与支持</h5>
+          <ul class="footer-links">
+            <li><a href="https://github.com/hurmuri/codex-beacon/issues" target="_blank" rel="noopener">提交问题反馈</a></li>
+            <li><a href="https://github.com/hurmuri/codex-beacon/discussions" target="_blank" rel="noopener">社区讨论</a></li>
+            <li><a href="https://github.com/hurmuri/codex-beacon/blob/main/SECURITY.md" target="_blank" rel="noopener">安全策略</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          © 2026 Codex Beacon Contributors. Released under the MIT License.
+        </div>
+        <div>
+          Designed with ❤️ for Windows AI Developers · Hosted on GitHub Pages
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Internationalization Script -->
+  <script>
+    const translations = {
+      'zh-CN': {
+        'nav.features': '核心特性',
+        'nav.architecture': '双层管线架构',
+        'nav.gallery': '原生界面',
+        'nav.downloads': '版本下载',
+        'nav.faq': '常见问题',
+        'hero.badge': 'v0.3.0 最新稳定版现已发布 · 专为 Windows 打造',
+        'hero.titleGradient': 'Windows 原生控制中心',
+        'hero.desc': '统一纳管 Windows 上的 Codex 桌面客户端、CLI、OpenCodex 模型分发代理、Codex Relay 移动端中继与 Tailscale 网状拓扑。告别繁杂的控制台命令，在 Windows 11 Fluent 原生面板中纵览全局。',
+        'hero.downloadBtn': '立即下载便携版 (免安装)',
+        'hero.githubBtn': 'GitHub 开源仓库',
+        'hero.metaWin': '兼容 Windows 10 1809+ / Windows 11',
+        'hero.metaZero': '零凭据存储 · 保护 API 密钥安全',
+        'hero.metaWinui': 'WinUI 3 原生明亮 Fluent 体验',
+        'hero.captionLeft': '🖥️ 真实 Windows 桌面运行截图 · 浅色 Fluent 原生设计',
+        'features.tag': 'CORE CAPABILITIES',
+        'features.title': '为何需要专用的管控中心？',
+        'features.desc': 'AI 研发工具链的扩展让开发者需要在桌面客户端、CLI、代理服务和 VPN 隧道间反复横跳。Codex Beacon 让一切生命周期在单一窗口内透明受控。',
+        'features.c1Title': 'WinUI 3 原生 Fluent 质感',
+        'features.c1Text': '基于 Windows App SDK 与 C# 构建，坚持明亮主题与 Windows 11 设计语言规范。无 Chromium/Electron 内存膨胀，冷启动毫秒级响应，与 Windows 系统体验严丝合缝。',
+        'features.c2Title': '零凭据原则 · 绝不触碰密钥',
+        'features.c2Text': '坚持最严格的安全隐私底线：系统仅通过进程树、端口监听与 TCP 状态判断服务健康，绝不读取、存储或上传任何 API Token、登录凭据或会话载荷。',
+        'features.c3Title': '真实双层数据管线',
+        'features.c3Text': '行业首创将“模型分发管线”与“底层网络代理路径”解耦观测。一眼看清当前请求是直连官方、走 OpenCodex 智能分流，还是被系统代理转发。',
+        'features.c4Title': '状态驱动的全生命周期操作',
+        'features.c4Text': '安装、登录、启动、停止、重启或升级均受服务状态前置约束。支持 Node.js/NVM 运行时切换、npm 模块依赖校验，管理员特权操作标注 🛡️ 盾牌提示。',
+        'features.c5Title': '精细公网出口 IP 诊断',
+        'features.c5Text': '直观展现 ChatGPT 真实外网出口 IP，配合国家国旗 Emoji、城市、运营商/AS 归属，并智能标注家庭宽带 (Residential) 或机房节点 (IDC)，告别被拒风险。',
+        'features.c6Title': '即时双语无缝切换',
+        'features.c6Text': '内置完整 English 与 简体中文 双语系统。不仅默认智能跟随 Windows 显示语言，更支持在设置中免重启即时热切换所有诊断文本与控制面板。',
+        'arch.tag': 'DATA PIPELINE ARCHITECTURE',
+        'arch.title': '双层链路观测：彻底弄清流量去向',
+        'arch.desc': 'AI 客户端与代理的故障 80% 出在路径错位上。Codex Beacon 将逻辑模型转发与底层物理通信分离开来，让问题无处遁形。',
+        'arch.l1Title': '模型请求发起与分发管线 (Model Dispatch Pipeline)',
+        'arch.l2Title': '底层网络通信与公网出口链路 (Network Proxy & Public Egress)',
+        'gallery.tag': 'INTERFACE SHOWCASE',
+        'gallery.title': '精雕细琢的原生 Windows 11 交互',
+        'gallery.desc': '完全遵循微软 Fluent Design System 规范，卡片化布局、清爽排版与直观的状态色谱。',
+        'gallery.capTitle': 'Codex Beacon 运行实况（浅色 Fluent 主题）',
+        'gallery.capDesc': '左侧紧凑导航栏，右侧实时双层数据流卡片与服务状态网格，信息密度精准舒适。',
+        'matrix.tag': 'TOOLCHAIN INVENTORY',
+        'matrix.title': '受控生态组件一览',
+        'matrix.desc': '核心官方工具链与社区可选扩展严格隔离，互不干扰，组件状态一目了然。',
+        'matrix.thComp': '组件名称',
+        'matrix.thRole': '角色定位',
+        'matrix.thType': '包体 / 宿主类型',
+        'matrix.thAction': '支持的管理动作',
+        'matrix.thDep': '依赖关系',
+        'download.tag': 'DOWNLOAD & GET STARTED',
+        'download.title': '获取 Codex Beacon',
+        'download.desc': '所有构建均已通过 Windows 10/11 本地测试，提供便携免安装版与精简依赖版两种选择。',
+        'download.recBadge': '推荐绝大多数用户',
+        'download.pTitle': '便携免安装版 (Portable)',
+        'download.pDesc': '开箱即用。已完整内嵌 .NET 10 运行时及 Windows App SDK，解压即可直接运行。',
+        'download.p1': '无需在系统上单独安装任何运行库',
+        'download.p2': '自包含独立运行目录，绿色不留垃圾',
+        'download.p3': '体积约 87 MB (ZIP 压缩包)',
+        'download.pBtn': '下载 CodexBeacon-portable-win-x64.zip',
+        'download.rTitle': '依赖运行库版 (Slim)',
+        'download.rDesc': '极小体积包。适合已有 .NET 10 与 Windows App SDK 基础运行库的开发者。',
+        'download.r1': '需系统预装 .NET 10 Desktop Runtime x64',
+        'download.r2': '需系统预装 Windows App Runtime 1.8 x64',
+        'download.r3': '体积轻巧，仅约 11 MB',
+        'download.rBtn': '下载 CodexBeacon-runtime-dependent-win-x64.zip',
+        'download.shaTitle': '🔒 官方发布构建 SHA-256 校验值 (最新构建)',
+        'faq.tag': 'FREQUENTLY ASKED QUESTIONS',
+        'faq.title': '常见问题解答',
+        'faq.desc': '关于系统要求、安全性、权限与运行机制的解答。',
+        'faq.q1': '运行 Codex Beacon 的最低系统要求是什么？',
+        'faq.a1': '操作系统要求 Windows 10 1809 (Build 17763) 或更高版本（推荐 Windows 11 最新版），仅支持 x64 架构。使用“便携免安装版 (Portable)”无需额外安装环境，解压即可运行。',
+        'faq.q2': '运行此软件会读取或泄露我的 OpenAI API Key 吗？',
+        'faq.a2': '绝对不会。Codex Beacon 在代码和架构层面实行零凭据保护（Zero-Credential Policy）。诊断程序仅探测进程命令行中的服务标识、已监听端口和网络 IP 归属，严格禁止读取、打印、记录或上传任何 API 密钥、Token 或模型交互文本。',
+        'faq.q3': '启动时出现 Windows SmartScreen 提示如何处理？',
+        'faq.a3': '由于本项目是社区开源项目且未购买昂贵的商业代码签名证书，Windows SmartScreen 可能会提示“已保护你的电脑”。点击“更多信息”，确认发布者信息后点击“仍要运行”即可。所有源代码均在 GitHub 开放审计。',
+        'faq.q4': '为什么某些按钮带有 🛡️ 盾牌图标？',
+        'faq.a4': '带有 🛡️ 图标的操作（如安装 Windows 服务、修改系统计划任务等）需要 Windows 管理员特权 (UAC Elevation)。点击后会弹出标准的 Windows 用户账户控制授权对话框，属于正常安全机制。',
+        'faq.q5': '安装 OpenCodex 或 Codex Relay 会影响原本的 Codex 配置吗？',
+        'faq.a5': '不会。扩展组件与核心客户端是严格解耦的，安装可选扩展仅是部署该工具本身，不会私自覆写你的 config.toml 或修改原本指向官方的 model_provider。',
+        'footer.desc': '专为 Windows 打造的 OpenAI Codex 原生服务、CLI、代理与网络生态管控看板。',
+        'footer.col1': '开源生态',
+        'footer.col2': '上游与参考',
+        'footer.col3': '文档与支持'
+      },
+      'en-US': {
+        'nav.features': 'Features',
+        'nav.architecture': 'Architecture',
+        'nav.gallery': 'Gallery',
+        'nav.downloads': 'Downloads',
+        'nav.faq': 'FAQ',
+        'hero.badge': 'v0.3.0 Latest Release Now Live · Built for Windows',
+        'hero.titleGradient': 'Native Windows Control Center',
+        'hero.desc': 'Unified management for OpenAI Codex desktop app, CLI, OpenCodex model proxy, Codex Relay tunnels, and Tailscale mesh VPN on Windows. No more messy terminal windows—experience clean Fluent native UI.',
+        'hero.downloadBtn': 'Download Portable Release (No Install)',
+        'hero.githubBtn': 'GitHub Repository',
+        'hero.metaWin': 'Compatible with Windows 10 1809+ / Windows 11',
+        'hero.metaZero': 'Zero-Credential Policy · API Keys Safe',
+        'hero.metaWinui': 'WinUI 3 Native Light Fluent Experience',
+        'hero.captionLeft': '🖥️ Live Windows Desktop Execution · Light Fluent Design',
+        'features.tag': 'CORE CAPABILITIES',
+        'features.title': 'Why a Dedicated Control Center?',
+        'features.desc': 'As your local AI toolchain expands, managing desktop apps, CLI tools, proxies, and tunnels becomes a headache. Codex Beacon brings total visibility in a single native window.',
+        'features.c1Title': 'WinUI 3 Native Fluent UI',
+        'features.c1Text': 'Built with Windows App SDK and C#, adhering strictly to Windows 11 Fluent guidelines. Zero Electron bloat, millisecond cold boot, and perfectly matched system aesthetics.',
+        'features.c2Title': 'Zero-Credential Policy',
+        'features.c2Text': 'Uncompromising security: the system inspects processes, listening ports, and TCP topologies without ever reading, storing, or transmitting API tokens or conversation payloads.',
+        'features.c3Title': 'Dual-Layer Live Pipelines',
+        'features.c3Text': 'Pioneering decoupled observation of the "Model Dispatch Pipeline" and "Network Proxy Path". Instantly tell whether requests hit official endpoints, OpenCodex proxies, or system gateways.',
+        'features.c4Title': 'State-Driven Operations',
+        'features.c4Text': 'Actions like Install, Sign In, Start, Stop, and Upgrade are strictly bounded by actual service states. Node.js/NVM switching supported, with 🛡️ shields for elevated UAC actions.',
+        'features.c5Title': 'Granular Public Egress Diagnostics',
+        'features.c5Text': 'Accurately inspects ChatGPT public egress IP with country flag emoji, city, ISP/organization, and smart Residential vs IDC classification to prevent access blocks.',
+        'features.c6Title': 'Instant Bilingual Switching',
+        'features.c6Text': 'Complete native English and Simplified Chinese support. Automatically respects Windows display language and supports instant in-app switching without process restarts.',
+        'arch.tag': 'DATA PIPELINE ARCHITECTURE',
+        'arch.title': 'Dual-Layer Pipelines: Know Where Packets Go',
+        'arch.desc': 'Over 80% of local AI client issues stem from path misconfigurations. Codex Beacon cleanly separates logical model dispatching from physical transport proxies.',
+        'arch.l1Title': 'Model Dispatch Pipeline (Logical Routing)',
+        'arch.l2Title': 'Network Proxy & Public Egress (Transport Routing)',
+        'gallery.tag': 'INTERFACE SHOWCASE',
+        'gallery.title': 'Crafted for Native Windows 11',
+        'gallery.desc': 'Adheres to Microsoft Fluent Design with clean card layouts, crisp typography, and intuitive status colors.',
+        'gallery.capTitle': 'Codex Beacon in Action (Light Fluent Theme)',
+        'gallery.capDesc': 'Compact left navigation, live dual-layer data pipeline cards, and service status grids with optimal information density.',
+        'matrix.tag': 'TOOLCHAIN INVENTORY',
+        'matrix.title': 'Managed Ecosystem Overview',
+        'matrix.desc': 'Official core clients and community optional extensions remain strictly decoupled with transparent statuses.',
+        'matrix.thComp': 'Component',
+        'matrix.thRole': 'Role & Purpose',
+        'matrix.thType': 'Package / Host',
+        'matrix.thAction': 'Supported Actions',
+        'matrix.thDep': 'Dependencies',
+        'download.tag': 'DOWNLOAD & GET STARTED',
+        'download.title': 'Get Codex Beacon',
+        'download.desc': 'All builds are verified locally on Windows 10/11. Choose between the self-contained Portable edition or the Slim edition.',
+        'download.recBadge': 'Recommended for Most Users',
+        'download.pTitle': 'Portable Edition (Self-Contained)',
+        'download.pDesc': 'Ready out of the box. Fully bundles .NET 10 Runtime and Windows App SDK. Unzip and run immediately.',
+        'download.p1': 'No pre-installed runtime dependencies required',
+        'download.p2': 'Completely portable directory, clean and isolated',
+        'download.p3': 'Archive size: ~87 MB (ZIP)',
+        'download.pBtn': 'Download CodexBeacon-portable-win-x64.zip',
+        'download.rTitle': 'Slim Edition (Runtime-Dependent)',
+        'download.rDesc': 'Minimal footprint for developers who already have .NET 10 and Windows App SDK installed.',
+        'download.r1': 'Requires .NET 10 Desktop Runtime x64 installed',
+        'download.r2': 'Requires Windows App Runtime 1.8 x64 installed',
+        'download.r3': 'Extremely lightweight: ~11 MB',
+        'download.rBtn': 'Download CodexBeacon-runtime-dependent-win-x64.zip',
+        'download.shaTitle': '🔒 Official Release SHA-256 Checksums (Latest Build)',
+        'faq.tag': 'FREQUENTLY ASKED QUESTIONS',
+        'faq.title': 'Frequently Asked Questions',
+        'faq.desc': 'Answers regarding system requirements, security, privileges, and runtime architecture.',
+        'faq.q1': 'What are the minimum system requirements?',
+        'faq.a1': 'Requires Windows 10 1809 (Build 17763) or later (Windows 11 recommended), x64 architecture only. Using the Portable edition requires no extra runtime installation.',
+        'faq.q2': 'Will this app read or expose my OpenAI API keys?',
+        'faq.a2': 'Never. Codex Beacon enforces a strict Zero-Credential Policy at both code and design levels. It only queries process names, listening ports, and network routes, never reading or logging tokens or payloads.',
+        'faq.q3': 'What should I do if Windows SmartScreen displays a warning?',
+        'faq.a3': 'Because this is an open-source community project without an expensive commercial code-signing certificate, SmartScreen may show a prompt. Click "More info" and then "Run anyway". All code is open for review on GitHub.',
+        'faq.q4': 'Why do some action buttons feature a 🛡️ shield icon?',
+        'faq.a4': 'Actions with a 🛡️ icon (such as managing Windows services or scheduled tasks) require Windows Administrator elevation (UAC). Clicking them triggers the standard Windows UAC prompt.',
+        'faq.q5': 'Does installing OpenCodex or Codex Relay alter my existing Codex setup?',
+        'faq.a5': 'No. Optional extensions are completely decoupled. Installing an extension simply deploys that module and will never overwrite config.toml or switch your model provider automatically.',
+        'footer.desc': 'Native Windows control center for OpenAI Codex app, CLI, proxy bridges, and network mesh topologies.',
+        'footer.col1': 'Ecosystem',
+        'footer.col2': 'Upstream & Credits',
+        'footer.col3': 'Docs & Support'
+      }
+    };
+
+    let currentLang = 'zh-CN';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      
+      const btnText = document.getElementById('langText');
+      if (btnText) {
+        btnText.textContent = lang === 'zh-CN' ? 'English' : '简体中文';
+      }
+
+      const heroImg = document.getElementById('heroImg');
+      if (heroImg) {
+        heroImg.src = lang === 'zh-CN' ? 'assets/codex-beacon-hero-zh.png' : 'assets/codex-beacon-hero-en.png';
+      }
+
+      const elements = document.querySelectorAll('[data-i18n]');
+      elements.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (translations[lang] && translations[lang][key]) {
+          el.innerHTML = translations[lang][key];
+        }
+      });
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'zh-CN' ? 'en-US' : 'zh-CN';
+      setLanguage(nextLang);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const userLang = navigator.language || navigator.userLanguage;
+      if (userLang && !userLang.toLowerCase().startsWith('zh')) {
+        setLanguage('en-US');
+      } else {
+        setLanguage('zh-CN');
+      }
+    });
+  </script>
+</body>
+</html>
