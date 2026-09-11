@@ -56,13 +56,17 @@ Every code modification must go through a complete inspection, single-file build
 2. Single-File Packaging with Versioning (独立单文件打包):
    - The application must always be packaged as a **single, standalone executable** (`.exe`).
    - **Never produce or distribute `.zip` archive packages.**
-   - The executable output must include the semantic version number in its filename, following the format: `CodexBeacon-<version>.exe` (for example, `CodexBeacon-0.3.22.exe`), alongside a sibling `CodexBeacon.exe` for convenient direct invocation.
-   - Run the automated single-file build:
+   - Maintain dual single-file release variants (双打包规范：含运行时与不含运行时):
+     1. **Portable (含运行时完整版)**: Self-contained with bundled .NET runtime and Windows App SDK payload. Runs out-of-the-box on any target machine without external runtime prerequisites. Outputs as `publish\CodexBeacon-<version>.exe` (and convenient sibling `publish\CodexBeacon.exe`).
+     2. **Slim (不含运行时精简版)**: Framework-dependent payload relying on the machine's installed .NET runtime, producing a much smaller standalone executable. Outputs as `publish\CodexBeacon-<version>-slim.exe`.
+   - Both variants must be built as single, standalone `.exe` executables without companion ZIPs or loose dependency folders.
+   - Run the automated single-file dual build:
      ```powershell
-     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Build-SingleFile.ps1 -Target portable
+     powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Build-SingleFile.ps1 -Target all
      ```
-   - The single executable will be generated at:
-     `publish\CodexBeacon-<version>.exe`
+   - The standalone executables are generated directly at:
+     - `publish\CodexBeacon-<version>.exe` (Portable)
+     - `publish\CodexBeacon-<version>-slim.exe` (Slim)
 
 3. Changelog & GitHub Workflow (日志生成与代码推送):
    - Update `CHANGELOG.md` with all notable additions, changes, and fixes under the current release header.
