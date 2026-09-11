@@ -1,12 +1,69 @@
 ﻿param(
     [switch]$IncludeLatest,
-    [string]$SettingsPath = ''
+    [string]$SettingsPath = '',
+    [ValidateSet('en-US','zh-CN')][string]$Language = 'en-US'
 )
 
 $ErrorActionPreference = 'SilentlyContinue'
 $ProgressPreference = 'SilentlyContinue'
 [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
 $OutputEncoding = [Console]::OutputEncoding
+
+function Convert-UiText([string]$Text) {
+    if ($Language -ne 'en-US' -or [string]::IsNullOrEmpty($Text)) { return $Text }
+    $exact = @{
+        '尚未查询远端版本' = 'Remote version not checked'; '远端版本清单暂时不可达' = 'The remote version manifest is temporarily unavailable'
+        'Node.js 版本管理器' = 'Node.js version manager'; '安装前置条件' = 'Installation prerequisite'
+        'Codex 桌面客户端' = 'Codex desktop app'; 'OpenAI 官方 Windows 应用' = 'Official OpenAI Windows app'
+        'Codex 桌面应用' = 'Codex desktop app'; 'Codex 工具运行时' = 'Codex tool runtime'; 'Codex CLI / 子进程' = 'Codex CLI / child process'
+        'Codex 客户端' = 'Codex clients'; '本机进程与当前配置' = 'Local processes and active configuration'
+        '当前 Provider' = 'Active provider'; 'config.toml 的 model_provider' = 'model_provider in config.toml'
+        '默认 Provider' = 'Default provider'; 'OpenAI 官方服务' = 'Official OpenAI service'
+        'config.toml 未选择自定义 model_provider' = 'No custom model_provider is selected in config.toml'
+        'Provider 端点' = 'Provider endpoint'; '当前 provider 的 base_url' = 'base_url of the active provider'
+        '当前 Provider 上游' = 'Active provider upstream'; 'Codex 服务连接' = 'Codex service connection'
+        '外网上游' = 'External upstream'; '当前 Provider 的已建立 TCP 连接（远端服务 IP）' = 'Established TCP connections from the active provider (remote service IPs)'
+        '空闲时按需连接' = 'Connects on demand when active'; '采样时没有可归属的已建立连接' = 'No attributable established connection was observed during this sample'
+        '备用端点' = 'Fallback endpoint'; '已配置，未证明参与当前路径' = 'Configured, but not proven to participate in the active path'
+        '系统默认网络路径' = 'System default network path'; 'api64.ipify.org 从外部观察' = 'Observed externally by api64.ipify.org'
+        '当前在线' = 'Online now'; '未知' = 'Unknown'; 'Windows 网络服务' = 'Windows network service'
+        '未检测到 Codex 桌面客户端或 Codex CLI' = 'Codex desktop app and Codex CLI were not detected'
+        'Codex 已安装，但当前 Provider 的本地端点未就绪' = 'Codex is installed, but the local endpoint for the active provider is not ready'
+        'Codex 客户端管理已就绪；扩展模块为可选项' = 'Codex client management is ready; extension modules are optional'
+        '为保护凭据，不展示进程参数' = 'Process arguments are hidden to protect credentials'
+    }
+    if ($exact.ContainsKey($Text)) { return $exact[$Text] }
+    $Text = $Text -replace '正在运行', 'Running'
+    $Text = $Text -replace '尚未查询远端版本', 'Remote version not checked'
+    $Text = $Text -replace '远端版本清单暂时不可达', 'The remote version manifest is temporarily unavailable'
+    $Text = $Text -replace '^同步 Microsoft Store 产品 (.+) · 清单 (.+)$', 'Synced Microsoft Store product $1 · manifest $2'
+    $Text = $Text -replace '^(\d+) 个已安装的 Node\.js 版本 · ', '$1 installed Node.js version(s) · '
+    $Text = $Text -replace '^未在 PATH 中检测到 nvm\.exe$', 'nvm.exe was not found on PATH'
+    $Text = $Text -replace '^满足 Codex Relay 的最低要求 ≥ 22\.14\.0 · ', 'Meets the Codex Relay minimum requirement ≥ 22.14.0 · '
+    $Text = $Text -replace '^版本过低；请先升级 Node\.js 至 22\.14\.0 或更高版本$', 'Version is too old; upgrade Node.js to 22.14.0 or newer'
+    $Text = $Text -replace '^未在 PATH 中检测到 node\.exe$', 'node.exe was not found on PATH'
+    $Text = $Text -replace '^包管理器可用 · ', 'Package manager available · '
+    $Text = $Text -replace '^未在 PATH 中检测到 npm\.cmd，无法安装或升级组件$', 'npm.cmd was not found on PATH; components cannot be installed or upgraded'
+    $Text = $Text -replace '^未检测到 OpenAI\.Codex 应用包$', 'The OpenAI.Codex app package was not detected'
+    $Text = $Text -replace '^已安装，Codex 账号尚未登录$', 'Installed; the Codex account is signed out'
+    $Text = $Text -replace '^正在运行$', 'Running'
+    $Text = $Text -replace '^已安装，当前未运行$', 'Installed; currently stopped'
+    $Text = $Text -replace '^未检测到全局 npm 包$', 'The global npm package was not detected'
+    $Text = $Text -replace '^已安装，但尚未登录账号$', 'Installed, but signed out'
+    $Text = $Text -replace '^已安装并已登录账号$', 'Installed and signed in'
+    $Text = $Text -replace '^已安装；登录状态无法确认$', 'Installed; sign-in status could not be confirmed'
+    $Text = $Text -replace '^监听端口 (.+) · 计划任务 (.+)$', 'Listening on port(s) $1 · scheduled task $2'
+    $Text = $Text -replace '^包已安装，但计划任务尚未配置$', 'Package installed; scheduled task not configured'
+    $Text = $Text -replace '^未检测到监听端口 · 计划任务 (.+)$', 'No listening port detected · scheduled task $1'
+    $Text = $Text -replace '^127\.0\.0\.1:8787 正在监听 · 计划任务 (.+)$', '127.0.0.1:8787 is listening · scheduled task $1'
+    $Text = $Text -replace '^包已安装；点击启动可使用官方后台模式$', 'Package installed; select Start to use the official background mode'
+    $Text = $Text -replace '^端口 8787 未监听 · 计划任务 (.+)$', 'Port 8787 is not listening · scheduled task $1'
+    $Text = $Text -replace '^未安装 Tailscale$', 'Tailscale is not installed'
+    $Text = $Text -replace '^已安装，但尚未登录 Tailnet$', 'Installed, but signed out of the Tailnet'
+    $Text = $Text -replace '^未读取到 Tailnet 状态$', 'Tailnet status could not be read'
+    $Text = $Text -replace '^监听进程 PID (\d+)$', 'Listening process PID $1'
+    return $Text
+}
 
 function Invoke-VersionCommand([string]$Command, [string[]]$Arguments) {
     try {
@@ -287,5 +344,15 @@ $snapshot = [ordered]@{
     OverallState = $(if (-not $coreInstalled) { 'Stopped' } elseif ($routeNeedsAttention) { 'Warning' } else { 'Healthy' })
     OverallMessage = $(if (-not $coreInstalled) { '未检测到 Codex 桌面客户端或 Codex CLI' } elseif ($routeNeedsAttention) { 'Codex 已安装，但当前 Provider 的本地端点未就绪' } else { 'Codex 客户端管理已就绪；扩展模块为可选项' })
     Components = $components; Processes = $processes; ProxyChain = $proxyHops; CandidateEndpoints = $candidateEndpoints; ExternalConnections = $externalConnections; PublicEgress = $publicEgress; TailscaleDevices = $tailDevices; NodeVersions = $nodeVersions; Error = $null
+}
+if ($Language -eq 'en-US') {
+    $snapshot.OverallMessage = Convert-UiText $snapshot.OverallMessage
+    foreach ($item in $snapshot.Components) { $item.Name = Convert-UiText $item.Name; $item.Kind = Convert-UiText $item.Kind; $item.Detail = Convert-UiText $item.Detail }
+    foreach ($item in $snapshot.Processes) { $item.Role = Convert-UiText $item.Role; $item.CommandLine = Convert-UiText $item.CommandLine }
+    foreach ($item in $snapshot.ProxyChain) { $item.Name = Convert-UiText $item.Name; $item.Address = Convert-UiText $item.Address; $item.Evidence = Convert-UiText $item.Evidence }
+    foreach ($item in $snapshot.CandidateEndpoints) { $item.Name = Convert-UiText $item.Name; $item.Evidence = Convert-UiText $item.Evidence }
+    foreach ($item in $snapshot.ExternalConnections) { $item.Role = Convert-UiText $item.Role }
+    foreach ($item in $snapshot.PublicEgress) { $item.Route = Convert-UiText $item.Route; $item.Evidence = Convert-UiText $item.Evidence }
+    foreach ($item in $snapshot.TailscaleDevices) { $item.LastSeen = Convert-UiText $item.LastSeen }
 }
 $snapshot | ConvertTo-Json -Depth 7 -Compress

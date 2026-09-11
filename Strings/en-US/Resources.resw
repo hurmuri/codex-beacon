@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="NavDashboard.Content" xml:space="preserve"><value>Overview</value></data>
+  <data name="NavProcesses.Content" xml:space="preserve"><value>Processes</value></data>
+  <data name="NavNetwork.Content" xml:space="preserve"><value>Network &amp; proxy</value></data>
+  <data name="NavInstallations.Content" xml:space="preserve"><value>Installations</value></data>
+  <data name="NavSettings.Content" xml:space="preserve"><value>Settings</value></data>
+  <data name="DashboardTitle.Text" xml:space="preserve"><value>System pulse</value></data>
+  <data name="OverallMessage.Text" xml:space="preserve"><value>Reading the local Codex toolchain…</value></data>
+  <data name="RefreshNow.Text" xml:space="preserve"><value>Refresh now</value></data>
+  <data name="CurrentDataPath.Title" xml:space="preserve"><value>Current data path</value></data>
+  <data name="AwaitingFirstSample.Text" xml:space="preserve"><value>Awaiting first sample</value></data>
+  <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>Service status</value></data>
+  <data name="VersionLabel.Text" xml:space="preserve"><value>Version</value></data>
+  <data name="ActionInstall.Label" xml:space="preserve"><value>Install</value></data>
+  <data name="ActionLogin.Label" xml:space="preserve"><value>Sign in</value></data>
+  <data name="ActionStart.Label" xml:space="preserve"><value>Start</value></data>
+  <data name="ActionStop.Label" xml:space="preserve"><value>Stop</value></data>
+  <data name="ActionRestart.Label" xml:space="preserve"><value>Restart</value></data>
+  <data name="ActionUpgrade.Label" xml:space="preserve"><value>Upgrade</value></data>
+  <data name="TailscaleOverviewHeading.Text" xml:space="preserve"><value>Tailscale overview</value></data>
+  <data name="TailscaleNetworkCard.Header" xml:space="preserve"><value>Tailscale network</value></data>
+  <data name="ReadingTailnet.Text" xml:space="preserve"><value>Reading Tailnet…</value></data>
+  <data name="DeviceStatusPlaceholder.Text" xml:space="preserve"><value>Device status will appear here</value></data>
+  <data name="ViewDevices.Content" xml:space="preserve"><value>View devices</value></data>
+  <data name="ProcessesTitle.Text" xml:space="preserve"><value>Codex processes</value></data>
+  <data name="ProcessesDescription.Text" xml:space="preserve"><value>Identifies the desktop app, CLI, proxies, Relay, and their runtimes by parent-child relationship. Unrelated Node.js processes are excluded.</value></data>
+  <data name="ProcessRoleHeader.Text" xml:space="preserve"><value>Role / process</value></data>
+  <data name="ProcessVersionHeader.Text" xml:space="preserve"><value>Version</value></data>
+  <data name="ProcessStartedHeader.Text" xml:space="preserve"><value>Started</value></data>
+  <data name="ProcessPathHeader.Text" xml:space="preserve"><value>Executable path</value></data>
+  <data name="RecoveryControlsHeading.Text" xml:space="preserve"><value>Recovery controls</value></data>
+  <data name="BulkRecoveryCard.Header" xml:space="preserve"><value>Recover optional services</value></data>
+  <data name="BulkRecoveryCard.Description" xml:space="preserve"><value>Only OpenCodex Proxy, Codex Relay, and explicitly matched service processes are affected. The Codex desktop app and Codex Beacon stay open.</value></data>
+  <data name="TerminateServices.Label" xml:space="preserve"><value>Terminate services</value></data>
+  <data name="RestartAll.Label" xml:space="preserve"><value>Restart all</value></data>
+  <data name="NetworkTitle.Text" xml:space="preserve"><value>Network &amp; proxy</value></data>
+  <data name="NetworkDescription.Text" xml:space="preserve"><value>Builds the active request path from configuration, environment, listening ports, and observed processes. Sensitive credentials are never read or displayed.</value></data>
+  <data name="ProxyChainHeading.Text" xml:space="preserve"><value>Codex proxy chain</value></data>
+  <data name="PublicEgressHeading.Text" xml:space="preserve"><value>Public egress</value></data>
+  <data name="ExternalConnectionsHeading.Text" xml:space="preserve"><value>Current external connections</value></data>
+  <data name="CandidateEndpointsHeading.Text" xml:space="preserve"><value>Configured fallback endpoints</value></data>
+  <data name="TailnetDevicesHeading.Text" xml:space="preserve"><value>Tailnet devices</value></data>
+  <data name="InstallationsTitle.Text" xml:space="preserve"><value>Installation management</value></data>
+  <data name="InstallationsDescription.Text" xml:space="preserve"><value>Reads versions from the official npm registry. Installation and upgrades preserve existing configuration and trigger a fresh check when complete.</value></data>
+  <data name="NvmExpander.Header" xml:space="preserve"><value>NVM · Node.js version control</value></data>
+  <data name="NvmExpander.Description" xml:space="preserve"><value>Manage locally installed Node.js versions. Codex Relay requires Node.js 22.14.0 or newer.</value></data>
+  <data name="CurrentEnvironmentCard.Header" xml:space="preserve"><value>Current environment</value></data>
+  <data name="CheckingNvm.Text" xml:space="preserve"><value>Checking NVM…</value></data>
+  <data name="SwitchNodeCard.Header" xml:space="preserve"><value>Switch Node.js</value></data>
+  <data name="SwitchNodeCard.Description" xml:space="preserve"><value>Select a version installed by NVM</value></data>
+  <data name="NodeVersionPickerText.PlaceholderText" xml:space="preserve"><value>Select an installed version</value></data>
+  <data name="ApplyNodeVersion.Content" xml:space="preserve"><value>Apply</value></data>
+  <data name="InstallNodeCard.Header" xml:space="preserve"><value>Install Node.js</value></data>
+  <data name="InstallNodeCard.Description" xml:space="preserve"><value>Enter a full version, for example 24.15.0</value></data>
+  <data name="InstallNodeButton.Content" xml:space="preserve"><value>Install</value></data>
+  <data name="PrerequisitesExpander.Header" xml:space="preserve"><value>Installation prerequisites</value></data>
+  <data name="PrerequisitesExpander.Description" xml:space="preserve"><value>Validate the runtime and package manager before installing or upgrading npm packages.</value></data>
+  <data name="CheckingVersionPath.Text" xml:space="preserve"><value>Checking version and path…</value></data>
+  <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>Installed version</value></data>
+  <data name="LatestVersionLabel.Text" xml:space="preserve"><value>Latest known version</value></data>
+  <data name="InstallPackageButton.Content" xml:space="preserve"><value>Install</value></data>
+  <data name="UpgradePackageButton.Content" xml:space="preserve"><value>Upgrade</value></data>
+  <data name="PermissionsInfo.Title" xml:space="preserve"><value>Permissions</value></data>
+  <data name="PermissionsInfo.Message" xml:space="preserve"><value>Global npm installation may need write access to the Node.js directory. Installing the Relay scheduled task may require administrator privileges. Codex Beacon reports explicit errors and never elevates silently.</value></data>
+  <data name="SettingsTitle.Text" xml:space="preserve"><value>Settings</value></data>
+  <data name="SettingsDescription.Text" xml:space="preserve"><value>These values describe local services only and never contain credentials.</value></data>
+  <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>General</value></data>
+  <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>Refresh frequency, display language, and local scheduled-task mappings</value></data>
+  <data name="LanguageCard.Header" xml:space="preserve"><value>Display language</value></data>
+  <data name="LanguageCard.Description" xml:space="preserve"><value>Follow Windows or switch instantly between English and Simplified Chinese.</value></data>
+  <data name="LanguageSystem.Content" xml:space="preserve"><value>Follow Windows</value></data>
+  <data name="RefreshIntervalCard.Header" xml:space="preserve"><value>Automatic refresh interval</value></data>
+  <data name="RefreshIntervalCard.Description" xml:space="preserve"><value>5–300 seconds</value></data>
+  <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
+  <data name="ProxyTaskCard.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
+  <data name="SaveChangesCard.Header" xml:space="preserve"><value>Save changes</value></data>
+  <data name="SaveChangesCard.Description" xml:space="preserve"><value>Settings are stored locally and contain no credentials.</value></data>
+  <data name="SaveButton.Content" xml:space="preserve"><value>Save</value></data>
+  <data name="ReferencesHeading.Text" xml:space="preserve"><value>Upstream projects and references</value></data>
+  <data name="OpenSourceProjectsExpander.Header" xml:space="preserve"><value>Open-source projects</value></data>
+  <data name="OpenSourceProjectsExpander.Description" xml:space="preserve"><value>Open component sources, version-management references, and network-domain data.</value></data>
+  <data name="OpenCodexReference.Description" xml:space="preserve"><value>Optional provider proxy extension</value></data>
+  <data name="AppManagerReference.Description" xml:space="preserve"><value>Reference for Codex desktop version management</value></data>
+  <data name="RelayReference.Description" xml:space="preserve"><value>Optional mobile bridge extension</value></data>
+  <data name="DomainListReference.Description" xml:space="preserve"><value>Network-domain classification reference; its data is not bundled in this release</value></data>
+  <data name="ReadyStatus.Text" xml:space="preserve"><value>Ready</value></data>
+  <data name="NotRefreshed.Text" xml:space="preserve"><value>Not refreshed</value></data>
+  <data name="CurrentInUse" xml:space="preserve"><value>in use</value></data>
+  <data name="ReadinessInstall" xml:space="preserve"><value>Next: install</value></data>
+  <data name="ReadinessLogin" xml:space="preserve"><value>Next: sign in</value></data>
+  <data name="ReadinessUnknownAccount" xml:space="preserve"><value>Sign-in status needs verification</value></data>
+  <data name="ReadinessPrerequisites" xml:space="preserve"><value>Complete runtime setup first</value></data>
+  <data name="ReadinessStart" xml:space="preserve"><value>Next: start service</value></data>
+  <data name="ReadinessUpgrade" xml:space="preserve"><value>Update available</value></data>
+  <data name="ReadinessReady" xml:space="preserve"><value>Ready</value></data>
+  <data name="VersionManagementReference" xml:space="preserve"><value>Version reference</value></data>
+  <data name="StatusHealthy" xml:space="preserve"><value>Healthy</value></data>
+  <data name="StatusStopped" xml:space="preserve"><value>Stopped</value></data>
+  <data name="StatusWarning" xml:space="preserve"><value>Needs attention</value></data>
+  <data name="StatusUnavailable" xml:space="preserve"><value>Not installed</value></data>
+  <data name="StatusUnknown" xml:space="preserve"><value>Unknown</value></data>
+  <data name="Reachable" xml:space="preserve"><value>Reachable</value></data>
+  <data name="PendingVerification" xml:space="preserve"><value>Verify</value></data>
+  <data name="Unreachable" xml:space="preserve"><value>Unreachable</value></data>
+  <data name="Online" xml:space="preserve"><value>Online</value></data>
+  <data name="Offline" xml:space="preserve"><value>Offline</value></data>
+  <data name="ThisDevice" xml:space="preserve"><value>This device</value></data>
+  <data name="CollectionIncomplete" xml:space="preserve"><value>Collection did not complete</value></data>
+  <data name="CollectionNoData" xml:space="preserve"><value>Collection returned no data</value></data>
+  <data name="CollectionParseFailed" xml:space="preserve"><value>Could not parse collection results</value></data>
+  <data name="ActionNoResult" xml:space="preserve"><value>The action returned no result</value></data>
+  <data name="ActionFailed" xml:space="preserve"><value>Action failed</value></data>
+  <data name="UnableToStart" xml:space="preserve"><value>Unable to start {0}</value></data>
+  <data name="NoMoreDiagnostics" xml:space="preserve"><value>No additional diagnostic information is available.</value></data>
+  <data name="CheckingLatest" xml:space="preserve"><value>Checking local components and latest versions…</value></data>
+  <data name="RefreshingStatus" xml:space="preserve"><value>Refreshing runtime status…</value></data>
+  <data name="CheckComplete" xml:space="preserve"><value>Check complete</value></data>
+  <data name="RefreshFailed" xml:space="preserve"><value>Refresh failed: {0}</value></data>
+  <data name="SampleFailed" xml:space="preserve"><value>Sample failed</value></data>
+  <data name="SampleAt" xml:space="preserve"><value>Sampled {0:HH:mm:ss}</value></data>
+  <data name="DataUnavailable" xml:space="preserve"><value>Data unavailable</value></data>
+  <data name="UpdatedAt" xml:space="preserve"><value>Updated {0:HH:mm:ss}</value></data>
+  <data name="MissingNodeResult" xml:space="preserve"><value>No Node.js result returned</value></data>
+  <data name="MissingNpmResult" xml:space="preserve"><value>No npm result returned</value></data>
+  <data name="MissingNvmResult" xml:space="preserve"><value>No NVM result returned</value></data>
+  <data name="TailscaleDisconnected" xml:space="preserve"><value>Not connected to Tailscale</value></data>
+  <data name="TailnetConnected" xml:space="preserve"><value>{0} is connected to the Tailnet</value></data>
+  <data name="TailscaleSignInHint" xml:space="preserve"><value>Confirm that Tailscale is installed and signed in</value></data>
+  <data name="TailnetOnlineCount" xml:space="preserve"><value>{0} devices online · This device {1}</value></data>
+  <data name="PrerequisiteHint" xml:space="preserve"><value>Install Node.js 22.14.0 or newer and make sure npm is available.</value></data>
+  <data name="RestartServicesTitle" xml:space="preserve"><value>Restart all Codex services?</value></data>
+  <data name="TerminateServicesTitle" xml:space="preserve"><value>Terminate all Codex services?</value></data>
+  <data name="RestartServicesBody" xml:space="preserve"><value>Stops the OpenCodex Proxy and Codex Relay scheduled tasks and their explicitly matched service processes, then starts the tasks again. The Codex desktop app and Codex Beacon stay open.</value></data>
+  <data name="TerminateServicesBody" xml:space="preserve"><value>Stops the OpenCodex Proxy and Codex Relay scheduled tasks and their explicitly matched service processes. The Codex desktop app, Codex Beacon, and unrelated Node.js processes stay open.</value></data>
+  <data name="RestartAllButton" xml:space="preserve"><value>Restart all</value></data>
+  <data name="TerminateServicesButton" xml:space="preserve"><value>Terminate services</value></data>
+  <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="RestartingServices" xml:space="preserve"><value>Restarting services…</value></data>
+  <data name="TerminatingServices" xml:space="preserve"><value>Terminating services…</value></data>
+  <data name="FullNodeVersionHint" xml:space="preserve"><value>Enter a complete Node.js version, for example 24.15.0.</value></data>
+  <data name="InstallingNode" xml:space="preserve"><value>Installing Node.js {0} with NVM…</value></data>
+  <data name="SelectNodeVersion" xml:space="preserve"><value>Select an installed Node.js version first.</value></data>
+  <data name="SwitchingNode" xml:space="preserve"><value>Switching to Node.js {0}…</value></data>
+  <data name="SettingsSaved" xml:space="preserve"><value>Settings saved. They will take effect on the next refresh.</value></data>
+  <data name="SettingsSavedRestart" xml:space="preserve"><value>Settings saved. Restart Codex Beacon to apply the display language.</value></data>
+  <data name="RestartRequiredTitle" xml:space="preserve"><value>Restart to change language?</value></data>
+  <data name="RestartRequiredBody" xml:space="preserve"><value>The new display language is saved. Restart Codex Beacon now to apply it.</value></data>
+  <data name="RestartNowButton" xml:space="preserve"><value>Restart now</value></data>
+  <data name="LaterButton" xml:space="preserve"><value>Later</value></data>
+  <data name="ActionStartName" xml:space="preserve"><value>starting</value></data>
+  <data name="ActionStopName" xml:space="preserve"><value>stopping</value></data>
+  <data name="ActionRestartName" xml:space="preserve"><value>restarting</value></data>
+  <data name="ActionInstallName" xml:space="preserve"><value>installing or repairing</value></data>
+  <data name="ActionUpgradeName" xml:space="preserve"><value>upgrading</value></data>
+  <data name="ActionLoginName" xml:space="preserve"><value>opening sign-in for</value></data>
+  <data name="ActionProcessName" xml:space="preserve"><value>processing</value></data>
+  <data name="RunningAction" xml:space="preserve"><value>{0} {1}…</value></data>
+</root>

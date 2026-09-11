@@ -8,7 +8,7 @@ public sealed class SystemSnapshot
 {
     public DateTime CollectedAt { get; set; }
     public string OverallState { get; set; } = "Unknown";
-    public string OverallMessage { get; set; } = "正在等待首次检测";
+    public string OverallMessage { get; set; } = "";
     public List<ComponentStatus> Components { get; set; } = [];
     public List<ProcessRecord> Processes { get; set; } = [];
     public List<ProxyHop> ProxyChain { get; set; } = [];
@@ -34,7 +34,7 @@ public sealed class ExternalConnection
 public sealed class PublicEgress
 {
     public string Address { get; set; } = "";
-    public string Route { get; set; } = "系统默认网络路径";
+    public string Route { get; set; } = "";
     public string Evidence { get; set; } = "";
     public string CheckedAt { get; set; } = "";
 }
@@ -43,7 +43,7 @@ public sealed class NodeRuntime
 {
     public string Version { get; set; } = "";
     public bool IsCurrent { get; set; }
-    public string DisplayName => IsCurrent ? $"{Version} · 当前使用" : Version;
+    public string DisplayName => IsCurrent ? $"{Version} · {Localization.Get("CurrentInUse")}" : Version;
 }
 
 public sealed class ComponentStatus
@@ -76,13 +76,13 @@ public sealed class ComponentStatus
     [JsonIgnore]
     public bool CanLogin => IsInstalled && AccountState == "SignedOut";
     [JsonIgnore]
-    public string ReadinessLabel => !IsInstalled ? "下一步：安装"
-        : AccountState == "SignedOut" ? "下一步：登录账号"
-        : AccountState == "Unknown" ? "登录状态待确认"
-        : !PrerequisitesReady ? "请先完成运行环境配置"
-        : !IsRunning && CanManageService ? "下一步：启动服务"
-        : CanUpgrade ? "有可用更新"
-        : "已就绪";
+    public string ReadinessLabel => !IsInstalled ? Localization.Get("ReadinessInstall")
+        : AccountState == "SignedOut" ? Localization.Get("ReadinessLogin")
+        : AccountState == "Unknown" ? Localization.Get("ReadinessUnknownAccount")
+        : !PrerequisitesReady ? Localization.Get("ReadinessPrerequisites")
+        : !IsRunning && CanManageService ? Localization.Get("ReadinessStart")
+        : CanUpgrade ? Localization.Get("ReadinessUpgrade")
+        : Localization.Get("ReadinessReady");
     [JsonIgnore]
     public Uri? RepositoryUri => Id switch
     {
@@ -97,14 +97,14 @@ public sealed class ComponentStatus
         _ => null
     };
     [JsonIgnore]
-    public string RepositoryLabel => Id == "desktop" ? "版本管理参考" : "GitHub";
+    public string RepositoryLabel => Id == "desktop" ? Localization.Get("VersionManagementReference") : "GitHub";
     public string StatusLabel => State switch
     {
-        "Healthy" => "运行正常",
-        "Stopped" => "已停止",
-        "Warning" => "需要关注",
-        "Unavailable" => "未安装",
-        _ => "状态未知"
+        "Healthy" => Localization.Get("StatusHealthy"),
+        "Stopped" => Localization.Get("StatusStopped"),
+        "Warning" => Localization.Get("StatusWarning"),
+        "Unavailable" => Localization.Get("StatusUnavailable"),
+        _ => Localization.Get("StatusUnknown")
     };
     public string VersionSummary => LatestVersion is not "—" && InstalledVersion != LatestVersion
         ? $"{InstalledVersion}  →  {LatestVersion}"
@@ -138,7 +138,7 @@ public sealed class ProcessRecord
     public int Pid { get; set; }
     public int ParentPid { get; set; }
     public string Name { get; set; } = "";
-    public string Role { get; set; } = "Codex 相关进程";
+    public string Role { get; set; } = "";
     public string Version { get; set; } = "—";
     public string Architecture { get; set; } = "—";
     public string StartedAt { get; set; } = "—";
@@ -154,7 +154,7 @@ public sealed class ProxyHop
     public string State { get; set; } = "Unknown";
     public string Evidence { get; set; } = "";
     public string OrderLabel => Order.ToString("00");
-    public string StateLabel => State == "Healthy" ? "可达" : State == "Warning" ? "待确认" : "不可达";
+    public string StateLabel => State == "Healthy" ? Localization.Get("Reachable") : State == "Warning" ? Localization.Get("PendingVerification") : Localization.Get("Unreachable");
 }
 
 public sealed class TailnetDevice
@@ -166,8 +166,8 @@ public sealed class TailnetDevice
     public bool Online { get; set; }
     public bool IsSelf { get; set; }
     public string LastSeen { get; set; } = "";
-    public string OnlineLabel => Online ? "在线" : "离线";
-    public string DeviceLabel => IsSelf ? $"{Name} · 本机" : Name;
+    public string OnlineLabel => Online ? Localization.Get("Online") : Localization.Get("Offline");
+    public string DeviceLabel => IsSelf ? $"{Name} · {Localization.Get("ThisDevice")}" : Name;
 }
 
 public sealed class ActionResult
@@ -182,4 +182,5 @@ public sealed class AppSettings
     public int RefreshSeconds { get; set; } = 15;
     public string RelayTaskName { get; set; } = "Codex Relay";
     public string ProxyTaskName { get; set; } = "opencodex-proxy";
+    public string Language { get; set; } = Localization.SystemLanguage;
 }

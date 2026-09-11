@@ -26,19 +26,19 @@
                         IsSettingsVisible="False" IsPaneToggleButtonVisible="True" SelectionChanged="Nav_SelectionChanged"
                         Background="Transparent" OpenPaneLength="224" CompactPaneLength="52">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="总览" Tag="dashboard" IsSelected="True">
+                <NavigationViewItem x:Uid="NavDashboard" Content="总览" Tag="dashboard" IsSelected="True">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="进程" Tag="processes">
+                <NavigationViewItem x:Uid="NavProcesses" Content="进程" Tag="processes">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE9D9;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="网络与代理" Tag="network">
+                <NavigationViewItem x:Uid="NavNetwork" Content="网络与代理" Tag="network">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE968;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="安装管理" Tag="installations">
+                <NavigationViewItem x:Uid="NavInstallations" Content="安装管理" Tag="installations">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE896;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="设置" Tag="settings">
+                <NavigationViewItem x:Uid="NavSettings" Content="设置" Tag="settings">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE713;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
@@ -49,15 +49,15 @@
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                             <StackPanel>
-                                <TextBlock Text="系统脉冲" Style="{StaticResource PageTitleStyle}" />
-                                <TextBlock x:Name="OverallMessageText" Text="正在读取本机 Codex 工具链…" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" />
+                                <TextBlock x:Uid="DashboardTitle" Text="系统脉冲" Style="{StaticResource PageTitleStyle}" />
+                                <TextBlock x:Uid="OverallMessage" x:Name="OverallMessageText" Text="正在读取本机 Codex 工具链…" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" />
                             </StackPanel>
                             <Button x:Name="RefreshButton" Grid.Column="1" Style="{StaticResource QuietButtonStyle}" Click="Refresh_Click" VerticalAlignment="Center">
-                                <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72C;" FontSize="15" /><TextBlock Text="立即刷新" /></StackPanel>
+                                <StackPanel Orientation="Horizontal" Spacing="8"><FontIcon Glyph="&#xE72C;" FontSize="15" /><TextBlock x:Uid="RefreshNow" Text="立即刷新" /></StackPanel>
                             </Button>
                         </Grid>
 
-                        <InfoBar IsOpen="True" Severity="Informational" Title="当前数据路径" Margin="0,18,0,0" IsClosable="False">
+                        <InfoBar x:Uid="CurrentDataPath" IsOpen="True" Severity="Informational" Title="当前数据路径" Margin="0,18,0,0" IsClosable="False">
                             <StackPanel Spacing="8">
                                 <ProgressBar IsIndeterminate="True" Height="3" />
                                 <Grid>
@@ -72,12 +72,12 @@
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>
-                                    <TextBlock x:Name="PulseTimestampText" Text="等待首次采样" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontFamily="Cascadia Mono" FontSize="11" />
+                                    <TextBlock x:Uid="AwaitingFirstSample" x:Name="PulseTimestampText" Text="等待首次采样" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontFamily="Cascadia Mono" FontSize="11" />
                                 </Grid>
                             </StackPanel>
                         </InfoBar>
 
-                        <TextBlock Text="服务状态" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="ServiceStatusHeading" Text="服务状态" Style="{StaticResource SectionTitleStyle}" />
                         <ItemsControl x:Name="ComponentCards" ItemsSource="{x:Bind Components}">
                             <ItemsControl.ItemsPanel><ItemsPanelTemplate><ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" ItemWidth="360" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
@@ -88,17 +88,17 @@
                                                 <TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusForeground}" FontSize="12" FontWeight="SemiBold" />
                                             </Border>
                                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                                <TextBlock Text="版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
+                                                <TextBlock x:Uid="VersionLabel" Text="版本" Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" />
                                                 <TextBlock Text="{Binding VersionSummary}" FontFamily="Cascadia Mono" FontSize="12" TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
                                             <TextBlock Text="{Binding ReadinessLabel}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" FontSize="12" />
                                             <CommandBar DefaultLabelPosition="Collapsed" IsOpen="False" Background="Transparent" Padding="0">
-                                                <AppBarButton Label="安装" Icon="Add" Tag="install" Click="ServiceAction_Click" IsEnabled="{Binding CanInstall}" />
-                                                <AppBarButton Label="登录" Icon="Contact" Tag="login" Click="ServiceAction_Click" IsEnabled="{Binding CanLogin}" />
-                                                <AppBarButton Label="启动" Icon="Play" Tag="start" Click="ServiceAction_Click" IsEnabled="{Binding CanStart}" />
-                                                <AppBarButton Label="停止" Icon="Stop" Tag="stop" Click="ServiceAction_Click" IsEnabled="{Binding CanStop}" />
-                                                <AppBarButton Label="重启" Icon="Refresh" Tag="restart" Click="ServiceAction_Click" IsEnabled="{Binding CanRestart}" />
-                                                <AppBarButton Label="升级" Icon="Download" Tag="upgrade" Click="ServiceAction_Click" IsEnabled="{Binding CanUpgrade}" />
+                                                <AppBarButton x:Uid="ActionInstall" Label="安装" Icon="Add" Tag="install" Click="ServiceAction_Click" IsEnabled="{Binding CanInstall}" />
+                                                <AppBarButton x:Uid="ActionLogin" Label="登录" Icon="Contact" Tag="login" Click="ServiceAction_Click" IsEnabled="{Binding CanLogin}" />
+                                                <AppBarButton x:Uid="ActionStart" Label="启动" Icon="Play" Tag="start" Click="ServiceAction_Click" IsEnabled="{Binding CanStart}" />
+                                                <AppBarButton x:Uid="ActionStop" Label="停止" Icon="Stop" Tag="stop" Click="ServiceAction_Click" IsEnabled="{Binding CanStop}" />
+                                                <AppBarButton x:Uid="ActionRestart" Label="重启" Icon="Refresh" Tag="restart" Click="ServiceAction_Click" IsEnabled="{Binding CanRestart}" />
+                                                <AppBarButton x:Uid="ActionUpgrade" Label="升级" Icon="Download" Tag="upgrade" Click="ServiceAction_Click" IsEnabled="{Binding CanUpgrade}" />
                                             </CommandBar>
                                         </StackPanel>
                                     </toolkit:SettingsCard>
@@ -106,26 +106,26 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
-                        <TextBlock Text="Tailscale 概况" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsCard Header="Tailscale 网络" IsClickEnabled="False">
+                        <TextBlock x:Uid="TailscaleOverviewHeading" Text="Tailscale 概况" Style="{StaticResource SectionTitleStyle}" />
+                        <toolkit:SettingsCard x:Uid="TailscaleNetworkCard" Header="Tailscale 网络" IsClickEnabled="False">
                             <toolkit:SettingsCard.Description>
-                                <StackPanel><TextBlock x:Name="TailnetSummaryText" Text="正在读取 Tailnet…" /><TextBlock x:Name="TailnetDetailText" Text="设备状态将在这里显示" /></StackPanel>
+                                <StackPanel><TextBlock x:Uid="ReadingTailnet" x:Name="TailnetSummaryText" Text="正在读取 Tailnet…" /><TextBlock x:Uid="DeviceStatusPlaceholder" x:Name="TailnetDetailText" Text="设备状态将在这里显示" /></StackPanel>
                             </toolkit:SettingsCard.Description>
-                            <Button Tag="network" Click="OpenSection_Click" Content="查看设备" />
+                            <Button x:Uid="ViewDevices" Tag="network" Click="OpenSection_Click" Content="查看设备" />
                         </toolkit:SettingsCard>
                     </StackPanel>
                 </ScrollViewer>
 
                 <ScrollViewer x:Name="ProcessesPage" Visibility="Collapsed" Padding="30,22,30,40">
                     <StackPanel MaxWidth="1280">
-                        <TextBlock Text="Codex 进程" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock Text="按父子关系识别桌面应用、CLI、代理、Relay 及其运行时；普通 Node 进程不会被纳入。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
+                        <TextBlock x:Uid="ProcessesTitle" Text="Codex 进程" Style="{StaticResource PageTitleStyle}" />
+                        <TextBlock x:Uid="ProcessesDescription" Text="按父子关系识别桌面应用、CLI、代理、Relay 及其运行时；普通 Node 进程不会被纳入。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="ProcessList" ItemsSource="{x:Bind Processes}" SelectionMode="None">
                                 <ListView.Header>
                                     <Grid Padding="18,12" Background="#EEF3F6" ColumnSpacing="14">
                                         <Grid.ColumnDefinitions><ColumnDefinition Width="90" /><ColumnDefinition Width="180" /><ColumnDefinition Width="100" /><ColumnDefinition Width="110" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                                        <TextBlock Text="PID" FontWeight="SemiBold" /><TextBlock Grid.Column="1" Text="角色 / 进程" FontWeight="SemiBold" /><TextBlock Grid.Column="2" Text="版本" FontWeight="SemiBold" /><TextBlock Grid.Column="3" Text="启动时间" FontWeight="SemiBold" /><TextBlock Grid.Column="4" Text="可执行路径" FontWeight="SemiBold" />
+                                        <TextBlock Text="PID" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessRoleHeader" Grid.Column="1" Text="角色 / 进程" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessVersionHeader" Grid.Column="2" Text="版本" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessStartedHeader" Grid.Column="3" Text="启动时间" FontWeight="SemiBold" /><TextBlock x:Uid="ProcessPathHeader" Grid.Column="4" Text="可执行路径" FontWeight="SemiBold" />
                                     </Grid>
                                 </ListView.Header>
                                 <ListView.ItemTemplate>
@@ -142,11 +142,11 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock Text="恢复控制" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsCard Header="批量恢复可选服务" Description="仅处理 OpenCodex Proxy、Codex Relay 与明确匹配的服务进程；不会关闭 Codex 桌面应用或本管理器。" IsClickEnabled="False">
+                        <TextBlock x:Uid="RecoveryControlsHeading" Text="恢复控制" Style="{StaticResource SectionTitleStyle}" />
+                        <toolkit:SettingsCard x:Uid="BulkRecoveryCard" Header="批量恢复可选服务" Description="仅处理 OpenCodex Proxy、Codex Relay 与明确匹配的服务进程；不会关闭 Codex 桌面应用或本管理器。" IsClickEnabled="False">
                             <CommandBar DefaultLabelPosition="Right" Background="Transparent">
-                                <AppBarButton Label="终止服务" Icon="Cancel" Tag="kill" Click="DangerAction_Click" />
-                                <AppBarButton Label="全部重启" Icon="Refresh" Tag="restart" Click="DangerAction_Click" />
+                                <AppBarButton x:Uid="TerminateServices" Label="终止服务" Icon="Cancel" Tag="kill" Click="DangerAction_Click" />
+                                <AppBarButton x:Uid="RestartAll" Label="全部重启" Icon="Refresh" Tag="restart" Click="DangerAction_Click" />
                             </CommandBar>
                         </toolkit:SettingsCard>
                     </StackPanel>
@@ -154,9 +154,9 @@
 
                 <ScrollViewer x:Name="NetworkPage" Visibility="Collapsed" Padding="30,22,30,40">
                     <StackPanel MaxWidth="1280">
-                        <TextBlock Text="网络与代理" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock Text="根据配置文件、环境变量、监听端口和实际进程拼出当前请求路径。敏感凭据不会读取或展示。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
-                        <TextBlock Text="Codex 代理链" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="NetworkTitle" Text="网络与代理" Style="{StaticResource PageTitleStyle}" />
+                        <TextBlock x:Uid="NetworkDescription" Text="根据配置文件、环境变量、监听端口和实际进程拼出当前请求路径。敏感凭据不会读取或展示。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                        <TextBlock x:Uid="ProxyChainHeading" Text="Codex 代理链" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind ProxyHops}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -173,7 +173,7 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock Text="公网出口" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="PublicEgressHeading" Text="公网出口" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind PublicEgressRoutes}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -189,7 +189,7 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock Text="当前外网连接" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="ExternalConnectionsHeading" Text="当前外网连接" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind ExternalConnections}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -205,7 +205,7 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock Text="已配置的备用端点" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="CandidateEndpointsHeading" Text="已配置的备用端点" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind CandidateEndpoints}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -220,7 +220,7 @@
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <TextBlock Text="Tailnet 设备" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="TailnetDevicesHeading" Text="Tailnet 设备" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="TailnetList" ItemsSource="{x:Bind TailnetDevices}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -242,23 +242,23 @@
 
                 <ScrollViewer x:Name="InstallationsPage" Visibility="Collapsed" Padding="30,22,30,40">
                     <StackPanel MaxWidth="1100">
-                        <TextBlock Text="安装管理" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock Text="从 npm 官方注册表获取版本信息。安装与升级会保留现有配置，并在完成后重新检测。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
-                        <toolkit:SettingsExpander Header="NVM · Node.js 版本控制" Description="管理本机已安装的 Node.js 版本；Codex Relay 需要 Node.js 22.14.0 或更高版本。" IsExpanded="True" Margin="0,0,0,14">
+                        <TextBlock x:Uid="InstallationsTitle" Text="安装管理" Style="{StaticResource PageTitleStyle}" />
+                        <TextBlock x:Uid="InstallationsDescription" Text="从 npm 官方注册表获取版本信息。安装与升级会保留现有配置，并在完成后重新检测。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" TextWrapping="Wrap" />
+                        <toolkit:SettingsExpander x:Uid="NvmExpander" Header="NVM · Node.js 版本控制" Description="管理本机已安装的 Node.js 版本；Codex Relay 需要 Node.js 22.14.0 或更高版本。" IsExpanded="True" Margin="0,0,0,14">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="当前环境" IsClickEnabled="False"><TextBlock x:Name="NvmRequirementText" Text="正在检测 NVM…" TextWrapping="Wrap" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="切换 Node.js" Description="选择 NVM 已安装的版本" IsClickEnabled="False">
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><ComboBox x:Name="NodeVersionPicker" Width="210" PlaceholderText="选择已安装版本" ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName" /><Button Content="应用" Click="SwitchNode_Click" /></StackPanel>
+                                <toolkit:SettingsCard x:Uid="CurrentEnvironmentCard" Header="当前环境" IsClickEnabled="False"><TextBlock x:Uid="CheckingNvm" x:Name="NvmRequirementText" Text="正在检测 NVM…" TextWrapping="Wrap" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="SwitchNodeCard" Header="切换 Node.js" Description="选择 NVM 已安装的版本" IsClickEnabled="False">
+                                    <StackPanel Orientation="Horizontal" Spacing="8"><ComboBox x:Uid="NodeVersionPickerText" x:Name="NodeVersionPicker" Width="210" PlaceholderText="选择已安装版本" ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName" /><Button x:Uid="ApplyNodeVersion" Content="应用" Click="SwitchNode_Click" /></StackPanel>
                                 </toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="安装 Node.js" Description="输入完整版本号，例如 24.15.0" IsClickEnabled="False">
-                                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBox x:Name="NewNodeVersionBox" Width="210" PlaceholderText="24.15.0" /><Button Content="安装" Click="InstallNode_Click" /></StackPanel>
+                                <toolkit:SettingsCard x:Uid="InstallNodeCard" Header="安装 Node.js" Description="输入完整版本号，例如 24.15.0" IsClickEnabled="False">
+                                    <StackPanel Orientation="Horizontal" Spacing="8"><TextBox x:Name="NewNodeVersionBox" Width="210" PlaceholderText="24.15.0" /><Button x:Uid="InstallNodeButton" Content="安装" Click="InstallNode_Click" /></StackPanel>
                                 </toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
-                        <toolkit:SettingsExpander Header="安装前置条件" Description="在安装或升级 npm 包前验证运行时与包管理器。" IsExpanded="True" Margin="0,0,0,18">
+                        <toolkit:SettingsExpander x:Uid="PrerequisitesExpander" Header="安装前置条件" Description="在安装或升级 npm 包前验证运行时与包管理器。" IsExpanded="True" Margin="0,0,0,18">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="Node.js" IsClickEnabled="False"><TextBlock x:Name="NodeRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="npm" IsClickEnabled="False"><TextBlock x:Name="NpmRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="Node.js" IsClickEnabled="False"><TextBlock x:Uid="CheckingVersionPath" x:Name="NodeRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard Header="npm" IsClickEnabled="False"><TextBlock x:Uid="CheckingVersionPath" x:Name="NpmRequirementText" Text="正在检测版本与路径…" TextWrapping="Wrap" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
@@ -268,40 +268,47 @@
                                         <Grid Padding="18,16" ColumnSpacing="16">
                                             <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="150" /><ColumnDefinition Width="150" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                                             <StackPanel><TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold" /><StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="{Binding Kind}" Foreground="{StaticResource MutedBrush}" FontSize="12" VerticalAlignment="Center" /><HyperlinkButton Content="{Binding RepositoryLabel}" NavigateUri="{Binding RepositoryUri}" Padding="0" FontSize="12" /></StackPanel></StackPanel>
-                                            <StackPanel Grid.Column="1"><TextBlock Text="当前版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding InstalledVersion}" FontFamily="Cascadia Mono" /></StackPanel>
-                                            <StackPanel Grid.Column="2"><TextBlock Text="已知最新版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding LatestVersion}" FontFamily="Cascadia Mono" /></StackPanel>
+                                            <StackPanel Grid.Column="1"><TextBlock x:Uid="InstalledVersionLabel" Text="当前版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding InstalledVersion}" FontFamily="Cascadia Mono" /></StackPanel>
+                                            <StackPanel Grid.Column="2"><TextBlock x:Uid="LatestVersionLabel" Text="已知最新版本" Foreground="{StaticResource MutedBrush}" FontSize="12" /><TextBlock Text="{Binding LatestVersion}" FontFamily="Cascadia Mono" /></StackPanel>
                                             <StackPanel Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-                                                <Button Content="安装" Tag="install" Click="PackageAction_Click" IsEnabled="{Binding CanInstall}" />
-                                                <Button Content="升级" Tag="upgrade" Click="PackageAction_Click" IsEnabled="{Binding CanUpgrade}" />
+                                                <Button x:Uid="InstallPackageButton" Content="安装" Tag="install" Click="PackageAction_Click" IsEnabled="{Binding CanInstall}" />
+                                                <Button x:Uid="UpgradePackageButton" Content="升级" Tag="upgrade" Click="PackageAction_Click" IsEnabled="{Binding CanUpgrade}" />
                                             </StackPanel>
                                         </Grid>
                                     </DataTemplate>
                                 </ListView.ItemTemplate>
                             </ListView>
                         </Border>
-                        <InfoBar IsOpen="True" Severity="Informational" Title="权限说明" Message="全局 npm 安装可能需要对 Node.js 安装目录的写权限；Relay 服务的计划任务安装可能需要管理员权限。Codex Beacon 会显示明确错误，不会静默提权。" Margin="0,18,0,0" />
+                        <InfoBar x:Uid="PermissionsInfo" IsOpen="True" Severity="Informational" Title="权限说明" Message="全局 npm 安装可能需要对 Node.js 安装目录的写权限；Relay 服务的计划任务安装可能需要管理员权限。Codex Beacon 会显示明确错误，不会静默提权。" Margin="0,18,0,0" />
                     </StackPanel>
                 </ScrollViewer>
 
                 <ScrollViewer x:Name="SettingsPage" Visibility="Collapsed" Padding="30,22,30,40">
                     <StackPanel MaxWidth="760" HorizontalAlignment="Left">
-                        <TextBlock Text="设置" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock Text="这些值只描述本机服务，不包含任何密钥。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" />
-                        <toolkit:SettingsExpander Header="常规" Description="刷新频率与本机计划任务映射" IsExpanded="True">
+                        <TextBlock x:Uid="SettingsTitle" Text="设置" Style="{StaticResource PageTitleStyle}" />
+                        <TextBlock x:Uid="SettingsDescription" Text="这些值只描述本机服务，不包含任何密钥。" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,20" />
+                        <toolkit:SettingsExpander x:Uid="GeneralSettingsExpander" Header="常规" Description="刷新频率与本机计划任务映射" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False"><NumberBox x:Name="RefreshSecondsBox" Width="160" Minimum="5" Maximum="300" SpinButtonPlacementMode="Compact" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="Codex Relay 计划任务" IsClickEnabled="False"><TextBox x:Name="RelayTaskNameBox" Width="300" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="OpenCodex Proxy 计划任务" IsClickEnabled="False"><TextBox x:Name="ProxyTaskNameBox" Width="300" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="保存更改" Description="设置仅存储在本机，不包含凭据。" IsClickEnabled="False"><Button Content="保存" Click="SaveSettings_Click" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="LanguageCard" Header="显示语言" Description="跟随 Windows，或在 English / 简体中文之间即时切换。" IsClickEnabled="False">
+                                    <ComboBox x:Name="LanguagePicker" Width="210" SelectedValuePath="Tag" SelectionChanged="LanguagePicker_SelectionChanged">
+                                        <ComboBoxItem x:Uid="LanguageSystem" Content="跟随 Windows" Tag="system" />
+                                        <ComboBoxItem Content="English" Tag="en-US" />
+                                        <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                                    </ComboBox>
+                                </toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="RefreshIntervalCard" Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False"><NumberBox x:Name="RefreshSecondsBox" Width="160" Minimum="5" Maximum="300" SpinButtonPlacementMode="Compact" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="RelayTaskCard" Header="Codex Relay 计划任务" IsClickEnabled="False"><TextBox x:Name="RelayTaskNameBox" Width="300" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="ProxyTaskCard" Header="OpenCodex Proxy 计划任务" IsClickEnabled="False"><TextBox x:Name="ProxyTaskNameBox" Width="300" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="SaveChangesCard" Header="保存更改" Description="设置仅存储在本机，不包含凭据。" IsClickEnabled="False"><Button x:Uid="SaveButton" Content="保存" Click="SaveSettings_Click" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
-                        <TextBlock Text="上游与实现参考" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsExpander Header="开源项目" Description="查看组件源码、版本管理方案与网络域名分类数据。" IsExpanded="True">
+                        <TextBlock x:Uid="ReferencesHeading" Text="上游与实现参考" Style="{StaticResource SectionTitleStyle}" />
+                        <toolkit:SettingsExpander x:Uid="OpenSourceProjectsExpander" Header="开源项目" Description="查看组件源码、版本管理方案与网络域名分类数据。" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="Codex App Manager" Description="Codex 桌面版本管理实现参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="domain-list-community" Description="网络域名分类实现参考；当前版本未内置其数据"><HyperlinkButton Content="v2fly/domain-list-community" NavigateUri="https://github.com/v2fly/domain-list-community" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="OpenCodexReference" Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="AppManagerReference" Header="Codex App Manager" Description="Codex 桌面版本管理实现参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="RelayReference" Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="DomainListReference" Header="domain-list-community" Description="网络域名分类实现参考；当前版本未内置其数据"><HyperlinkButton Content="v2fly/domain-list-community" NavigateUri="https://github.com/v2fly/domain-list-community" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
                     </StackPanel>
@@ -312,8 +319,8 @@
         <Grid Grid.Row="2" Background="#EEF3F6" Padding="16,0">
             <Grid.ColumnDefinitions><ColumnDefinition Width="Auto" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
             <ProgressRing x:Name="BusyRing" Width="18" Height="18" IsActive="False" />
-            <TextBlock x:Name="StatusText" Grid.Column="1" Text="准备就绪" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource MutedBrush}" />
-            <TextBlock x:Name="RefreshAgeText" Grid.Column="2" Text="尚未刷新" VerticalAlignment="Center" FontFamily="Cascadia Mono" FontSize="12" Foreground="{StaticResource MutedBrush}" />
+            <TextBlock x:Uid="ReadyStatus" x:Name="StatusText" Grid.Column="1" Text="准备就绪" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="{StaticResource MutedBrush}" />
+            <TextBlock x:Uid="NotRefreshed" x:Name="RefreshAgeText" Grid.Column="2" Text="尚未刷新" VerticalAlignment="Center" FontFamily="Cascadia Mono" FontSize="12" Foreground="{StaticResource MutedBrush}" />
         </Grid>
     </Grid>
 </Window>

@@ -8,6 +8,7 @@ public partial class App : Application
 
     public App()
     {
+        Localization.Initialize();
         InitializeComponent();
         UnhandledException += (_, e) =>
         {
@@ -27,6 +28,13 @@ public partial class App : Application
             WriteCrashLog(ex);
             throw;
         }
+    }
+
+    internal void ReloadMainWindow(Window previousWindow)
+    {
+        _window = new MainWindow();
+        _window.Activate();
+        previousWindow.Close();
     }
 
     private static void WriteCrashLog(Exception exception)

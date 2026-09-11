@@ -13,6 +13,7 @@ public sealed partial class MainWindow : Window
     private readonly DispatcherQueueTimer _timer;
     private bool _busy;
     private bool _loaded;
+    private bool _initializingLanguage = true;
     private AppSettings _settings;
 
     public ObservableCollection<ComponentStatus> Components { get; } = [];
@@ -32,6 +33,9 @@ public sealed partial class MainWindow : Window
         RefreshSecondsBox.Value = _settings.RefreshSeconds;
         RelayTaskNameBox.Text = _settings.RelayTaskName;
         ProxyTaskNameBox.Text = _settings.ProxyTaskName;
+        LanguagePicker.SelectedValue = _settings.Language;
+        if (LanguagePicker.SelectedIndex < 0) LanguagePicker.SelectedValue = Localization.SystemLanguage;
+        _initializingLanguage = false;
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
@@ -41,6 +45,7 @@ public sealed partial class MainWindow : Window
         _timer.Interval = TimeSpan.FromSeconds(_settings.RefreshSeconds);
         _timer.Tick += async (_, _) => await RefreshAsync(false);
         Activated += MainWindow_Activated;
+        Closed += (_, _) => _timer.Stop();
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -54,7 +59,7 @@ public sealed partial class MainWindow : Window
     private async Task RefreshAsync(bool includeLatest)
     {
         if (_busy) return;
-        SetBusy(true, includeLatest ? "正在检测本机组件并查询最新版本…" : "正在刷新运行状态…");
+        SetBusy(true, Localization.Get(includeLatest ? "CheckingLatest" : "RefreshingStatus"));
         try
         {
             var previousLatest = Components.Concat(InstallableComponents)
@@ -67,11 +72,11 @@ public sealed partial class MainWindow : Window
                         component.LatestVersion = latest;
             }
             ApplySnapshot(snapshot);
-            StatusText.Text = snapshot.Error is null ? "检测完成" : snapshot.Error;
+            StatusText.Text = snapshot.Error is null ? Localization.Get("CheckComplete") : snapshot.Error;
         }
         catch (Exception ex)
         {
-            StatusText.Text = $"刷新失败：{ex.Message}";
+            StatusText.Text = Localization.Format("RefreshFailed", ex.Message);
         }
         finally
         {
@@ -104,17 +109,17 @@ public sealed partial class MainWindow : Window
         if (snapshot.PublicEgress.Count > 0) Replace(PublicEgressRoutes, snapshot.PublicEgress);
 
         OverallMessageText.Text = snapshot.OverallMessage;
-        PulseTimestampText.Text = snapshot.CollectedAt == default ? "采样失败" : $"采样 {snapshot.CollectedAt.ToLocalTime():HH:mm:ss}";
-        RefreshAgeText.Text = snapshot.CollectedAt == default ? "数据不可用" : $"更新于 {snapshot.CollectedAt.ToLocalTime():HH:mm:ss}";
-        NodeRequirementText.Text = node is null ? "未返回 Node.js 检测结果" : $"{node.StatusLabel} · {node.InstalledVersion}\n{node.Detail}";
-        NpmRequirementText.Text = npm is null ? "未返回 npm 检测结果" : $"{npm.StatusLabel} · {npm.InstalledVersion}\n{npm.Detail}";
-        NvmRequirementText.Text = nvm is null ? "未返回 NVM 检测结果" : $"{nvm.StatusLabel} · {nvm.InstalledVersion}\n{nvm.Detail}";
+        PulseTimestampText.Text = snapshot.CollectedAt == default ? Localization.Get("SampleFailed") : Localization.Format("SampleAt", snapshot.CollectedAt.ToLocalTime());
+        RefreshAgeText.Text = snapshot.CollectedAt == default ? Localization.Get("DataUnavailable") : Localization.Format("UpdatedAt", snapshot.CollectedAt.ToLocalTime());
+        NodeRequirementText.Text = node is null ? Localization.Get("MissingNodeResult") : $"{node.StatusLabel} · {node.InstalledVersion}\n{node.Detail}";
+        NpmRequirementText.Text = npm is null ? Localization.Get("MissingNpmResult") : $"{npm.StatusLabel} · {npm.InstalledVersion}\n{npm.Detail}";
+        NvmRequirementText.Text = nvm is null ? Localization.Get("MissingNvmResult") : $"{nvm.StatusLabel} · {nvm.InstalledVersion}\n{nvm.Detail}";
         if (NodeVersionPicker.SelectedItem is null && NodeVersions.Count > 0) NodeVersionPicker.SelectedIndex = 0;
 
         var online = snapshot.TailscaleDevices.Count(x => x.Online);
         var self = snapshot.TailscaleDevices.FirstOrDefault(x => x.IsSelf);
-        TailnetSummaryText.Text = self is null ? "未连接 Tailscale" : $"{self.Name} 已连接 Tailnet";
-        TailnetDetailText.Text = self is null ? "请确认 Tailscale 已安装并登录" : $"{online} 台设备在线 · 本机 {self.Addresses}";
+        TailnetSummaryText.Text = self is null ? Localization.Get("TailscaleDisconnected") : Localization.Format("TailnetConnected", self.Name);
+        TailnetDetailText.Text = self is null ? Localization.Get("TailscaleSignInHint") : Localization.Format("TailnetOnlineCount", online, self.Addresses);
     }
 
     private static void Replace<T>(ObservableCollection<T> collection, IEnumerable<T> items)
@@ -160,7 +165,7 @@ public sealed partial class MainWindow : Window
     private async void ServiceAction_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not FrameworkElement { Tag: string action, DataContext: ComponentStatus component }) return;
-        await RunActionAsync(component.Id, action, $"正在{ActionName(action)} {component.Name}…");
+        await RunActionAsync(component.Id, action, Localization.Format("RunningAction", ActionName(action), component.Name));
     }
 
     private async void PackageAction_Click(object sender, RoutedEventArgs e)
@@ -168,10 +173,10 @@ public sealed partial class MainWindow : Window
         if (sender is not Button { Tag: string action, DataContext: ComponentStatus component }) return;
         if (action == "install" ? !component.CanInstall : !component.CanUpgrade)
         {
-            StatusText.Text = "请先安装 Node.js 22.14.0 或更高版本，并确认 npm 可用。";
+            StatusText.Text = Localization.Get("PrerequisiteHint");
             return;
         }
-        await RunActionAsync(component.Id, action, $"正在{ActionName(action)} {component.Name}…");
+        await RunActionAsync(component.Id, action, Localization.Format("RunningAction", ActionName(action), component.Name));
     }
 
     private async void DangerAction_Click(object sender, RoutedEventArgs e)
@@ -181,16 +186,14 @@ public sealed partial class MainWindow : Window
         var dialog = new ContentDialog
         {
             XamlRoot = Content.XamlRoot,
-            Title = restarting ? "重新启动所有 Codex 服务？" : "终止所有 Codex 服务？",
-            Content = restarting
-                ? "将停止 OpenCodex Proxy 与 Codex Relay 的计划任务及其明确匹配的服务进程，然后重新启动计划任务。Codex 桌面客户端和 Codex Beacon 不会关闭。"
-                : "将停止 OpenCodex Proxy 与 Codex Relay 的计划任务及其明确匹配的服务进程。Codex 桌面客户端、Codex Beacon 和无关 Node 进程不会关闭。",
-            PrimaryButtonText = restarting ? "全部重启" : "终止服务",
-            CloseButtonText = "取消",
+            Title = Localization.Get(restarting ? "RestartServicesTitle" : "TerminateServicesTitle"),
+            Content = Localization.Get(restarting ? "RestartServicesBody" : "TerminateServicesBody"),
+            PrimaryButtonText = Localization.Get(restarting ? "RestartAllButton" : "TerminateServicesButton"),
+            CloseButtonText = Localization.Get("Cancel"),
             DefaultButton = ContentDialogButton.Close
         };
         if (await dialog.ShowAsync() == ContentDialogResult.Primary)
-            await RunActionAsync("all", action == "kill" ? "kill" : "restart", restarting ? "正在重新启动服务…" : "正在终止服务…");
+            await RunActionAsync("all", action == "kill" ? "kill" : "restart", Localization.Get(restarting ? "RestartingServices" : "TerminatingServices"));
     }
 
     private async Task RunActionAsync(string component, string action, string busyMessage)
@@ -215,21 +218,21 @@ public sealed partial class MainWindow : Window
         var version = NewNodeVersionBox.Text.Trim().TrimStart('v');
         if (!Version.TryParse(version, out _) || version.Count(c => c == '.') != 2)
         {
-            StatusText.Text = "请输入完整 Node.js 版本号，例如 24.15.0。";
+            StatusText.Text = Localization.Get("FullNodeVersionHint");
             NewNodeVersionBox.Focus(FocusState.Programmatic);
             return;
         }
-        await RunVersionActionAsync("install-node", version, $"正在通过 NVM 安装 Node.js {version}…");
+        await RunVersionActionAsync("install-node", version, Localization.Format("InstallingNode", version));
     }
 
     private async void SwitchNode_Click(object sender, RoutedEventArgs e)
     {
         if (NodeVersionPicker.SelectedItem is not NodeRuntime runtime)
         {
-            StatusText.Text = "请先选择一个已安装的 Node.js 版本。";
+            StatusText.Text = Localization.Get("SelectNodeVersion");
             return;
         }
-        await RunVersionActionAsync("use-node", runtime.Version, $"正在切换到 Node.js {runtime.Version}…");
+        await RunVersionActionAsync("use-node", runtime.Version, Localization.Format("SwitchingNode", runtime.Version));
     }
 
     private async Task RunVersionActionAsync(string action, string version, string busyMessage)
@@ -255,25 +258,44 @@ public sealed partial class MainWindow : Window
     private void SaveSettings_Click(object sender, RoutedEventArgs e)
     {
         var seconds = double.IsNaN(RefreshSecondsBox.Value) ? 15 : (int)RefreshSecondsBox.Value;
+        var language = LanguagePicker.SelectedValue as string ?? Localization.SystemLanguage;
         _settings = new AppSettings
         {
             RefreshSeconds = Math.Clamp(seconds, 5, 300),
             RelayTaskName = string.IsNullOrWhiteSpace(RelayTaskNameBox.Text) ? "Codex Relay" : RelayTaskNameBox.Text.Trim(),
-            ProxyTaskName = string.IsNullOrWhiteSpace(ProxyTaskNameBox.Text) ? "opencodex-proxy" : ProxyTaskNameBox.Text.Trim()
+            ProxyTaskName = string.IsNullOrWhiteSpace(ProxyTaskNameBox.Text) ? "opencodex-proxy" : ProxyTaskNameBox.Text.Trim(),
+            Language = language
         };
         _systemService.SaveSettings(_settings);
         _timer.Interval = TimeSpan.FromSeconds(_settings.RefreshSeconds);
-        StatusText.Text = "设置已保存，将在下次刷新时生效。";
+        StatusText.Text = Localization.Get("SettingsSaved");
+    }
+
+    private void LanguagePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_initializingLanguage || LanguagePicker.SelectedValue is not string language || language == _settings.Language) return;
+        var seconds = double.IsNaN(RefreshSecondsBox.Value) ? 15 : (int)RefreshSecondsBox.Value;
+        _settings = new AppSettings
+        {
+            RefreshSeconds = Math.Clamp(seconds, 5, 300),
+            RelayTaskName = string.IsNullOrWhiteSpace(RelayTaskNameBox.Text) ? "Codex Relay" : RelayTaskNameBox.Text.Trim(),
+            ProxyTaskName = string.IsNullOrWhiteSpace(ProxyTaskNameBox.Text) ? "opencodex-proxy" : ProxyTaskNameBox.Text.Trim(),
+            Language = language
+        };
+        _systemService.SaveSettings(_settings);
+        Localization.ApplyLanguage(language);
+        ((App)Application.Current).ReloadMainWindow(this);
     }
 
     private static string ActionName(string action) => action switch
     {
-        "start" => "启动",
-        "stop" => "停止",
-        "restart" => "重启",
-        "install" => "安装或修复",
-        "upgrade" => "升级",
-        "login" => "登录",
-        _ => "处理"
+        "start" => Localization.Get("ActionStartName"),
+        "stop" => Localization.Get("ActionStopName"),
+        "restart" => Localization.Get("ActionRestartName"),
+        "install" => Localization.Get("ActionInstallName"),
+        "upgrade" => Localization.Get("ActionUpgradeName"),
+        "login" => Localization.Get("ActionLoginName"),
+        _ => Localization.Get("ActionProcessName")
     };
+
 }

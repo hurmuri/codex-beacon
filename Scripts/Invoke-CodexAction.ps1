@@ -2,7 +2,8 @@
     [Parameter(Mandatory=$true)][ValidateSet('nvm','desktop','codex','opencodex','relay','tailscale','all')][string]$Component,
     [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node')][string]$Action,
     [string]$Version = '',
-    [string]$SettingsPath = ''
+    [string]$SettingsPath = '',
+    [ValidateSet('en-US','zh-CN')][string]$Language = 'en-US'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -17,8 +18,61 @@ if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     } catch {}
 }
 
+function Convert-ActionText([string]$Text) {
+    if ($Language -ne 'en-US' -or [string]::IsNullOrEmpty($Text)) { return $Text }
+    $exact = @{
+        '缺少 Node.js 或 npm。请先安装 Node.js 22.14.0 或更高版本。' = 'Node.js or npm is missing. Install Node.js 22.14.0 or newer first.'
+        'Codex Relay 尚未安装。请先完成安装。' = 'Codex Relay is not installed. Complete installation first.'
+        '未检测到 winget，无法安装或升级 NVM for Windows。' = 'winget was not detected, so NVM for Windows cannot be installed or upgraded.'
+        'NVM for Windows 安装状态已更新' = 'NVM for Windows installation status updated'
+        '未检测到 NVM for Windows。请先安装 NVM 并重新打开 Codex Beacon。' = 'NVM for Windows was not detected. Install NVM and reopen Codex Beacon.'
+        '请输入完整 Node.js 版本号，例如 24.15.0。' = 'Enter a complete Node.js version, for example 24.15.0.'
+        'NVM 不支持此操作。' = 'NVM does not support this action.'
+        '已打开 Codex 登录流程' = 'Codex sign-in opened'
+        '请在 Codex 桌面客户端中完成登录，完成后返回并刷新。' = 'Complete sign-in in the Codex desktop app, then return and refresh.'
+        '已打开 Codex 的 Microsoft Store 产品页' = 'Opened the Codex Microsoft Store product page'
+        '产品 ID 9PLM9XGG6VKS；安装与升级由官方应用分发通道完成。' = 'Product ID 9PLM9XGG6VKS. Installation and upgrades use the official app distribution channel.'
+        'Codex 桌面客户端已启动' = 'Codex desktop app started'
+        'Codex 桌面客户端已关闭' = 'Codex desktop app closed'
+        'Codex 桌面客户端已重新启动' = 'Codex desktop app restarted'
+        '已打开 Tailscale 登录流程' = 'Tailscale sign-in opened'
+        '请在新窗口中完成浏览器授权，完成后返回并刷新。' = 'Complete browser authorization in the new window, then return and refresh.'
+        '未检测到 winget，无法安装或升级 Tailscale。' = 'winget was not detected, so Tailscale cannot be installed or upgraded.'
+        'Tailscale 安装状态已更新' = 'Tailscale installation status updated'
+        'Tailscale 服务已启动' = 'Tailscale service started'; 'Tailscale 服务已停止' = 'Tailscale service stopped'; 'Tailscale 服务已重新启动' = 'Tailscale service restarted'
+        'Tailscale 不支持此操作。' = 'Tailscale does not support this action.'
+        'Codex CLI 尚未安装。请先完成安装。' = 'Codex CLI is not installed. Complete installation first.'
+        '请在新窗口中完成登录，完成后返回并刷新。' = 'Complete sign-in in the new window, then return and refresh.'
+        '批量安装不受支持，请逐项执行。' = 'Bulk installation is not supported. Install components individually.'
+        '安装完成。需要使用该扩展时，再点击“启动”完成服务配置。' = 'Installation complete. Select Start when you want to configure and use this extension.'
+        '安装完成。点击“启动”会使用 Relay 官方后台模式运行。' = 'Installation complete. Select Start to use the official Relay background mode.'
+        'Codex 可选服务已重新启动' = 'Optional Codex services restarted'
+        'Codex 可选服务已终止' = 'Optional Codex services terminated'
+        'Codex CLI 不是常驻服务；请在进程页管理正在运行的代理与 Relay。' = 'Codex CLI is not a persistent service. Manage active proxies and Relay from the Processes page.'
+        'Codex Relay 已启动' = 'Codex Relay started'; 'Codex Relay 已停止' = 'Codex Relay stopped'; 'Codex Relay 已重新启动' = 'Codex Relay restarted'
+        'OpenCodex 尚未安装。请先完成安装。' = 'OpenCodex is not installed. Complete installation first.'
+        '操作未完成' = 'Action did not complete'
+    }
+    if ($exact.ContainsKey($Text)) { return $exact[$Text] }
+    $Text = $Text -replace '^Node\.js (.+) 版本过低；需要 22\.14\.0 或更高版本。$', 'Node.js $1 is too old; version 22.14.0 or newer is required.'
+    $Text = $Text -replace '^未找到计划任务 \[(.+)\]。请先完成对应服务安装。$', 'Scheduled task [$1] was not found. Install the corresponding service first.'
+    $Text = $Text -replace '^Node\.js (.+) 已安装$', 'Node.js $1 installed'
+    $Text = $Text -replace '^已切换到 Node\.js (.+)$', 'Switched to Node.js $1'
+    $Text = $Text -replace '^(.+) 已安装为最新版$', '$1 installed at the latest version'
+    $Text = $Text -replace '^终止了 (\d+) 个明确匹配的服务进程；已启动：(.+)。$', 'Terminated $1 explicitly matched service process(es); started: $2.'
+    $Text = $Text -replace '^终止了 (\d+) 个明确匹配的服务进程；Codex 桌面应用和本管理器未受影响。$', 'Terminated $1 explicitly matched service process(es). The Codex desktop app and Codex Beacon were not affected.'
+    $Text = $Text -replace '^不支持的操作：(.+)$', 'Unsupported action: $1'
+    $Text = $Text -replace '^OpenCodex 服务已启动$', 'OpenCodex service started'
+    $Text = $Text -replace '^OpenCodex 服务已停止$', 'OpenCodex service stopped'
+    $Text = $Text -replace '^OpenCodex 服务已重新启动$', 'OpenCodex service restarted'
+    $Text = $Text -replace '^(.+) 已启动$', '$1 started'
+    $Text = $Text -replace '^(.+) 已停止$', '$1 stopped'
+    $Text = $Text -replace '^(.+) 已重新启动$', '$1 restarted'
+    return ($Text -replace '已隐藏','redacted' -replace 'OpenCodex 计划任务','OpenCodex scheduled task' -replace 'Relay 计划任务','Relay scheduled task' -replace 'OpenCodex 服务','OpenCodex service' -replace 'Relay 后台模式','Relay background mode' -replace '、',', ')
+}
+
 function Result([bool]$Success, [string]$Message, [string]$Details = '') {
-    [ordered]@{ Success = $Success; Message = $Message; Details = $Details } | ConvertTo-Json -Compress
+    [ordered]@{ Success = $Success; Message = (Convert-ActionText $Message); Details = (Convert-ActionText $Details) } | ConvertTo-Json -Compress
 }
 
 function Assert-Prerequisites {

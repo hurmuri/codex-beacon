@@ -8,7 +8,8 @@
     <Product>Codex Beacon</Product>
     <Description>Native WinUI 3 manager for the Windows Codex toolchain.</Description>
     <Authors>Codex Beacon contributors</Authors>
-    <Version>0.1.1</Version>
+    <Version>0.2.0</Version>
+    <DefaultLanguage>en-US</DefaultLanguage>
     <RepositoryUrl>https://github.com/hurmuri/codex-beacon</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

@@ -13,8 +13,10 @@ public sealed class SystemService
     };
 
     private readonly string _scriptDirectory = Path.Combine(AppContext.BaseDirectory, "Scripts");
-    private readonly string _settingsPath = Path.Combine(
+    public static string SettingsPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", "settings.json");
+
+    private readonly string _settingsPath = SettingsPath;
 
     public AppSettings LoadSettings()
     {
@@ -39,21 +41,22 @@ public sealed class SystemService
         {
             "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
             "-File", Path.Combine(_scriptDirectory, "Collect-CodexStatus.ps1"),
-            "-SettingsPath", _settingsPath
+            "-SettingsPath", _settingsPath,
+            "-Language", EffectiveLanguage()
         };
         if (includeLatest) arguments.Add("-IncludeLatest");
         var result = await RunAsync("powershell.exe", arguments, cancellationToken);
         if (result.ExitCode != 0)
-            return new() { OverallState = "Warning", OverallMessage = "检测未完成", Error = SafeError(result.Error) };
+            return new() { OverallState = "Warning", OverallMessage = Localization.Get("CollectionIncomplete"), Error = SafeError(result.Error) };
 
         try
         {
             return JsonSerializer.Deserialize<SystemSnapshot>(result.Output, JsonOptions)
-                ?? new() { OverallState = "Warning", OverallMessage = "检测没有返回数据" };
+                ?? new() { OverallState = "Warning", OverallMessage = Localization.Get("CollectionNoData") };
         }
         catch (Exception ex)
         {
-            return new() { OverallState = "Warning", OverallMessage = "无法解析检测结果", Error = SafeError(ex.Message) };
+            return new() { OverallState = "Warning", OverallMessage = Localization.Get("CollectionParseFailed"), Error = SafeError(ex.Message) };
         }
     }
 
@@ -63,7 +66,8 @@ public sealed class SystemService
         {
             "-NoLogo", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
             "-File", Path.Combine(_scriptDirectory, "Invoke-CodexAction.ps1"),
-            "-Component", component, "-Action", action, "-SettingsPath", _settingsPath
+            "-Component", component, "-Action", action, "-SettingsPath", _settingsPath,
+            "-Language", EffectiveLanguage()
         };
         if (!string.IsNullOrWhiteSpace(version)) { arguments.Add("-Version"); arguments.Add(version); }
         var result = await RunAsync("powershell.exe", arguments, cancellationToken);
@@ -71,11 +75,11 @@ public sealed class SystemService
         try
         {
             return JsonSerializer.Deserialize<ActionResult>(result.Output, JsonOptions)
-                ?? new() { Success = false, Message = "操作没有返回结果", Details = SafeError(result.Error) };
+                ?? new() { Success = false, Message = Localization.Get("ActionNoResult"), Details = SafeError(result.Error) };
         }
         catch
         {
-            return new() { Success = false, Message = "操作执行失败", Details = SafeError(result.Error + " " + result.Output) };
+            return new() { Success = false, Message = Localization.Get("ActionFailed"), Details = SafeError(result.Error + " " + result.Output) };
         }
     }
 
@@ -92,7 +96,7 @@ public sealed class SystemService
             StandardErrorEncoding = Encoding.UTF8
         };
         foreach (var argument in arguments) info.ArgumentList.Add(argument);
-        using var process = Process.Start(info) ?? throw new InvalidOperationException($"无法启动 {fileName}");
+        using var process = Process.Start(info) ?? throw new InvalidOperationException(Localization.Format("UnableToStart", fileName));
         var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
         var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
         await process.WaitForExitAsync(cancellationToken);
@@ -101,11 +105,15 @@ public sealed class SystemService
 
     private static string SafeError(string value)
     {
-        if (string.IsNullOrWhiteSpace(value)) return "没有更多诊断信息。";
+        if (string.IsNullOrWhiteSpace(value)) return Localization.Get("NoMoreDiagnostics");
         var lines = value.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
             .Where(line => !line.Contains("token", StringComparison.OrdinalIgnoreCase)
                         && !line.Contains("authorization", StringComparison.OrdinalIgnoreCase)
                         && !line.Contains("api_key", StringComparison.OrdinalIgnoreCase));
         return string.Join(" ", lines).Trim();
     }
+
+    private static string EffectiveLanguage() => Localization.CurrentLanguage == Localization.SystemLanguage
+        ? (System.Globalization.CultureInfo.CurrentUICulture.Name.StartsWith("zh", StringComparison.OrdinalIgnoreCase) ? "zh-CN" : "en-US")
+        : Localization.CurrentLanguage;
 }
