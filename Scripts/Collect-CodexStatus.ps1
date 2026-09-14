@@ -440,16 +440,33 @@ if ($openCodexVersion) {
     $openCodexCommand = Get-Command opencodex -ErrorAction SilentlyContinue
     if ($openCodexCommand) {
         try {
-            $modelJson = & $openCodexCommand.Source models list --json 2>$null | Out-String | ConvertFrom-Json
-            foreach ($entry in @($modelJson.models)) {
-                if ($entry.model) {
-                    $providerId = [string]$entry.provider
-                    $modelId = [string]$entry.model
-                    $selector = if ($providerId) { "$providerId/$modelId" } else { $modelId }
-                    $openCodexModels += [ordered]@{
-                        Id=$modelId
-                        Provider=$providerId
-                        IsVisible=(-not $disabledOpenCodexModels.Contains($selector))
+            $liveRaw = & $openCodexCommand.Source models live --json 2>$null | Out-String
+            if ($liveRaw -and $liveRaw.Trim().StartsWith('[')) {
+                $liveList = $liveRaw | ConvertFrom-Json
+                foreach ($entry in @($liveList)) {
+                    $modelId = if ($entry.id) { [string]$entry.id } else { [string]$entry.model }
+                    if ($modelId) {
+                        $providerId = [string]$entry.provider
+                        $isDisabled = [bool]$entry.disabled
+                        $openCodexModels += [ordered]@{
+                            Id=$modelId
+                            Provider=$providerId
+                            IsVisible=(-not $isDisabled)
+                        }
+                    }
+                }
+            } else {
+                $modelJson = & $openCodexCommand.Source models list --json 2>$null | Out-String | ConvertFrom-Json
+                foreach ($entry in @($modelJson.models)) {
+                    if ($entry.model) {
+                        $providerId = [string]$entry.provider
+                        $modelId = [string]$entry.model
+                        $selector = if ($providerId -and $providerId -ne 'openai') { "$providerId/$modelId" } else { $modelId }
+                        $openCodexModels += [ordered]@{
+                            Id=$modelId
+                            Provider=$providerId
+                            IsVisible=(-not $disabledOpenCodexModels.Contains($selector))
+                        }
                     }
                 }
             }

@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+﻿﻿using System.Text.Json.Serialization;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI;
@@ -104,7 +104,7 @@ public sealed class OpenCodexModel
     public string Id { get; set; } = "";
     public string Provider { get; set; } = "";
     public bool IsVisible { get; set; } = true;
-    [JsonIgnore] public string Selector => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Provider}/{Id}";
+    [JsonIgnore] public string Selector => string.IsNullOrWhiteSpace(Provider) || Provider.Equals("openai", StringComparison.OrdinalIgnoreCase) ? Id : $"{Provider}/{Id}";
     [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Id} · {Provider}";
     [JsonIgnore] public string VisibilityLabel => Localization.Get(IsVisible ? "ModelVisible" : "ModelHidden");
 }

@@ -370,7 +370,33 @@ public sealed class SystemService
     public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(CancellationToken cancellationToken = default)
     {
         var list = new List<OpenCodexModel>();
-        var disabled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            var liveOutcome = await RunAsync("opencodex", new[] { "models", "live", "--json" }, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(liveOutcome.Output) && liveOutcome.Output.TrimStart().StartsWith("["))
+            {
+                using var doc = JsonDocument.Parse(liveOutcome.Output);
+                foreach (var item in doc.RootElement.EnumerateArray())
+                {
+                    var model = item.TryGetProperty("id", out var idProp) ? idProp.GetString()
+                        : (item.TryGetProperty("model", out var mProp) ? mProp.GetString() : null);
+                    var provider = item.TryGetProperty("provider", out var pProp) ? pProp.GetString() : null;
+                    var disabled = item.TryGetProperty("disabled", out var dProp) && dProp.GetBoolean();
+                    if (!string.IsNullOrWhiteSpace(model))
+                    {
+                        list.Add(new OpenCodexModel
+                        {
+                            Id = model,
+                            Provider = provider ?? "",
+                            IsVisible = !disabled
+                        });
+                    }
+                }
+                if (list.Count > 0) return list;
+            }
+        }
+        catch { }
+        var disabledSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         try
         {
             var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".opencodex", "config.json");
@@ -380,7 +406,7 @@ public sealed class SystemService
                 foreach (var entry in disabledModels.EnumerateArray())
                 {
                     var selector = entry.GetString();
-                    if (!string.IsNullOrWhiteSpace(selector)) disabled.Add(selector);
+                    if (!string.IsNullOrWhiteSpace(selector)) disabledSet.Add(selector);
                 }
             }
         }
@@ -399,8 +425,8 @@ public sealed class SystemService
                         var provider = item.TryGetProperty("provider", out var p) ? p.GetString() : null;
                         if (!string.IsNullOrWhiteSpace(model))
                         {
-                            var selector = string.IsNullOrWhiteSpace(provider) ? model : $"{provider}/{model}";
-                            list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabled.Contains(selector) });
+                            var selector = string.IsNullOrWhiteSpace(provider) || provider.Equals("openai", StringComparison.OrdinalIgnoreCase) ? model : $"{provider}/{model}";
+                            list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabledSet.Contains(selector) });
                         }
                     }
                 }
