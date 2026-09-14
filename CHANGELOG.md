@@ -4,6 +4,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed ChatGPT desktop client upgrade workflow from the Overview page:
+  - Resolved an issue where clicking 'Store install/upgrade' failed to update the client because WinGet reports 'No available upgrade found' for msstore packages whose version metadata is marked as Unknown, or triggers '0x80073d02' when processes are active.
+  - Dynamically routes desktop actions: buttons accurately display 'Store install', 'Store upgrade', or 'Open Store' according to current package and update availability.
+  - Upgrades seamlessly launch the official Microsoft Store product details page ('ms-windows-store://pdp/?ProductId=9PLM9XGG6VKS') so the Store native engine safely handles downloading, process scheduling, and updating with clear user guidance.
+
+
 ### Added
 
 - Canonical 9-page information architecture: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Providers, OpenCodex, Tailscale, Codex Relay, and Settings.

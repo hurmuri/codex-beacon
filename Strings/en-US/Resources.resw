@@ -271,6 +271,10 @@
   <data name="ActionInstallName" xml:space="preserve"><value>installing or repairing</value></data>
   <data name="ActionUpgradeName" xml:space="preserve"><value>upgrading</value></data>
   <data name="ActionLoginName" xml:space="preserve"><value>opening sign-in for</value></data>
+  <data name="ActionStoreName" xml:space="preserve"><value>open Microsoft Store</value></data>
+  <data name="ActionInstallStore" xml:space="preserve"><value>Store install</value></data>
+  <data name="ActionUpgradeStore" xml:space="preserve"><value>Store upgrade</value></data>
+  <data name="ActionOpenStore" xml:space="preserve"><value>Open Store</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>processing</value></data>
   <data name="RunningAction" xml:space="preserve"><value>{0} {1}…</value></data>
 
@@ -293,8 +297,9 @@
   <data name="ActionDesktopStarted" xml:space="preserve"><value>Codex desktop app started</value></data>
   <data name="ActionDesktopStopped" xml:space="preserve"><value>Terminated {0} Codex / ChatGPT process(es)</value></data>
   <data name="ActionDesktopRestarted" xml:space="preserve"><value>ChatGPT desktop app restarted ({0} stale processes cleared)</value></data>
-  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>Opened the Codex Microsoft Store product page</value></data>
+  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>Opened the Microsoft Store product page for ChatGPT</value></data>
   <data name="ActionDesktopStoreHint" xml:space="preserve"><value>Product ID {0}. Installation and upgrades use the official app distribution channel.</value></data>
+  <data name="ActionDesktopStoreUpgradeHint" xml:space="preserve"><value>Microsoft Store opened. Click "Update" on the product page, or go to the Library tab and click "Get updates".</value></data>
   <data name="ActionTailscaleLoginOpened" xml:space="preserve"><value>Tailscale sign-in opened</value></data>
   <data name="ActionTailscaleLoginHint" xml:space="preserve"><value>Complete browser authorization in the new window, then return and refresh.</value></data>
   <data name="ActionTailscaleInstalled" xml:space="preserve"><value>Tailscale installation state updated</value></data>
@@ -455,4 +460,62 @@
   <data name="ServiceControlHeading.Text" xml:space="preserve"><value>Service control</value></data>
   <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
   <data name="SaveRelayButton.Content" xml:space="preserve"><value>Save Relay settings</value></data>
+
+  <!-- QA fix round: wired previously hardcoded UI strings -->
+  <data name="OverviewStoreChannelLabel.Text" xml:space="preserve"><value>Microsoft Store channel</value></data>
+  <data name="OverviewRuntimeLabel.Text" xml:space="preserve"><value>Node.js &amp; npm runtime</value></data>
+  <data name="DesktopCardTitle.Text" xml:space="preserve"><value>ChatGPT desktop client</value></data>
+  <data name="DesktopCardSubtitle.Text" xml:space="preserve"><value>Official OpenAI Windows desktop app</value></data>
+  <data name="StatusDetectingShort.Text" xml:space="preserve"><value>Detecting…</value></data>
+  <data name="DesktopStoreInstallButton.Content" xml:space="preserve"><value>Store install/upgrade</value></data>
+  <data name="CodexCardSubtitle.Text" xml:space="preserve"><value>Official OpenAI command-line tool</value></data>
+  <data name="ProxyModeHint.Text" xml:space="preserve"><value>Choose the proxy mode; after switching or entering an address you can test connectivity right away, then save to apply.</value></data>
+  <data name="ActiveProviderLabel.Text" xml:space="preserve"><value>Current Codex router provider</value></data>
+  <data name="ActiveProviderDetecting.Text" xml:space="preserve"><value>Detecting the active provider…</value></data>
+  <data name="ProviderBannerActive.Text" xml:space="preserve"><value>Active</value></data>
+  <data name="ProviderSetActiveBtn.Content" xml:space="preserve"><value>Set as current</value></data>
+  <data name="ProviderTestConnBtn.Content" xml:space="preserve"><value>Test connection</value></data>
+  <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex local proxy service</value></data>
+  <data name="VersionStatusLabel.Text" xml:space="preserve"><value>Version status</value></data>
+  <data name="CheckNewerButton.Content" xml:space="preserve"><value>Check for newer version</value></data>
+  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>Reads models registered and routed by the local OpenCodex service; pick one to run a connectivity check.</value></data>
+  <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>Pick a model to test</value></data>
+  <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>Version and background service control</value></data>
+  <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale local network service</value></data>
+  <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>A Windows background service drives the VPN (start, stop and restart require administrator)</value></data>
+  <data name="TailscaleWingetUpgrade.Content" xml:space="preserve"><value>Upgrade via WinGet</value></data>
+  <data name="RelayCardTitle.Text" xml:space="preserve"><value>Codex Relay bridge service</value></data>
+  <data name="RelayCardSubtitle.Text" xml:space="preserve"><value>Two-way communication extension between mobile devices and desktop Codex (default port 8787)</value></data>
+  <data name="TaskScheduleHeading.Text" xml:space="preserve"><value>Scheduled task configuration</value></data>
+  <data name="LanguageZh.Content" xml:space="preserve"><value>Simplified Chinese</value></data>
+  <data name="AboutOpenSourceHeading.Text" xml:space="preserve"><value>About Codex Beacon and open-source info</value></data>
+  <data name="ProjectInfoExpander.Header" xml:space="preserve"><value>Project info</value></data>
+  <data name="ProjectInfoExpander.Description" xml:space="preserve"><value>Codex Beacon's own version and GitHub repository details</value></data>
+  <data name="ProjectVersionCard.Header" xml:space="preserve"><value>Current version</value></data>
+  <data name="ProjectVersionCard.Description" xml:space="preserve"><value>Native Windows x64 app</value></data>
+  <data name="ProjectRepoCard.Header" xml:space="preserve"><value>GitHub repository</value></data>
+  <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>Open-source license</value></data>
+  <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>Permissive free-software license</value></data>
+  <data name="ReferenceOpencodex.Description" xml:space="preserve"><value>Optional provider proxy extension</value></data>
+  <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Reference for Codex desktop version management</value></data>
+  <data name="ReferenceRelay.Description" xml:space="preserve"><value>Optional mobile bridge extension</value></data>
+  <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex egress IP and risk-check data source</value></data>
+  <data name="ProviderBannerOpencodex" xml:space="preserve"><value>OpenCodex local proxy (http://127.0.0.1:10100/v1)</value></data>
+  <data name="ProviderBannerOpenAI" xml:space="preserve"><value>OpenAI direct (https://api.openai.com/v1)</value></data>
+  <data name="DesktopStorePathFallback" xml:space="preserve"><value>Official OpenAI Store package</value></data>
+  <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm global install</value></data>
+  <data name="NetworkTesting" xml:space="preserve"><value>Testing network and proxy connectivity…</value></data>
+  <data name="NetworkTestDone" xml:space="preserve"><value>Network connectivity test complete.</value></data>
+  <data name="NetworkTestFailed" xml:space="preserve"><value>Network test failed: {0}</value></data>
+  <data name="CheckingComponentUpdate" xml:space="preserve"><value>Checking the latest version of {0}…</value></data>
+  <data name="ComponentUpdateResult" xml:space="preserve"><value>{0} latest version: {1}</value></data>
+  <data name="ComponentUpdateUnknown" xml:space="preserve"><value>No remote version found for {0}.</value></data>
+  <data name="ComponentUpdateFailed" xml:space="preserve"><value>Query failed: {0}</value></data>
+  <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT desktop app</value></data>
+  <data name="OpenCodexIntegrationNone" xml:space="preserve"><value>Integration: —</value></data>
+  <data name="OpenCodexIntegrationCurrent" xml:space="preserve"><value>Integration: active</value></data>
+  <data name="OpenCodexIntegrationState" xml:space="preserve"><value>Integration: {0}</value></data>
+  <!-- QA fix round addendum -->
+  <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>Built-in and detected providers (incl. OpenCodex local proxy)</value></data>
+  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>Applied via --registry when installing or upgrading Codex CLI and Relay; separate from the system-wide npm config.</value></data>
 </root>

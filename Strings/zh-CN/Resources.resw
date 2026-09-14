@@ -270,6 +270,10 @@
   <data name="ActionInstallName" xml:space="preserve"><value>安装或修复</value></data>
   <data name="ActionUpgradeName" xml:space="preserve"><value>升级</value></data>
   <data name="ActionLoginName" xml:space="preserve"><value>登录</value></data>
+  <data name="ActionStoreName" xml:space="preserve"><value>打开应用商店</value></data>
+  <data name="ActionInstallStore" xml:space="preserve"><value>商店安装</value></data>
+  <data name="ActionUpgradeStore" xml:space="preserve"><value>商店升级</value></data>
+  <data name="ActionOpenStore" xml:space="preserve"><value>打开商店</value></data>
   <data name="ActionProcessName" xml:space="preserve"><value>处理</value></data>
   <data name="RunningAction" xml:space="preserve"><value>正在{0} {1}…</value></data>
 
@@ -292,8 +296,9 @@
   <data name="ActionDesktopStarted" xml:space="preserve"><value>Codex 桌面客户端已启动</value></data>
   <data name="ActionDesktopStopped" xml:space="preserve"><value>已终止 {0} 个 Codex / ChatGPT 进程</value></data>
   <data name="ActionDesktopRestarted" xml:space="preserve"><value>ChatGPT 桌面客户端已重新启动（清理 {0} 个旧进程）</value></data>
-  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>已打开 Codex 的 Microsoft Store 产品页</value></data>
+  <data name="ActionDesktopStoreOpened" xml:space="preserve"><value>已打开 ChatGPT 桌面客户端的 Microsoft Store 产品页</value></data>
   <data name="ActionDesktopStoreHint" xml:space="preserve"><value>产品 ID {0}；安装与升级由官方应用分发通道完成。</value></data>
+  <data name="ActionDesktopStoreUpgradeHint" xml:space="preserve"><value>已为您打开应用商店。请在商店页面点击“更新”；若未显示更新按钮，可前往商店“库”中点击“获取更新”。</value></data>
   <data name="ActionTailscaleLoginOpened" xml:space="preserve"><value>已打开 Tailscale 登录流程</value></data>
   <data name="ActionTailscaleLoginHint" xml:space="preserve"><value>请在新窗口中完成浏览器授权，然后返回刷新。</value></data>
   <data name="ActionTailscaleInstalled" xml:space="preserve"><value>Tailscale 安装状态已更新</value></data>
@@ -454,4 +459,62 @@
   <data name="ServiceControlHeading.Text" xml:space="preserve"><value>服务控制</value></data>
   <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
   <data name="SaveRelayButton.Content" xml:space="preserve"><value>保存 Relay 设置</value></data>
+
+  <!-- QA fix round: wired previously hardcoded UI strings -->
+  <data name="OverviewStoreChannelLabel.Text" xml:space="preserve"><value>Microsoft Store 渠道状态</value></data>
+  <data name="OverviewRuntimeLabel.Text" xml:space="preserve"><value>Node.js 与 npm 运行环境</value></data>
+  <data name="DesktopCardTitle.Text" xml:space="preserve"><value>ChatGPT 桌面客户端</value></data>
+  <data name="DesktopCardSubtitle.Text" xml:space="preserve"><value>OpenAI 官方 Windows 桌面应用</value></data>
+  <data name="StatusDetectingShort.Text" xml:space="preserve"><value>检测中</value></data>
+  <data name="DesktopStoreInstallButton.Content" xml:space="preserve"><value>商店安装/升级</value></data>
+  <data name="CodexCardSubtitle.Text" xml:space="preserve"><value>OpenAI 官方命令行工具</value></data>
+  <data name="ProxyModeHint.Text" xml:space="preserve"><value>选择代理工作模式；切换或填入代理地址后可直接测试连通性，确认无误后点击保存生效。</value></data>
+  <data name="ActiveProviderLabel.Text" xml:space="preserve"><value>当前 Codex 主路由服务商</value></data>
+  <data name="ActiveProviderDetecting.Text" xml:space="preserve"><value>正在检测当前 Provider…</value></data>
+  <data name="ProviderBannerActive.Text" xml:space="preserve"><value>生效中</value></data>
+  <data name="ProviderSetActiveBtn.Content" xml:space="preserve"><value>设为当前</value></data>
+  <data name="ProviderTestConnBtn.Content" xml:space="preserve"><value>联通测试</value></data>
+  <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex 本地代理服务</value></data>
+  <data name="VersionStatusLabel.Text" xml:space="preserve"><value>版本状态</value></data>
+  <data name="CheckNewerButton.Content" xml:space="preserve"><value>检查新版本</value></data>
+  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>从本地 OpenCodex 服务中读取已注册与路由模型，可直接选择模型发起连通性验证。</value></data>
+  <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>请选择模型进行测试</value></data>
+  <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>版本与后台服务控制</value></data>
+  <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale 本机网络服务</value></data>
+  <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>Windows 后台服务驱动虚拟专用网络（启动、停止与重启需管理员权限）</value></data>
+  <data name="TailscaleWingetUpgrade.Content" xml:space="preserve"><value>通过 WinGet 升级</value></data>
+  <data name="RelayCardTitle.Text" xml:space="preserve"><value>Codex Relay 桥接服务</value></data>
+  <data name="RelayCardSubtitle.Text" xml:space="preserve"><value>移动设备与桌面端 Codex 的双向通信扩展 (默认端口 8787)</value></data>
+  <data name="TaskScheduleHeading.Text" xml:space="preserve"><value>计划任务配置</value></data>
+  <data name="LanguageZh.Content" xml:space="preserve"><value>简体中文</value></data>
+  <data name="AboutOpenSourceHeading.Text" xml:space="preserve"><value>关于 Codex Beacon 与项目开源信息</value></data>
+  <data name="ProjectInfoExpander.Header" xml:space="preserve"><value>项目信息</value></data>
+  <data name="ProjectInfoExpander.Description" xml:space="preserve"><value>Codex Beacon 自身版本与 GitHub 仓库详情</value></data>
+  <data name="ProjectVersionCard.Header" xml:space="preserve"><value>当前版本</value></data>
+  <data name="ProjectVersionCard.Description" xml:space="preserve"><value>Windows x64 独立原生应用</value></data>
+  <data name="ProjectRepoCard.Header" xml:space="preserve"><value>GitHub 源码仓库</value></data>
+  <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>开源许可协议</value></data>
+  <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>宽松的自由软件授权</value></data>
+  <data name="ReferenceOpencodex.Description" xml:space="preserve"><value>可选 Provider 代理扩展</value></data>
+  <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Codex 桌面版本管理方案参考</value></data>
+  <data name="ReferenceRelay.Description" xml:space="preserve"><value>可选移动端桥接扩展</value></data>
+  <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex 出口 IP 与风险检测数据源</value></data>
+  <data name="ProviderBannerOpencodex" xml:space="preserve"><value>OpenCodex 本地代理 (http://127.0.0.1:10100/v1)</value></data>
+  <data name="ProviderBannerOpenAI" xml:space="preserve"><value>OpenAI 官方直连 (https://api.openai.com/v1)</value></data>
+  <data name="DesktopStorePathFallback" xml:space="preserve"><value>OpenAI 官方 Store 应用包</value></data>
+  <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm 全局安装</value></data>
+  <data name="NetworkTesting" xml:space="preserve"><value>正在测试网络与代理连通性…</value></data>
+  <data name="NetworkTestDone" xml:space="preserve"><value>网络连通性测试完成。</value></data>
+  <data name="NetworkTestFailed" xml:space="preserve"><value>网络测试失败: {0}</value></data>
+  <data name="CheckingComponentUpdate" xml:space="preserve"><value>正在查询 {0} 最新版本…</value></data>
+  <data name="ComponentUpdateResult" xml:space="preserve"><value>{0} 最新版本: {1}</value></data>
+  <data name="ComponentUpdateUnknown" xml:space="preserve"><value>未查询到 {0} 的远端版本。</value></data>
+  <data name="ComponentUpdateFailed" xml:space="preserve"><value>查询失败: {0}</value></data>
+  <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT 桌面应用</value></data>
+  <data name="OpenCodexIntegrationNone" xml:space="preserve"><value>集成状态：—</value></data>
+  <data name="OpenCodexIntegrationCurrent" xml:space="preserve"><value>集成状态：已集成</value></data>
+  <data name="OpenCodexIntegrationState" xml:space="preserve"><value>集成状态：{0}</value></data>
+  <!-- QA fix round addendum -->
+  <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>系统预置与已检测 Provider (含 OpenCodex 本地代理)</value></data>
+  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。</value></data>
 </root>

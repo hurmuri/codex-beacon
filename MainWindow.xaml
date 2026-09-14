@@ -97,11 +97,11 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Spacing="2">
-                                    <TextBlock Text="Microsoft Store 渠道状态" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock x:Uid="OverviewStoreChannelLabel" Text="Microsoft Store 渠道状态" Style="{StaticResource CaptionTextStyle}" />
                                     <TextBlock x:Name="StoreDependencyText" x:Uid="DetectingStatus" Text="正在检测…" Style="{StaticResource CardTitleStyle}" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="2">
-                                    <TextBlock Text="Node.js 与 npm 运行环境" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock x:Uid="OverviewRuntimeLabel" Text="Node.js 与 npm 运行环境" Style="{StaticResource CaptionTextStyle}" />
                                     <TextBlock x:Name="NpmDependencyText" x:Uid="DetectingStatus" Text="正在检测…" Style="{StaticResource CardTitleStyle}" />
                                 </StackPanel>
                                 <Button Grid.Column="2" x:Uid="DependencySettingsButton" Content="管理依赖" Style="{StaticResource QuietButtonStyle}" VerticalAlignment="Center" Click="NavigateDependencies_Click" />
@@ -124,11 +124,11 @@
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Spacing="2">
-                                            <TextBlock Text="ChatGPT 桌面客户端" Style="{StaticResource CardTitleStyle}" />
-                                            <TextBlock Text="OpenAI 官方 Windows 桌面应用" Style="{StaticResource CaptionTextStyle}" />
+                                            <TextBlock x:Uid="DesktopCardTitle" Text="ChatGPT 桌面客户端" Style="{StaticResource CardTitleStyle}" />
+                                            <TextBlock x:Uid="DesktopCardSubtitle" Text="OpenAI 官方 Windows 桌面应用" Style="{StaticResource CaptionTextStyle}" />
                                         </StackPanel>
                                         <Border Grid.Column="1" x:Name="DesktopStatusBadgeBorder" Background="#E5F6EF" CornerRadius="10" Padding="8,3" VerticalAlignment="Top">
-                                            <TextBlock x:Name="DesktopStatusBadgeText" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                            <TextBlock x:Name="DesktopStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                         </Border>
                                     </Grid>
 
@@ -144,10 +144,10 @@
                                     <TextBlock x:Name="DesktopPathText" Text="—" Style="{StaticResource MonoCaptionStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
 
                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                        <Button x:Name="DesktopStartButton" Content="启动" Style="{StaticResource ActionButtonStyle}" Tag="start" Click="DesktopAction_Click" />
-                                        <Button x:Name="DesktopStopButton" Content="停止" Style="{StaticResource ActionButtonStyle}" Tag="stop" Click="DesktopAction_Click" />
-                                        <Button x:Name="DesktopRestartButton" Content="重启" Style="{StaticResource ActionButtonStyle}" Tag="restart" Click="DesktopAction_Click" />
-                                        <Button x:Name="DesktopInstallButton" Content="商店安装/升级" Style="{StaticResource ActionButtonStyle}" Tag="install" Click="DesktopAction_Click" />
+                                        <Button x:Name="DesktopStartButton" x:Uid="ActionStart" Content="启动" Style="{StaticResource ActionButtonStyle}" Tag="start" Click="DesktopAction_Click" />
+                                        <Button x:Name="DesktopStopButton" x:Uid="ActionStop" Content="停止" Style="{StaticResource ActionButtonStyle}" Tag="stop" Click="DesktopAction_Click" />
+                                        <Button x:Name="DesktopRestartButton" x:Uid="ActionRestart" Content="重启" Style="{StaticResource ActionButtonStyle}" Tag="restart" Click="DesktopAction_Click" />
+                                        <Button x:Name="DesktopInstallButton" x:Uid="DesktopStoreInstallButton" Content="商店安装/升级" Style="{StaticResource ActionButtonStyle}" Tag="install" Click="DesktopAction_Click" />
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -162,10 +162,10 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Spacing="2">
                                             <TextBlock Text="Codex CLI" Style="{StaticResource CardTitleStyle}" />
-                                            <TextBlock Text="OpenAI 官方命令行工具" Style="{StaticResource CaptionTextStyle}" />
+                                            <TextBlock x:Uid="CodexCardSubtitle" Text="OpenAI 官方命令行工具" Style="{StaticResource CaptionTextStyle}" />
                                         </StackPanel>
                                         <Border Grid.Column="1" x:Name="CodexStatusBadgeBorder" Background="#E5F6EF" CornerRadius="10" Padding="8,3" VerticalAlignment="Top">
-                                            <TextBlock x:Name="CodexStatusBadgeText" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                            <TextBlock x:Name="CodexStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                         </Border>
                                     </Grid>
 
@@ -181,10 +181,10 @@
                                     <TextBlock x:Name="CodexPathText" Text="—" Style="{StaticResource MonoCaptionStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
 
                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                        <Button x:Name="CodexLoginButton" Content="登录" Style="{StaticResource ActionButtonStyle}" Tag="login" Click="CodexAction_Click" />
-                                        <Button Content="检查更新" Tag="codex" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
-                                        <Button x:Name="CodexUpgradeButton" Content="升级" Style="{StaticResource ActionButtonStyle}" Tag="upgrade" Click="CodexAction_Click" />
-                                        <Button Content="依赖设置" Style="{StaticResource ActionButtonStyle}" Click="NavigateDependencies_Click" />
+                                        <Button x:Name="CodexLoginButton" x:Uid="ActionLogin" Content="登录" Style="{StaticResource ActionButtonStyle}" Tag="login" Click="CodexAction_Click" />
+                                        <Button x:Uid="CheckUpdateButton" Content="检查更新" Tag="codex" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
+                                        <Button x:Name="CodexUpgradeButton" x:Uid="ActionUpgrade" Content="升级" Style="{StaticResource ActionButtonStyle}" Tag="upgrade" Click="CodexAction_Click" />
+                                        <Button x:Uid="DependencySettingsButton" Content="依赖设置" Style="{StaticResource ActionButtonStyle}" Click="NavigateDependencies_Click" />
                                     </StackPanel>
                                 </StackPanel>
                             </Border>
@@ -275,7 +275,7 @@
                         <TextBlock x:Uid="ProxyModeHeading" Text="代理模式与设置" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
                             <StackPanel Spacing="14">
-                                <TextBlock Text="选择代理工作模式；切换或填入代理地址后可直接测试连通性，确认无误后点击保存生效。" Style="{StaticResource CaptionTextStyle}" />
+                                <TextBlock x:Uid="ProxyModeHint" Text="选择代理工作模式；切换或填入代理地址后可直接测试连通性，确认无误后点击保存生效。" Style="{StaticResource CaptionTextStyle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="16">
                                     <ComboBox x:Name="NetworkModePicker" Width="260" SelectedValuePath="Tag">
                                         <ComboBoxItem x:Uid="ProxyModeSystem" Content="使用系统代理" Tag="system" />
@@ -413,17 +413,17 @@
                             <Grid ColumnSpacing="16">
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                                 <StackPanel Spacing="2">
-                                    <TextBlock Text="当前 Codex 主路由服务商" Style="{StaticResource CaptionTextStyle}" />
-                                    <TextBlock x:Name="ActiveProviderBannerText" Text="正在检测当前 Provider…" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock x:Uid="ActiveProviderLabel" Text="当前 Codex 主路由服务商" Style="{StaticResource CaptionTextStyle}" />
+                                    <TextBlock x:Name="ActiveProviderBannerText" x:Uid="ActiveProviderDetecting" Text="正在检测当前 Provider…" Style="{StaticResource CardTitleStyle}" />
                                 </StackPanel>
                                 <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Center">
-                                    <TextBlock Text="生效中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                    <TextBlock x:Uid="ProviderBannerActive" Text="生效中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                 </Border>
                             </Grid>
                         </Border>
 
                         <!-- 系统预置与已检测 Provider -->
-                        <TextBlock Text="系统预置与已检测 Provider (含 OpenCodex 本地代理)" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="ProvidersDetectedHeading" Text="系统预置与已检测 Provider (含 OpenCodex 本地代理)" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView ItemsSource="{x:Bind ModelProviders}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -447,8 +447,8 @@
                                                 <TextBlock Text="{Binding StatusLabel}" Foreground="{Binding StatusForeground}" Style="{StaticResource PillTextStyle}" />
                                             </Border>
                                             <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
-                                                <Button Content="设为当前" Tag="{Binding Id}" Click="SwitchProvider_Click" IsEnabled="{Binding CanSwitch}" Style="{StaticResource ActionButtonStyle}" />
-                                                <Button Content="联通测试" Tag="{Binding Id}" Click="TestSystemProvider_Click" Style="{StaticResource QuietButtonStyle}" />
+                                                <Button x:Uid="ProviderSetActiveBtn" Content="设为当前" Tag="{Binding Id}" Click="SwitchProvider_Click" IsEnabled="{Binding CanSwitch}" Style="{StaticResource ActionButtonStyle}" />
+                                                <Button x:Uid="ProviderTestConnBtn" Content="联通测试" Tag="{Binding Id}" Click="TestSystemProvider_Click" Style="{StaticResource QuietButtonStyle}" />
                                             </StackPanel>
                                         </Grid>
                                     </DataTemplate>
@@ -504,11 +504,11 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="OpenCodex 本地代理服务" Style="{StaticResource CardTitleStyle}" />
-                                        <TextBlock x:Name="OpenCodexIntegrationText" Text="集成状态：—" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Uid="OpenCodexServiceTitle" Text="OpenCodex 本地代理服务" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Name="OpenCodexIntegrationText" x:Uid="OpenCodexIntegrationPending" Text="集成状态：—" Style="{StaticResource CaptionTextStyle}" />
                                     </StackPanel>
                                     <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Top">
-                                        <TextBlock x:Name="OpenCodexStatusBadgeText" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                        <TextBlock x:Name="OpenCodexStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                     </Border>
                                 </Grid>
 
@@ -517,19 +517,19 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock x:Uid="VersionStatusLabel" Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" x:Name="OpenCodexVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
                                 </Grid>
 
                                 <TextBlock x:Name="OpenCodexDetailText" Text="—" Style="{StaticResource CaptionTextStyle}" />
 
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="检查新版本" Tag="opencodex" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
+                                    <Button x:Uid="CheckNewerButton" Content="检查新版本" Tag="opencodex" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
                                     <Button x:Name="OpenCodexInstallButton" x:Uid="ActionInstall" Content="安装" Tag="install" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                     <Button x:Name="OpenCodexUpgradeButton" x:Uid="ActionUpgrade" Content="升级" Tag="upgrade" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                     <Button x:Name="OpenCodexStartButton" x:Uid="ActionStart" Content="启动" Tag="start" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                     <Button x:Name="OpenCodexStopButton" x:Uid="ActionStop" Content="停止" Tag="stop" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button Content="重启" Tag="restart" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Uid="ActionRestart" Content="重启" Tag="restart" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                     <Button x:Name="OpenCodexIntegrateButton" x:Uid="IntegrateCodexButton" Content="设为 Codex 主路由" Tag="integrate" Click="OpenCodexAction_Click" Style="{StaticResource QuietButtonStyle}" />
                                 </StackPanel>
                             </StackPanel>
@@ -539,9 +539,9 @@
                         <TextBlock x:Uid="AvailableModelsHeading" Text="可用模型与连通测试" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
                             <StackPanel Spacing="12">
-                                <TextBlock Text="从本地 OpenCodex 服务中读取已注册与路由模型，可直接选择模型发起连通性验证。" Style="{StaticResource CaptionTextStyle}" />
+                                <TextBlock x:Uid="OpenCodexModelsHint" Text="从本地 OpenCodex 服务中读取已注册与路由模型，可直接选择模型发起连通性验证。" Style="{StaticResource CaptionTextStyle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <ComboBox x:Name="OpenCodexModelPicker" Width="480" ItemsSource="{x:Bind OpenCodexModels}" DisplayMemberPath="DisplayName" PlaceholderText="请选择模型进行测试" />
+                                    <ComboBox x:Uid="OpenCodexModelPicker" x:Name="OpenCodexModelPicker" Width="480" ItemsSource="{x:Bind OpenCodexModels}" DisplayMemberPath="DisplayName" PlaceholderText="请选择模型进行测试" />
                                     <Button x:Uid="RefreshModelsButton" Content="刷新模型列表" Tag="models" Click="OpenCodexAction_Click" Style="{StaticResource QuietButtonStyle}" />
                                     <Button x:Uid="TestModelButton" Content="测试所选模型" Tag="test-model" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                 </StackPanel>
@@ -567,7 +567,7 @@
                                    Style="{StaticResource CaptionTextStyle}" Margin="0,6,0,0" />
 
                         <!-- 版本与服务控制卡片 -->
-                        <TextBlock Text="版本与后台服务控制" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="TailscaleControlHeading" Text="版本与后台服务控制" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Margin="0,18,0,0">
                             <StackPanel Spacing="14">
                                 <Grid>
@@ -576,11 +576,11 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="Tailscale 本机网络服务" Style="{StaticResource CardTitleStyle}" />
-                                        <TextBlock Text="Windows 后台服务驱动虚拟专用网络（启动、停止与重启需管理员权限）" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Uid="TailscaleCardTitle" Text="Tailscale 本机网络服务" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Uid="TailscaleCardSubtitle" Text="Windows 后台服务驱动虚拟专用网络（启动、停止与重启需管理员权限）" Style="{StaticResource CaptionTextStyle}" />
                                     </StackPanel>
                                     <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Top">
-                                        <TextBlock x:Name="TailscaleStatusBadgeText" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                        <TextBlock x:Name="TailscaleStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                     </Border>
                                 </Grid>
 
@@ -589,13 +589,13 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock x:Uid="VersionStatusLabel" Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" x:Name="TailscaleVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
                                 </Grid>
 
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="检查新版本" Tag="tailscale" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
-                                    <Button x:Name="TailscaleUpgradeButton" Content="通过 WinGet 升级" Tag="upgrade" Click="TailscaleServiceAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Uid="CheckNewerButton" Content="检查新版本" Tag="tailscale" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
+                                    <Button x:Name="TailscaleUpgradeButton" x:Uid="TailscaleWingetUpgrade" Content="通过 WinGet 升级" Tag="upgrade" Click="TailscaleServiceAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                     <Button x:Name="TailscaleStartButton" x:Uid="TailscaleStart" Content="启动服务" Style="{StaticResource ActionButtonStyle}" Tag="start" Click="TailscaleServiceAction_Click" />
                                     <Button x:Name="TailscaleStopButton" x:Uid="TailscaleStop" Content="停止服务" Style="{StaticResource ActionButtonStyle}" Tag="stop" Click="TailscaleServiceAction_Click" />
                                     <Button x:Name="TailscaleRestartButton" x:Uid="TailscaleRestart" Content="重启服务" Style="{StaticResource ActionButtonStyle}" Tag="restart" Click="TailscaleServiceAction_Click" />
@@ -821,6 +821,7 @@
                             <StackPanel Spacing="10">
                                 <TextBox x:Name="NodeMirrorBox" x:Uid="NodeMirrorBox" Header="Node.js 下载镜像" Width="520" HorizontalAlignment="Left" />
                                 <TextBox x:Name="NpmRegistryBox" Header="npm Registry" Width="520" HorizontalAlignment="Left" />
+                                <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。" Style="{StaticResource CaptionTextStyle}" />
                                 <Button x:Uid="SaveDependenciesButton" Content="保存依赖设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
                             </StackPanel>
                         </Border>
@@ -843,11 +844,11 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="4">
-                                        <TextBlock Text="Codex Relay 桥接服务" Style="{StaticResource CardTitleStyle}" />
-                                        <TextBlock Text="移动设备与桌面端 Codex 的双向通信扩展 (默认端口 8787)" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Uid="RelayCardTitle" Text="Codex Relay 桥接服务" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Uid="RelayCardSubtitle" Text="移动设备与桌面端 Codex 的双向通信扩展 (默认端口 8787)" Style="{StaticResource CaptionTextStyle}" />
                                     </StackPanel>
                                     <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Top">
-                                        <TextBlock x:Name="RelayStatusBadgeText" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
+                                        <TextBlock x:Name="RelayStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
                                     </Border>
                                 </Grid>
 
@@ -856,23 +857,23 @@
                                         <ColumnDefinition Width="Auto" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                    <TextBlock x:Uid="VersionStatusLabel" Text="版本状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" x:Name="RelayVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
                                 </Grid>
 
                                 <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button Content="检查新版本" Tag="relay" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
-                                    <Button x:Name="RelayUpgradeButton" Content="升级" Tag="upgrade" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayInstallButton" Content="安装" Tag="install" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayStartButton" Content="启动" Tag="start" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayStopButton" Content="停止" Tag="stop" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button Content="重启" Tag="restart" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Uid="CheckNewerButton" Content="检查新版本" Tag="relay" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
+                                    <Button x:Name="RelayUpgradeButton" x:Uid="ActionUpgrade" Content="升级" Tag="upgrade" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Name="RelayInstallButton" x:Uid="ActionInstall" Content="安装" Tag="install" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Name="RelayStartButton" x:Uid="ActionStart" Content="启动" Tag="start" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Name="RelayStopButton" x:Uid="ActionStop" Content="停止" Tag="stop" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
+                                    <Button x:Uid="ActionRestart" Content="重启" Tag="restart" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                 </StackPanel>
                             </StackPanel>
                         </Border>
 
                         <!-- 服务设置 -->
-                        <TextBlock Text="计划任务配置" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="TaskScheduleHeading" Text="计划任务配置" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
                             <StackPanel Spacing="10">
                                 <TextBox x:Name="RelayTaskNameBox" x:Uid="RelayTaskNameBox" Header="Codex Relay 计划任务" Width="460" HorizontalAlignment="Left" />
@@ -895,7 +896,7 @@
                                     <ComboBox x:Name="LanguagePicker" Style="{StaticResource InputComboBoxStyle}" Width="200" SelectedValuePath="Tag" SelectionChanged="LanguagePicker_SelectionChanged">
                                         <ComboBoxItem x:Uid="LanguageSystem" Content="跟随 Windows" Tag="system" />
                                         <ComboBoxItem Content="English" Tag="en-US" />
-                                        <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                                        <ComboBoxItem x:Uid="LanguageZh" Content="简体中文" Tag="zh-CN" />
                                     </ComboBox>
                                 </toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="RefreshIntervalCard" Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False">
@@ -908,10 +909,10 @@
                         </toolkit:SettingsExpander>
 
                         <!-- 关于 Codex Beacon 与项目开源信息 (诉求 11) -->
-                        <TextBlock Text="关于 Codex Beacon 与项目开源信息" Style="{StaticResource SectionTitleStyle}" />
-                        <toolkit:SettingsExpander Header="项目信息" Description="Codex Beacon 自身版本与 GitHub 仓库详情" IsExpanded="True">
+                        <TextBlock x:Uid="AboutOpenSourceHeading" Text="关于 Codex Beacon 与项目开源信息" Style="{StaticResource SectionTitleStyle}" />
+                        <toolkit:SettingsExpander x:Uid="ProjectInfoExpander" Header="项目信息" Description="Codex Beacon 自身版本与 GitHub 仓库详情" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="当前版本" Description="Windows x64 独立原生应用" IsClickEnabled="False">
+                                <toolkit:SettingsCard x:Uid="ProjectVersionCard" Header="当前版本" Description="Windows x64 独立原生应用" IsClickEnabled="False">
                                     <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                         <TextBlock x:Name="ProjectVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
                                         <Border Background="{StaticResource SurfaceMutedBrush}" BorderBrush="{StaticResource HairlineBrush}"
@@ -920,10 +921,10 @@
                                         </Border>
                                     </StackPanel>
                                 </toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="GitHub 源码仓库" Description="hurmuri/codex-beacon" IsClickEnabled="False">
+                                <toolkit:SettingsCard x:Uid="ProjectRepoCard" Header="GitHub 源码仓库" Description="hurmuri/codex-beacon" IsClickEnabled="False">
                                     <HyperlinkButton Content="https://github.com/hurmuri/codex-beacon" NavigateUri="https://github.com/hurmuri/codex-beacon" />
                                 </toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="开源许可协议" Description="宽松的自由软件授权" IsClickEnabled="False">
+                                <toolkit:SettingsCard x:Uid="ProjectLicenseCard" Header="开源许可协议" Description="宽松的自由软件授权" IsClickEnabled="False">
                                     <TextBlock Text="MIT License" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
                                 </toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
@@ -984,10 +985,10 @@
                         <TextBlock x:Uid="ReferencesHeading" Text="上游与开源参考" Style="{StaticResource SectionTitleStyle}" />
                         <toolkit:SettingsExpander x:Uid="OpenSourceProjectsExpander" Header="参考项目" Description="组件源码与实现参考" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="Codex App Manager" Description="Codex 桌面版本管理方案参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard Header="ip.net.coffee" Description="ChatGPT / Codex 出口 IP 与风险检测数据源"><HyperlinkButton Content="ip.net.coffee/gpt" NavigateUri="https://ip.net.coffee/gpt/" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="ReferenceOpencodex" Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="ReferenceAppManager" Header="Codex App Manager" Description="Codex 桌面版本管理方案参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="ReferenceRelay" Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="ReferenceIpCoffee" Header="ip.net.coffee" Description="ChatGPT / Codex 出口 IP 与风险检测数据源"><HyperlinkButton Content="ip.net.coffee/gpt" NavigateUri="https://ip.net.coffee/gpt/" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>
                     </StackPanel>

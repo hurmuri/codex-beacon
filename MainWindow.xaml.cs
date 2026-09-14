@@ -40,6 +40,9 @@ public sealed partial class MainWindow : Window
     public ObservableCollection<OpenCodexModel> OpenCodexModels { get; } = [];
     public ObservableCollection<ComponentStatus> OpenCodexComponents { get; } = [];
 
+    /// <summary>Nav tag to restore after the language-switch window reload.</summary>
+    internal static string? PendingNavTag;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -69,6 +72,16 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
         AppWindow.Resize(new SizeInt32(1320, 860));
+        if (AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter presenter)
+        {
+            presenter.PreferredMinimumWidth = 800;
+            presenter.PreferredMinimumHeight = 560;
+        }
+        if (PendingNavTag is string pendingTag)
+        {
+            PendingNavTag = null;
+            NavigateTo(pendingTag);
+        }
 
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(_settings.RefreshSeconds);
@@ -256,7 +269,7 @@ public sealed partial class MainWindow : Window
         }
         Replace(InstallableComponents, snapshot.Components.Where(x => x.Id is "appinstaller" or "winget" or "msstore" or "nvm"));
 
-        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex"));
+        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "opencodex" or "tailscale" or "relay"));
         Replace(OpenCodexComponents, snapshot.Components.Where(x => x.Id == "opencodex"));
         Replace(Processes, snapshot.Processes.OrderBy(x => x.RoleKey).ThenBy(x => x.Pid));
         Replace(TailnetDevices, snapshot.TailscaleDevices.OrderByDescending(x => x.IsSelf).ThenByDescending(x => x.Online).ThenBy(x => x.Name));
@@ -265,6 +278,11 @@ public sealed partial class MainWindow : Window
         Replace(ModelProviders, snapshot.Providers);
         if (snapshot.NetworkProbes.Count > 0) Replace(NetworkProbes, snapshot.NetworkProbes);
         Replace(OpenCodexModels, snapshot.OpenCodexModels);
+        OpenCodexIntegrationText.Text = string.IsNullOrWhiteSpace(snapshot.OpenCodexIntegration)
+            ? Localization.Get("OpenCodexIntegrationNone")
+            : snapshot.OpenCodexIntegration == "current"
+                ? Localization.Get("OpenCodexIntegrationCurrent")
+                : Localization.Format("OpenCodexIntegrationState", snapshot.OpenCodexIntegration);
         if (snapshot.PublicEgress.Count > 0) Replace(PublicEgressRoutes, snapshot.PublicEgress);
 
         OverallMessageText.Text = Localization.Get(snapshot.OverallKey);
@@ -286,12 +304,12 @@ public sealed partial class MainWindow : Window
         if (activeProvider is not null)
         {
             ActiveProviderBannerText.Text = activeProvider.Id == "opencodex"
-                ? "OpenCodex 本地代理 (http://127.0.0.1:10100/v1)"
+                ? Localization.Get("ProviderBannerOpencodex")
                 : $"{activeProvider.Name} ({activeProvider.BaseUrl})";
         }
         else
         {
-            ActiveProviderBannerText.Text = "OpenAI 官方直连 (https://api.openai.com/v1)";
+            ActiveProviderBannerText.Text = Localization.Get("ProviderBannerOpenAI");
         }
 
         if (NodeVersionPicker.SelectedItem is null && NodeVersions.Count > 0) NodeVersionPicker.SelectedIndex = 0;
@@ -338,11 +356,28 @@ public sealed partial class MainWindow : Window
             DesktopStatusBadgeBorder.Background = desktop.StatusBackground;
             DesktopStatusBadgeText.Foreground = desktop.StatusForeground;
             DesktopVersionText.Text = desktop.VersionSummary;
-            DesktopPathText.Text = string.IsNullOrWhiteSpace(desktop.Path) ? "OpenAI 官方 Store 应用包" : desktop.Path;
+            DesktopPathText.Text = string.IsNullOrWhiteSpace(desktop.Path) ? Localization.Get("DesktopStorePathFallback") : desktop.Path;
             DesktopStartButton.IsEnabled = desktop.CanStart;
             DesktopStopButton.IsEnabled = desktop.CanStop;
             DesktopRestartButton.IsEnabled = desktop.CanRestart;
-            DesktopInstallButton.IsEnabled = desktop.CanInstall || desktop.CanUpgrade;
+            if (!desktop.IsInstalled)
+            {
+                DesktopInstallButton.Content = Localization.Get("ActionInstallStore");
+                DesktopInstallButton.Tag = "install";
+                DesktopInstallButton.IsEnabled = true;
+            }
+            else if (desktop.CanUpgrade)
+            {
+                DesktopInstallButton.Content = Localization.Get("ActionUpgradeStore");
+                DesktopInstallButton.Tag = "upgrade";
+                DesktopInstallButton.IsEnabled = true;
+            }
+            else
+            {
+                DesktopInstallButton.Content = Localization.Get("ActionOpenStore");
+                DesktopInstallButton.Tag = "store";
+                DesktopInstallButton.IsEnabled = true;
+            }
         }
 
         var codex = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "codex");
@@ -352,7 +387,7 @@ public sealed partial class MainWindow : Window
             CodexStatusBadgeBorder.Background = codex.StatusBackground;
             CodexStatusBadgeText.Foreground = codex.StatusForeground;
             CodexVersionText.Text = codex.VersionSummary;
-            CodexPathText.Text = string.IsNullOrWhiteSpace(codex.Path) ? "PATH / npm 全局安装" : codex.Path;
+            CodexPathText.Text = string.IsNullOrWhiteSpace(codex.Path) ? Localization.Get("CodexPathFallback") : codex.Path;
             CodexLoginButton.IsEnabled = codex.IsInstalled;
             CodexUpgradeButton.IsEnabled = codex.CanUpgrade;
         }
@@ -396,7 +431,7 @@ public sealed partial class MainWindow : Window
     private async void DesktopAction_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string action }) return;
-        await ExecuteActionAsync("desktop", action, null, Localization.Format("RunningAction", ActionName(action), "ChatGPT 桌面应用"));
+        await ExecuteActionAsync("desktop", action, null, Localization.Format("RunningAction", ActionName(action), Localization.Get("DesktopAppName")));
     }
 
     private async void CodexAction_Click(object sender, RoutedEventArgs e)
@@ -580,7 +615,7 @@ public sealed partial class MainWindow : Window
 
     private async void CheckNetwork_Click(object sender, RoutedEventArgs e)
     {
-        SetStatus("正在测试网络与代理连通性…");
+        SetStatus(Localization.Get("NetworkTesting"));
         var proxy = NetworkModePicker.SelectedValue as string == "custom" ? CustomHttpProxyBox.Text.Trim() : null;
         try
         {
@@ -593,11 +628,11 @@ public sealed partial class MainWindow : Window
                 EgressEmptyText.Visibility = Visibility.Collapsed;
                 OpenEgressWebsiteButton.IsEnabled = true;
             }
-            SetStatus("网络连通性测试完成。");
+            SetStatus(Localization.Get("NetworkTestDone"));
         }
         catch (Exception ex)
         {
-            SetStatus($"网络测试失败: {ex.Message}");
+            SetStatus(Localization.Format("NetworkTestFailed", ex.Message));
         }
     }
 
@@ -673,14 +708,14 @@ public sealed partial class MainWindow : Window
         }
         catch (Exception ex)
         {
-            SetStatus($"测试失败: {ex.Message}");
+            SetStatus(Localization.Format("ProviderTestFailed", ex.Message));
         }
     }
 
     private async void CheckComponentUpdate_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string compId }) return;
-        SetStatus($"正在查询 {compId} 最新版本…");
+        SetStatus(Localization.Format("CheckingComponentUpdate", compId));
         try
         {
             var latestMap = await SystemService.QueryLatestVersionsAsync();
@@ -690,16 +725,16 @@ public sealed partial class MainWindow : Window
                     .FirstOrDefault(x => x.Id.Equals(compId, StringComparison.OrdinalIgnoreCase));
                 if (match is not null) match.LatestVersion = latestVer;
                 UpdateSpecializedComponentCards();
-                SetStatus($"{compId} 最新版本: {latestVer}");
+                SetStatus(Localization.Format("ComponentUpdateResult", compId, latestVer));
             }
             else
             {
-                SetStatus($"未查询到 {compId} 的远端版本。");
+                SetStatus(Localization.Format("ComponentUpdateUnknown", compId));
             }
         }
         catch (Exception ex)
         {
-            SetStatus($"查询失败: {ex.Message}");
+            SetStatus(Localization.Format("ComponentUpdateFailed", ex.Message));
         }
     }
 
@@ -866,6 +901,7 @@ public sealed partial class MainWindow : Window
         if (_initializingLanguage || LanguagePicker.SelectedValue is not string language) return;
         if (language == _settings.Language) return;
 
+        PendingNavTag = (Nav.SelectedItem as Microsoft.UI.Xaml.Controls.NavigationViewItem)?.Tag as string;
         PersistSettings(language);
         Localization.ApplyLanguage(_settings.Language);
         ((App)Application.Current).ReloadMainWindow(this);
@@ -1216,6 +1252,7 @@ public sealed partial class MainWindow : Window
         "install" => Localization.Get("ActionInstallName"),
         "upgrade" => Localization.Get("ActionUpgradeName"),
         "login" => Localization.Get("ActionLoginName"),
+        "store" => Localization.Get("ActionStoreName"),
         _ => Localization.Get("ActionProcessName")
     };
 }

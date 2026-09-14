@@ -1,6 +1,6 @@
 ﻿param(
     [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','opencodex','relay','tailscale','all','provider')][string]$Component,
-    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','models','test-model')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','models','test-model','store')][string]$Action,
     [string]$Version = '',
     [string]$SettingsPath = ''
 )
@@ -222,9 +222,12 @@ function Invoke-Nvm {
 }
 
 function Stop-CodexDesktop {
+    # Path-anchored allowlist only: never match by process name alone, so a
+    # same-named binary outside the Codex install locations is left alone.
+    $codexPathPattern = '(?i)(WindowsApps[\\/]OpenAI\.Codex_[^\\/]+|[\\/]OpenAI[\\/]Codex[\\/]|[\\/]\.vscode[\\/]extensions[\\/]openai\.chatgpt-|[\\/]\.codex-relay[\\/]|[\\/]@openai[\\/]codex)'
     $count = 0
     foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-        ($_.ExecutablePath -match '(?i)WindowsApps[\\/]OpenAI\.Codex_[^\\/]+') -or ($_.Name -in @('ChatGPT.exe','codex.exe','codex-code-mode-host.exe'))
+        $_.ExecutablePath -match $codexPathPattern
     })) {
         if ($p.ExecutablePath -match 'CodexBeacon|CodexServiceManager') { continue }
         Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
@@ -415,19 +418,38 @@ try {
     # --- desktop client ----------------------------------------------------
     if ($Component -eq 'desktop') {
         $appUserModelId = 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
-        if ($Action -eq 'login' -or $Action -eq 'start') {
+        $CodexStoreProductId = '9PLM9XGG6VKS'
+        $storeUri = "ms-windows-store://pdp/?ProductId=$CodexStoreProductId"
+
+        if ($Action -eq 'login') {
             Start-Process $appUserModelId
-            if ($Action -eq 'login') {
-                Write-Result -Success $true -MessageKey 'ActionDesktopLoginOpened' -HintKey 'ActionDesktopLoginHint'
-            }
+            Write-Result -Success $true -MessageKey 'ActionDesktopLoginOpened' -HintKey 'ActionDesktopLoginHint'
+        } elseif ($Action -eq 'start') {
+            Start-Process $appUserModelId
             Write-Result -Success $true -MessageKey 'ActionDesktopStarted'
-        } elseif ($Action -in @('install', 'upgrade')) {
+        } elseif ($Action -eq 'store') {
+            Start-Process $storeUri
+            Write-Result -Success $true -MessageKey 'ActionDesktopStoreOpened' -HintKey 'ActionDesktopStoreHint' -HintArgs @($CodexStoreProductId)
+        } elseif ($Action -eq 'upgrade') {
+            Start-Process $storeUri
+            Write-Result -Success $true -MessageKey 'ActionDesktopStoreOpened' -HintKey 'ActionDesktopStoreUpgradeHint' -HintArgs @($CodexStoreProductId)
+        } elseif ($Action -eq 'install') {
+            $existing = Get-AppxPackage -Name 'OpenAI.Codex' -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($existing) {
+                Start-Process $storeUri
+                Write-Result -Success $true -MessageKey 'ActionDesktopStoreOpened' -HintKey 'ActionDesktopStoreUpgradeHint' -HintArgs @($CodexStoreProductId)
+            }
             $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
-            if (-not $winget) { throw 'WINGET_MISSING_DESKTOP' }
-            $verb = if ($Action -eq 'install') { 'install' } else { 'upgrade' }
-            $run = Invoke-TrackedCommand $winget.Source @($verb,'9PLM9XGG6VKS','--source','msstore','--accept-package-agreements','--accept-source-agreements','--disable-interactivity') 'Downloading' 'Microsoft Store / winget'
+            if (-not $winget) {
+                Start-Process $storeUri
+                Write-Result -Success $true -MessageKey 'ActionDesktopStoreOpened' -HintKey 'ActionDesktopStoreHint' -HintArgs @($CodexStoreProductId)
+            }
+            $run = Invoke-TrackedCommand $winget.Source @('install', $CodexStoreProductId, '--source', 'msstore', '--accept-package-agreements', '--accept-source-agreements', '--disable-interactivity') 'Downloading' 'Microsoft Store / winget'
             $output = $run.Output
-            if ($run.ExitCode -ne 0) { throw $output.Trim() }
+            if ($run.ExitCode -ne 0 -or $output -match '0x80073d02|找不到可用的升级|No available upgrade|配置的源中没有可用的较新的包版本') {
+                Start-Process $storeUri
+                Write-Result -Success $true -MessageKey 'ActionDesktopStoreOpened' -HintKey 'ActionDesktopStoreUpgradeHint' -HintArgs @($CodexStoreProductId) -Details $output
+            }
             Write-Progress-Event -Stage 'Completed' -Source 'Microsoft Store / winget' -Message 'ChatGPT' -Percent 100
             Write-Result -Success $true -MessageKey 'ActionPackageInstalled' -MessageArgs @('ChatGPT') -Details $output
         } elseif ($Action -in @('stop', 'kill')) {
