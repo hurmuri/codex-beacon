@@ -23,6 +23,10 @@
   <data name="CurrentVersionLabel.Text" xml:space="preserve"><value>Current version</value></data>
   <data name="VersionUpToDate" xml:space="preserve"><value>Up to date</value></data>
   <data name="VersionUpdateAvailable" xml:space="preserve"><value>Update available</value></data>
+  <data name="AccountStatusLabel.Text" xml:space="preserve"><value>Sign-in status</value></data>
+  <data name="AccountSignedIn" xml:space="preserve"><value>Signed in</value></data>
+  <data name="AccountSignedOut" xml:space="preserve"><value>Signed out</value></data>
+  <data name="AccountUnknown" xml:space="preserve"><value>Unable to verify</value></data>
   <data name="ActionInstall.Content" xml:space="preserve"><value>Install</value></data>
   <data name="ActionLogin.Content" xml:space="preserve"><value>Sign in</value></data>
   <data name="ActionStart.Content" xml:space="preserve"><value>Start</value></data>
@@ -46,6 +50,25 @@
   <!-- Network &amp; proxy -->
   <data name="NetworkTitle.Text" xml:space="preserve"><value>Network &amp; proxy</value></data>
   <data name="NetworkDescription.Text" xml:space="preserve"><value>Check ChatGPT and Codex CLI connectivity and manage system proxy, TUN, or a custom HTTP proxy.</value></data>
+  <data name="EffectiveProxyLabel.Text" xml:space="preserve"><value>Effective route</value></data>
+  <data name="SystemProxyStateLabel.Text" xml:space="preserve"><value>Windows system proxy</value></data>
+  <data name="TunAutoStateLabel.Text" xml:space="preserve"><value>TUN / automatic proxy</value></data>
+  <data name="ProxyModeAuto.Content" xml:space="preserve"><value>Automatic detection</value></data>
+  <data name="ProxyEffective_auto" xml:space="preserve"><value>Automatic detection</value></data>
+  <data name="ProxyEffective_system" xml:space="preserve"><value>System proxy</value></data>
+  <data name="ProxyEffective_tun" xml:space="preserve"><value>TUN adapter</value></data>
+  <data name="ProxyEffective_custom" xml:space="preserve"><value>Custom HTTP proxy</value></data>
+  <data name="ProxyEffective_environment" xml:space="preserve"><value>User environment proxy</value></data>
+  <data name="ProxyEffective_direct" xml:space="preserve"><value>Direct connection</value></data>
+  <data name="ProxyConfiguredMode" xml:space="preserve"><value>Configured: {0}</value></data>
+  <data name="ProxyEnabled" xml:space="preserve"><value>Enabled</value></data>
+  <data name="ProxyDisabled" xml:space="preserve"><value>Disabled</value></data>
+  <data name="ProxyNoAddress" xml:space="preserve"><value>No proxy server configured</value></data>
+  <data name="TunNotDetected" xml:space="preserve"><value>No active adapter detected</value></data>
+  <data name="TunDetected" xml:space="preserve"><value>Connected · {0}</value></data>
+  <data name="ProxyPacValue" xml:space="preserve"><value>PAC: {0}</value></data>
+  <data name="ProxyAutoDetectOn" xml:space="preserve"><value>Windows automatic detection is on</value></data>
+  <data name="ProxyAutoDetectOff" xml:space="preserve"><value>Windows automatic detection is off</value></data>
   <data name="EgressHeading.Text" xml:space="preserve"><value>Public egress · OpenAI perspective</value></data>
   <data name="EgressIspLabel.Text" xml:space="preserve"><value>ISP</value></data>
   <data name="EgressAsnLabel.Text" xml:space="preserve"><value>ASN</value></data>
@@ -88,6 +111,28 @@
   <data name="RuntimeNvmName.Text" xml:space="preserve"><value>NVM for Windows</value></data>
   <data name="RuntimeNvmProbe.Text" xml:space="preserve"><value>Reads nvm.exe, the installed version list, and the active version</value></data>
   <data name="NvmSectionHeading.Text" xml:space="preserve"><value>NVM · Node.js version control</value></data>
+  <data name="NvmVersionActionTitle.Text" xml:space="preserve"><value>Select target version</value></data>
+  <data name="NvmVersionActionHint.Text" xml:space="preserve"><value>The list includes installed and downloadable versions; the selected version is switched or installed automatically.</value></data>
+  <data name="NvmVersionAction.Content" xml:space="preserve"><value>Select version</value></data>
+  <data name="NodeMirrorPicker.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
+  <data name="NpmRegistryPicker.Header" xml:space="preserve"><value>npm Registry (nrm presets)</value></data>
+  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>Official · nodejs.org</value></data>
+  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>Tsinghua TUNA</value></data>
+  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>Alibaba Cloud</value></data>
+  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud</value></data>
+  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud</value></data>
+  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm official</value></data>
+  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn</value></data>
+  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud</value></data>
+  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM</value></data>
+  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>Taobao / npmmirror</value></data>
+  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror</value></data>
+  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud</value></data>
+  <data name="LatestVersionValue" xml:space="preserve"><value>Latest version {0}</value></data>
+  <data name="NodeInstalled" xml:space="preserve"><value>Installed</value></data>
+  <data name="SelectVersionAction" xml:space="preserve"><value>Select version</value></data>
+  <data name="SwitchVersionAction" xml:space="preserve"><value>Switch to this version</value></data>
+  <data name="InstallVersionAction" xml:space="preserve"><value>Install and switch</value></data>
   <data name="NvmSwitchTitle.Text" xml:space="preserve"><value>Switch Node.js version</value></data>
   <data name="NodeVersionPicker.PlaceholderText" xml:space="preserve"><value>Select an installed version</value></data>
   <data name="NvmApply.Content" xml:space="preserve"><value>Apply</value></data>
@@ -97,7 +142,7 @@
   <data name="NvmMirrorLabel.Text" xml:space="preserve"><value>Download mirror</value></data>
   <data name="NvmMirrorHint.Text" xml:space="preserve"><value>nodejs.org is unreachable on some networks. Change the mirror below; the official host is used automatically when the mirror fails.</value></data>
 
-  <data name="ModulesHeading.Text" xml:space="preserve"><value>Install channels and base dependencies</value></data>
+  <data name="ModulesHeading.Text" xml:space="preserve"><value>Windows base dependencies</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>Installed version</value></data>
   <data name="LatestVersionLabel.Text" xml:space="preserve"><value>Latest version</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>Install</value></data>

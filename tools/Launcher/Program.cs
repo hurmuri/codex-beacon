@@ -7,6 +7,7 @@ namespace CodexBeaconLauncher;
 
 static class Program
 {
+    private const string StartupMutexName = @"Local\CodexBeacon.StartupReplacement";
 #if LAUNCHER_SLIM
     private const string VariantName = "slim";
     private const string AppDirName = "app-slim";
@@ -20,36 +21,21 @@ static class Program
     {
         try
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            var resourceName = assembly.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith("payload.zip"));
-            if (resourceName == null)
+            using var startupMutex = new Mutex(false, StartupMutexName);
+            var ownsMutex = false;
+            try
             {
-                // Fallback to local sibling directory if available
-                var localExe = Path.Combine(AppContext.BaseDirectory, "CodexBeacon.exe");
-                if (File.Exists(localExe)) { Start(localExe); return; }
-                return;
+                try { ownsMutex = startupMutex.WaitOne(TimeSpan.FromSeconds(30)); }
+                catch (AbandonedMutexException) { ownsMutex = true; }
+                if (!ownsMutex) throw new TimeoutException("Timed out waiting to replace the previous Codex Beacon instance.");
+
+                StopExistingInstances();
+                LaunchPayload();
             }
-
-            var appDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", AppDirName);
-            var targetExe = Path.Combine(appDir, "CodexBeacon.exe");
-            var stampFile = Path.Combine(appDir, "version.stamp");
-
-            using var stream = assembly.GetManifestResourceStream(resourceName)!;
-            var currentStamp = ResolveStamp(assembly, stream);
-
-            if (!File.Exists(targetExe) || !File.Exists(stampFile) || File.ReadAllText(stampFile) != currentStamp)
+            finally
             {
-                if (Directory.Exists(appDir))
-                {
-                    try { Directory.Delete(appDir, true); } catch { }
-                }
-                Directory.CreateDirectory(appDir);
-                using var archive = new ZipArchive(stream, ZipArchiveMode.Read);
-                archive.ExtractToDirectory(appDir, true);
-                File.WriteAllText(stampFile, currentStamp);
+                if (ownsMutex) startupMutex.ReleaseMutex();
             }
-
-            Start(targetExe);
         }
         catch (Exception ex)
         {
@@ -59,6 +45,66 @@ static class Program
                 File.WriteAllText(log, ex.ToString());
             }
             catch { }
+        }
+    }
+
+    static void LaunchPayload()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+        var resourceName = assembly.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith("payload.zip"));
+        if (resourceName == null)
+        {
+            // Fallback to local sibling directory if available
+            var localExe = Path.Combine(AppContext.BaseDirectory, "CodexBeacon.exe");
+            if (File.Exists(localExe)) { Start(localExe); return; }
+            return;
+        }
+
+        var appDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", AppDirName);
+        var targetExe = Path.Combine(appDir, "CodexBeacon.exe");
+        var stampFile = Path.Combine(appDir, "version.stamp");
+
+        using var stream = assembly.GetManifestResourceStream(resourceName)!;
+        var currentStamp = ResolveStamp(assembly, stream);
+
+        if (!File.Exists(targetExe) || !File.Exists(stampFile) || File.ReadAllText(stampFile) != currentStamp)
+        {
+            if (Directory.Exists(appDir))
+            {
+                try { Directory.Delete(appDir, true); } catch { }
+            }
+            Directory.CreateDirectory(appDir);
+            using var archive = new ZipArchive(stream, ZipArchiveMode.Read);
+            archive.ExtractToDirectory(appDir, true);
+            File.WriteAllText(stampFile, currentStamp);
+        }
+
+        Start(targetExe);
+    }
+
+    static void StopExistingInstances()
+    {
+        var currentId = Environment.ProcessId;
+        foreach (var process in Process.GetProcessesByName("CodexBeacon"))
+        {
+            using (process)
+            {
+                if (process.Id == currentId) continue;
+                try
+                {
+                    if (process.HasExited) continue;
+                    if (process.CloseMainWindow() && process.WaitForExit(1500)) continue;
+                    process.Kill(entireProcessTree: true);
+                    if (!process.WaitForExit(5000))
+                        throw new TimeoutException($"Codex Beacon process {process.Id} did not exit.");
+                }
+                catch (InvalidOperationException) { }
+                catch (System.ComponentModel.Win32Exception)
+                {
+                    try { if (process.HasExited) continue; } catch (InvalidOperationException) { continue; }
+                    throw;
+                }
+            }
         }
     }
 

@@ -23,6 +23,10 @@
   <data name="CurrentVersionLabel.Text" xml:space="preserve"><value>当前版本</value></data>
   <data name="VersionUpToDate" xml:space="preserve"><value>已是最新</value></data>
   <data name="VersionUpdateAvailable" xml:space="preserve"><value>可升级</value></data>
+  <data name="AccountStatusLabel.Text" xml:space="preserve"><value>登录状态</value></data>
+  <data name="AccountSignedIn" xml:space="preserve"><value>已登录</value></data>
+  <data name="AccountSignedOut" xml:space="preserve"><value>未登录</value></data>
+  <data name="AccountUnknown" xml:space="preserve"><value>无法确认</value></data>
   <data name="ActionInstall.Content" xml:space="preserve"><value>安装</value></data>
   <data name="ActionLogin.Content" xml:space="preserve"><value>登录</value></data>
   <data name="ActionStart.Content" xml:space="preserve"><value>启动</value></data>
@@ -46,6 +50,25 @@
   <!-- 网络与代理 -->
   <data name="NetworkTitle.Text" xml:space="preserve"><value>网络与代理</value></data>
   <data name="NetworkDescription.Text" xml:space="preserve"><value>检测 ChatGPT 与 Codex CLI 的网络连通性，并管理系统代理、TUN 或自定义 HTTP 代理。</value></data>
+  <data name="EffectiveProxyLabel.Text" xml:space="preserve"><value>当前生效路径</value></data>
+  <data name="SystemProxyStateLabel.Text" xml:space="preserve"><value>Windows 系统代理</value></data>
+  <data name="TunAutoStateLabel.Text" xml:space="preserve"><value>TUN / 自动代理</value></data>
+  <data name="ProxyModeAuto.Content" xml:space="preserve"><value>自动检测</value></data>
+  <data name="ProxyEffective_auto" xml:space="preserve"><value>自动检测</value></data>
+  <data name="ProxyEffective_system" xml:space="preserve"><value>系统代理</value></data>
+  <data name="ProxyEffective_tun" xml:space="preserve"><value>TUN 虚拟网卡</value></data>
+  <data name="ProxyEffective_custom" xml:space="preserve"><value>自定义 HTTP 代理</value></data>
+  <data name="ProxyEffective_environment" xml:space="preserve"><value>用户环境变量代理</value></data>
+  <data name="ProxyEffective_direct" xml:space="preserve"><value>直连</value></data>
+  <data name="ProxyConfiguredMode" xml:space="preserve"><value>设置：{0}</value></data>
+  <data name="ProxyEnabled" xml:space="preserve"><value>已启用</value></data>
+  <data name="ProxyDisabled" xml:space="preserve"><value>未启用</value></data>
+  <data name="ProxyNoAddress" xml:space="preserve"><value>未配置代理服务器</value></data>
+  <data name="TunNotDetected" xml:space="preserve"><value>未检测到活动网卡</value></data>
+  <data name="TunDetected" xml:space="preserve"><value>已连接 · {0}</value></data>
+  <data name="ProxyPacValue" xml:space="preserve"><value>PAC：{0}</value></data>
+  <data name="ProxyAutoDetectOn" xml:space="preserve"><value>Windows 自动检测已开启</value></data>
+  <data name="ProxyAutoDetectOff" xml:space="preserve"><value>Windows 自动检测未开启</value></data>
   <data name="EgressHeading.Text" xml:space="preserve"><value>公网出口 · OpenAI 视角</value></data>
   <data name="EgressIspLabel.Text" xml:space="preserve"><value>运营商</value></data>
   <data name="EgressAsnLabel.Text" xml:space="preserve"><value>ASN</value></data>
@@ -88,6 +111,28 @@
   <data name="RuntimeNvmName.Text" xml:space="preserve"><value>NVM for Windows</value></data>
   <data name="RuntimeNvmProbe.Text" xml:space="preserve"><value>检测 nvm.exe、已安装版本清单与当前启用版本</value></data>
   <data name="NvmSectionHeading.Text" xml:space="preserve"><value>NVM · Node.js 版本管理</value></data>
+  <data name="NvmVersionActionTitle.Text" xml:space="preserve"><value>选择目标版本</value></data>
+  <data name="NvmVersionActionHint.Text" xml:space="preserve"><value>列表包含已安装版本和可下载版本；选择后会自动切换或下载安装。</value></data>
+  <data name="NvmVersionAction.Content" xml:space="preserve"><value>选择版本</value></data>
+  <data name="NodeMirrorPicker.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
+  <data name="NpmRegistryPicker.Header" xml:space="preserve"><value>npm Registry（nrm 预设）</value></data>
+  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>官方 · nodejs.org</value></data>
+  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>清华大学 TUNA</value></data>
+  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>阿里云</value></data>
+  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>腾讯云</value></data>
+  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>华为云</value></data>
+  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm 官方</value></data>
+  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn</value></data>
+  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>腾讯云</value></data>
+  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM</value></data>
+  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>淘宝 / npmmirror</value></data>
+  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror</value></data>
+  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>华为云</value></data>
+  <data name="LatestVersionValue" xml:space="preserve"><value>最新版本 {0}</value></data>
+  <data name="NodeInstalled" xml:space="preserve"><value>已安装</value></data>
+  <data name="SelectVersionAction" xml:space="preserve"><value>选择版本</value></data>
+  <data name="SwitchVersionAction" xml:space="preserve"><value>切换到此版本</value></data>
+  <data name="InstallVersionAction" xml:space="preserve"><value>下载安装并切换</value></data>
   <data name="NvmSwitchTitle.Text" xml:space="preserve"><value>切换 Node.js 版本</value></data>
   <data name="NodeVersionPicker.PlaceholderText" xml:space="preserve"><value>选择已安装版本</value></data>
   <data name="NvmApply.Content" xml:space="preserve"><value>应用切换</value></data>
@@ -96,7 +141,7 @@
   <data name="NvmInstall.Content" xml:space="preserve"><value>下载安装</value></data>
   <data name="NvmMirrorLabel.Text" xml:space="preserve"><value>下载镜像</value></data>
   <data name="NvmMirrorHint.Text" xml:space="preserve"><value>nodejs.org 在部分网络下不可达。镜像可在本页下方修改，失败时会自动回退到官方源。</value></data>
-  <data name="ModulesHeading.Text" xml:space="preserve"><value>安装渠道与基础依赖</value></data>
+  <data name="ModulesHeading.Text" xml:space="preserve"><value>Windows 基础依赖</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>当前版本</value></data>
   <data name="LatestVersionLabel.Text" xml:space="preserve"><value>最新版本</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>安装</value></data>

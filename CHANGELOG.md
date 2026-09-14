@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Clarified core product state and dependency/network workflows:
+  - Codex Beacon now enforces one active app instance. Starting it again closes the previous window and force-stops it only when a graceful close does not finish, then launches the new instance. The single-file launcher performs the replacement before updating its extraction cache.
+  - Codex CLI now shows an explicit signed-in, signed-out, or unverifiable account state; the login action is disabled after a verified sign-in. Login checks now follow the resolved npm CLI path instead of borrowing state from a different bundled executable.
+  - ChatGPT desktop health is no longer derived from Codex CLI authentication, so an up-to-date running desktop client no longer appears as needing attention because the CLI is signed out.
+  - NVM, Node.js, and npm runtime cards now show current and latest versions. The Node.js selector merges `nvm list` with the selected mirror catalog and uses one state-driven action to switch an installed version or install and switch a missing version.
+  - Removed the duplicate NVM entry from the Windows prerequisite list. Node.js mirrors now include official, Tsinghua, Alibaba Cloud, Tencent Cloud, and Huawei Cloud choices; npm registries use the standard nrm preset list.
+  - The Network page now distinguishes configured mode from the observed effective path and reports Windows proxy address, automatic/PAC state, environment proxy, and active TUN adapter evidence.
+
 - Fixed single-file runtime packaging and Windows App Runtime missing dialog:
   - Resolved the 'Required components of the Windows App Runtime are missing Version 1.8' prompt in the Slim build by packaging with WindowsAppSDKSelfContained=true, bundling WinUI 3 native assets while maintaining framework-dependent .NET runtime.
   - Separated extraction cache targets between Portable (app-portable) and Slim (app-slim) with distinct payload content signatures, eliminating extraction collisions and file-lock conflicts when launching both variants.

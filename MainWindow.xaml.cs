@@ -27,9 +27,11 @@ public sealed partial class MainWindow : Window
     private string? _pendingUpdatePath;
     private CancellationTokenSource? _actionCancellation;
     private AppSettings _settings;
+    private readonly HashSet<string> _installedNodeVersions = new(StringComparer.OrdinalIgnoreCase);
 
     public ObservableCollection<ComponentStatus> CoreComponents { get; } = [];
     public ObservableCollection<ComponentStatus> InstallableComponents { get; } = [];
+    public ObservableCollection<ComponentStatus> RuntimeComponents { get; } = [];
     public ObservableCollection<ProcessRecord> Processes { get; } = [];
     public ObservableCollection<TailnetDevice> TailnetDevices { get; } = [];
     public ObservableCollection<NodeRuntime> NodeVersions { get; } = [];
@@ -50,11 +52,22 @@ public sealed partial class MainWindow : Window
         RefreshSecondsBox.Value = _settings.RefreshSeconds;
         RelayTaskNameBox.Text = _settings.RelayTaskName;
         ProxyTaskNameBox.Text = _settings.ProxyTaskName;
-        NodeMirrorBox.Text = _settings.NodeMirror;
-        NpmRegistryBox.Text = _settings.NpmRegistry;
+        NodeMirrorPicker.SelectedValue = _settings.NodeMirror;
+        if (NodeMirrorPicker.SelectedIndex < 0)
+        {
+            _settings.NodeMirror = new AppSettings().NodeMirror;
+            NodeMirrorPicker.SelectedValue = _settings.NodeMirror;
+        }
+        NpmRegistryPicker.SelectedValue = _settings.NpmRegistry;
+        if (NpmRegistryPicker.SelectedIndex < 0)
+        {
+            _settings.NpmRegistry = new AppSettings().NpmRegistry;
+            NpmRegistryPicker.SelectedValue = _settings.NpmRegistry;
+        }
         NetworkModePicker.SelectedValue = _settings.NetworkMode;
-        if (NetworkModePicker.SelectedIndex < 0) NetworkModePicker.SelectedValue = "system";
+        if (NetworkModePicker.SelectedIndex < 0) NetworkModePicker.SelectedValue = "auto";
         CustomHttpProxyBox.Text = _settings.CustomHttpProxy;
+        UpdateNetworkModeControls();
         Replace(ProviderProfiles, _systemService.LoadProviders());
         UpdateProviderEmptyState();
         LanguagePicker.SelectedValue = _settings.Language;
@@ -126,7 +139,7 @@ public sealed partial class MainWindow : Window
         SetStatus(Localization.Get("RefreshingStatus"));
         try
         {
-            var previousVersions = CoreComponents.Concat(InstallableComponents)
+            var previousVersions = CoreComponents.Concat(InstallableComponents).Concat(RuntimeComponents)
                 .GroupBy(component => component.Id)
                 .ToDictionary(group => group.Key, group => (group.First().LatestVersion, group.First().EvidenceKey, group.First().EvidenceArgs));
 
@@ -182,19 +195,30 @@ public sealed partial class MainWindow : Window
                         {
                             foreach (var (compKey, latestVer) in latestMap)
                             {
-                                var match = CoreComponents.Concat(InstallableComponents)
+                                var match = CoreComponents.Concat(InstallableComponents).Concat(RuntimeComponents)
                                     .FirstOrDefault(x => x.Id.Equals(compKey, StringComparison.OrdinalIgnoreCase));
                                 if (match is not null) match.LatestVersion = latestVer;
                             }
                             UpdateSpecializedComponentCards();
-                            
+                            UpdateRuntimeVersionDisplays();
                         });
                     }
                 }
                 catch { }
             });
 
-            // 任务 2.4：OpenCodex 模型拉取
+            // 任务 2.4：读取所选镜像的 Node.js 版本目录，并与本机 nvm list 合并。
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var catalog = await SystemService.QueryNodeVersionCatalogAsync(_settings.NodeMirror, proxyAddress).ConfigureAwait(false);
+                    DispatcherQueue.TryEnqueue(() => MergeNodeVersionCatalog(catalog));
+                }
+                catch { }
+            });
+
+            // 任务 2.5：OpenCodex 模型拉取
             if (snapshot.Components.Any(x => x.Id == "opencodex" && x.IsRunning))
             {
                 _ = Task.Run(async () =>
@@ -268,12 +292,19 @@ public sealed partial class MainWindow : Window
             };
             component.CanInstall = !component.IsInstalled && component.PrerequisitesReady;
         }
-        Replace(InstallableComponents, snapshot.Components.Where(x => x.Id is "appinstaller" or "winget" or "msstore" or "nvm"));
+        Replace(InstallableComponents, snapshot.Components.Where(x => x.Id is "appinstaller" or "winget" or "msstore"));
+        Replace(RuntimeComponents, snapshot.Components.Where(x => x.Id is "nvm" or "node" or "npm"));
 
         Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "opencodex" or "tailscale" or "relay"));
         Replace(OpenCodexComponents, snapshot.Components.Where(x => x.Id == "opencodex"));
         Replace(Processes, snapshot.Processes.OrderBy(x => x.RoleKey).ThenBy(x => x.Pid));
         Replace(TailnetDevices, snapshot.TailscaleDevices.OrderByDescending(x => x.IsSelf).ThenByDescending(x => x.Online).ThenBy(x => x.Name));
+        _installedNodeVersions.Clear();
+        foreach (var runtime in snapshot.NodeVersions)
+        {
+            runtime.IsInstalled = true;
+            _installedNodeVersions.Add(runtime.Version);
+        }
         Replace(NodeVersions, snapshot.NodeVersions.OrderByDescending(x => x.IsCurrent)
             .ThenByDescending(x => Version.TryParse(x.Version, out var version) ? version : new Version()));
         Replace(ModelProviders, snapshot.Providers);
@@ -298,6 +329,8 @@ public sealed partial class MainWindow : Window
         ApplyRuntime(npm, NpmStatusText, NpmPathText, NpmNoteText);
         ApplyRuntime(nvm, NvmStatusText, NvmPathText, NvmNoteText);
         NvmMirrorText.Text = Or(snapshot.NodeMirror);
+        ApplyProxyStatus(snapshot.Proxy);
+        UpdateRuntimeVersionDisplays();
         UpdateSpecializedComponentCards();
 
         // 更新当前主路由提示
@@ -340,6 +373,50 @@ public sealed partial class MainWindow : Window
         status.Text = $"{component.StatusLabel} · {component.InstalledVersionLabel}";
         path.Text = Or(component.Path);
         note.Text = component.Detail;
+    }
+
+    private void UpdateRuntimeVersionDisplays()
+    {
+        var components = RuntimeComponents.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        NvmLatestVersionText.Text = Localization.Format("LatestVersionValue", components.TryGetValue("nvm", out var nvm) ? nvm.LatestVersionLabel : Palette.Dash);
+        NodeLatestVersionText.Text = Localization.Format("LatestVersionValue", components.TryGetValue("node", out var node) ? node.LatestVersionLabel : Palette.Dash);
+        NpmLatestVersionText.Text = Localization.Format("LatestVersionValue", components.TryGetValue("npm", out var npm) ? npm.LatestVersionLabel : Palette.Dash);
+    }
+
+    private void MergeNodeVersionCatalog(IEnumerable<NodeRuntime> catalog)
+    {
+        var current = NodeVersions.FirstOrDefault(x => x.IsCurrent)?.Version;
+        var merged = catalog
+            .GroupBy(x => x.Version, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToDictionary(x => x.Version, StringComparer.OrdinalIgnoreCase);
+        foreach (var installed in _installedNodeVersions)
+        {
+            if (!merged.TryGetValue(installed, out var item))
+                merged[installed] = new NodeRuntime { Version = installed };
+            merged[installed].IsInstalled = true;
+        }
+        if (current is not null && merged.TryGetValue(current, out var active)) active.IsCurrent = true;
+        Replace(NodeVersions, merged.Values
+            .OrderByDescending(x => x.IsCurrent)
+            .ThenByDescending(x => x.IsInstalled)
+            .ThenByDescending(x => Version.TryParse(x.Version, out var parsed) ? parsed : new Version()));
+        if (NodeVersionPicker.SelectedItem is null && NodeVersions.Count > 0) NodeVersionPicker.SelectedIndex = 0;
+        UpdateNodeVersionAction();
+    }
+
+    private void ApplyProxyStatus(ProxyStatus proxy)
+    {
+        EffectiveProxyModeText.Text = Localization.Get($"ProxyEffective_{proxy.EffectiveMode}");
+        ConfiguredProxyModeText.Text = Localization.Format("ProxyConfiguredMode", Localization.Get($"ProxyEffective_{proxy.ConfiguredMode}"));
+        SystemProxyStatusText.Text = Localization.Get(proxy.SystemProxyEnabled ? "ProxyEnabled" : "ProxyDisabled");
+        SystemProxyAddressText.Text = proxy.SystemProxyEnabled ? Or(proxy.SystemProxyAddress) : Localization.Get("ProxyNoAddress");
+        TunStatusText.Text = string.IsNullOrWhiteSpace(proxy.TunAdapterName)
+            ? Localization.Get("TunNotDetected")
+            : Localization.Format("TunDetected", proxy.TunAdapterName);
+        AutoProxyStatusText.Text = !string.IsNullOrWhiteSpace(proxy.AutoConfigUrl)
+            ? Localization.Format("ProxyPacValue", proxy.AutoConfigUrl)
+            : proxy.AutoDetectEnabled ? Localization.Get("ProxyAutoDetectOn") : Localization.Get("ProxyAutoDetectOff");
     }
 
     private static void Replace<T>(ObservableCollection<T> collection, IEnumerable<T> items)
@@ -415,14 +492,23 @@ public sealed partial class MainWindow : Window
         var codex = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "codex");
         if (codex is not null)
         {
-            CodexStatusBadgeText.Text = codex.StatusLabel;
+            CodexStatusBadgeText.Text = codex.AccountState switch
+            {
+                "SignedIn" => Localization.Get("StatusHealthy"),
+                "SignedOut" => Localization.Get("AccountSignedOut"),
+                _ => codex.StatusLabel
+            };
             CodexStatusBadgeBorder.Background = codex.StatusBackground;
             CodexStatusBadgeText.Foreground = codex.StatusForeground;
             CodexCurrentVersionText.Text = codex.InstalledVersionLabel;
             CodexLatestVersionText.Text = codex.LatestVersionLabel;
             UpdateVersionBadge(codex, CodexUpdateBadgeBorder, CodexUpdateBadgeText);
+            CodexAccountStatusText.Text = codex.AccountStatusLabel;
             CodexPathText.Text = string.IsNullOrWhiteSpace(codex.Path) ? Localization.Get("CodexPathFallback") : codex.Path;
-            CodexLoginButton.IsEnabled = codex.IsInstalled;
+            CodexLoginButton.Content = codex.AccountState == "SignedIn"
+                ? Localization.Get("AccountSignedIn")
+                : Localization.Get("ActionLoginName");
+            CodexLoginButton.IsEnabled = codex.IsInstalled && codex.AccountState != "SignedIn";
             CodexUpgradeButton.IsEnabled = codex.CanUpgrade;
         }
 
@@ -622,30 +708,52 @@ public sealed partial class MainWindow : Window
         await ExecuteActionAsync("provider", "use", providerId, Localization.Format("SwitchingProvider", providerId));
     }
 
-    private async void InstallNode_Click(object sender, RoutedEventArgs e)
+    private void NodeVersionPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        => UpdateNodeVersionAction();
+
+    private void UpdateNodeVersionAction()
     {
-        var version = NewNodeVersionBox.Text.Trim().TrimStart('v');
-        if (!Version.TryParse(version, out _) || version.Count(c => c == '.') != 2)
+        if (NodeVersionPicker.SelectedItem is not NodeRuntime runtime)
         {
-            SetStatus(Localization.Get("FullNodeVersionHint"));
-            NewNodeVersionBox.Focus(FocusState.Programmatic);
+            NodeVersionActionButton.Content = Localization.Get("SelectVersionAction");
+            NodeVersionActionButton.IsEnabled = false;
             return;
         }
-        await ExecuteActionAsync("nvm", "install-node", version, Localization.Format("InstallingNode", version));
+        NodeVersionActionButton.Content = runtime.IsCurrent
+            ? Localization.Get("CurrentInUse")
+            : runtime.IsInstalled ? Localization.Get("SwitchVersionAction") : Localization.Get("InstallVersionAction");
+        NodeVersionActionButton.IsEnabled = !runtime.IsCurrent;
     }
 
-    private async void SwitchNode_Click(object sender, RoutedEventArgs e)
+    private async void ApplyNodeVersion_Click(object sender, RoutedEventArgs e)
     {
         if (NodeVersionPicker.SelectedItem is not NodeRuntime runtime)
         {
             SetStatus(Localization.Get("SelectNodeVersion"));
             return;
         }
-        await ExecuteActionAsync("nvm", "use-node", runtime.Version, Localization.Format("SwitchingNode", runtime.Version));
+        if (runtime.IsInstalled)
+        {
+            await ExecuteActionAsync("nvm", "use-node", runtime.Version, Localization.Format("SwitchingNode", runtime.Version));
+            return;
+        }
+        if (await ExecuteActionAsync("nvm", "install-node", runtime.Version, Localization.Format("InstallingNode", runtime.Version)))
+            await ExecuteActionAsync("nvm", "use-node", runtime.Version, Localization.Format("SwitchingNode", runtime.Version));
     }
 
     private void OpenEgressCheck_Click(object sender, RoutedEventArgs e)
         => _ = Windows.System.Launcher.LaunchUriAsync(new Uri(EgressWebsite));
+
+    private void NetworkModePicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        => UpdateNetworkModeControls();
+
+    private void UpdateNetworkModeControls()
+    {
+        if (CustomHttpProxyBox is null) return;
+        CustomHttpProxyBox.Visibility = NetworkModePicker.SelectedValue as string == "custom"
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
 
     private async void CheckNetwork_Click(object sender, RoutedEventArgs e)
     {
@@ -756,7 +864,7 @@ public sealed partial class MainWindow : Window
             var latestMap = await SystemService.QueryLatestVersionsAsync(proxyAddress);
             if (latestMap.TryGetValue(compId, out var latestVer))
             {
-                var match = CoreComponents.Concat(InstallableComponents)
+                var match = CoreComponents.Concat(InstallableComponents).Concat(RuntimeComponents)
                     .FirstOrDefault(x => x.Id.Equals(compId, StringComparison.OrdinalIgnoreCase));
                 if (match is not null) match.LatestVersion = latestVer;
                 UpdateSpecializedComponentCards();
@@ -873,26 +981,25 @@ public sealed partial class MainWindow : Window
 
     // ---------------------------------------------------------------- settings
 
-    private void SaveSettings_Click(object sender, RoutedEventArgs e)
+    private async void SaveSettings_Click(object sender, RoutedEventArgs e)
     {
         PersistSettings(LanguagePicker.SelectedValue as string);
-        var registry = NpmRegistryBox.Text.Trim();
+        var registry = NpmRegistryPicker.SelectedValue as string ?? "";
         if (!string.IsNullOrWhiteSpace(registry) && Uri.TryCreate(registry, UriKind.Absolute, out _))
         {
-            _ = Task.Run(() =>
+            try
             {
-                try
+                using var process = Process.Start(new ProcessStartInfo("cmd.exe")
                 {
-                    var p = Process.Start(new ProcessStartInfo("cmd.exe", $"/c npm config set registry {registry}")
-                    {
-                        CreateNoWindow = true,
-                        UseShellExecute = false
-                    });
-                    p?.WaitForExit(3000);
-                }
-                catch { }
-            });
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    ArgumentList = { "/d", "/c", "npm", "config", "set", "registry", registry }
+                });
+                if (process is not null) await process.WaitForExitAsync();
+            }
+            catch { }
         }
+        await RefreshAsync(true);
         SetStatus(Localization.Get("SettingsSaved"));
     }
 
@@ -905,8 +1012,8 @@ public sealed partial class MainWindow : Window
             RefreshSeconds = Math.Clamp(seconds, 5, 300),
             RelayTaskName = string.IsNullOrWhiteSpace(RelayTaskNameBox.Text) ? "Codex Relay" : RelayTaskNameBox.Text.Trim(),
             ProxyTaskName = string.IsNullOrWhiteSpace(ProxyTaskNameBox.Text) ? "opencodex-proxy" : ProxyTaskNameBox.Text.Trim(),
-            NodeMirror = NormalizeHttpEndpoint(NodeMirrorBox.Text, defaults.NodeMirror),
-            NpmRegistry = NormalizeHttpEndpoint(NpmRegistryBox.Text, defaults.NpmRegistry),
+            NodeMirror = NormalizeHttpEndpoint(NodeMirrorPicker.SelectedValue as string ?? "", defaults.NodeMirror),
+            NpmRegistry = NormalizeHttpEndpoint(NpmRegistryPicker.SelectedValue as string ?? "", defaults.NpmRegistry),
             NetworkMode = NetworkModePicker.SelectedValue as string ?? "system",
             CustomHttpProxy = NormalizeHttpEndpoint(CustomHttpProxyBox.Text, ""),
             Language = language is "en-US" or "zh-CN" ? language : Localization.SystemLanguage,

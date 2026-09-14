@@ -261,8 +261,67 @@ public sealed class SystemService
             catch { }
         }, cancellationToken);
 
-        await Task.WhenAll(desktopTask, codexTask, openCodexTask, relayTask, tailscaleTask).ConfigureAwait(false);
+        var nvmTask = Task.Run(async () =>
+        {
+            try
+            {
+                var json = await client.GetStringAsync("https://api.github.com/repos/coreybutler/nvm-windows/releases/latest", cancellationToken).ConfigureAwait(false);
+                using var doc = JsonDocument.Parse(json);
+                var version = doc.RootElement.GetProperty("tag_name").GetString()?.TrimStart('v');
+                if (!string.IsNullOrWhiteSpace(version)) lock (results) results["nvm"] = version;
+            }
+            catch { }
+        }, cancellationToken);
+
+        var nodeTask = Task.Run(async () =>
+        {
+            try
+            {
+                var json = await client.GetStringAsync("https://nodejs.org/dist/index.json", cancellationToken).ConfigureAwait(false);
+                using var doc = JsonDocument.Parse(json);
+                var version = doc.RootElement[0].GetProperty("version").GetString()?.TrimStart('v');
+                if (!string.IsNullOrWhiteSpace(version)) lock (results) results["node"] = version;
+            }
+            catch { }
+        }, cancellationToken);
+
+        var npmTask = Task.Run(async () =>
+        {
+            try
+            {
+                var json = await client.GetStringAsync("https://registry.npmjs.org/npm/latest", cancellationToken).ConfigureAwait(false);
+                using var doc = JsonDocument.Parse(json);
+                var version = doc.RootElement.GetProperty("version").GetString();
+                if (!string.IsNullOrWhiteSpace(version)) lock (results) results["npm"] = version;
+            }
+            catch { }
+        }, cancellationToken);
+
+        await Task.WhenAll(desktopTask, codexTask, openCodexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask).ConfigureAwait(false);
         return results;
+    }
+
+    public static async Task<List<NodeRuntime>> QueryNodeVersionCatalogAsync(
+        string nodeMirror, string? proxyAddress = null, CancellationToken cancellationToken = default)
+    {
+        var baseUri = Uri.TryCreate(nodeMirror, UriKind.Absolute, out var parsed)
+            ? parsed.ToString().TrimEnd('/')
+            : "https://nodejs.org/dist";
+        using var client = CreateConfiguredHttpClient(proxyAddress, TimeSpan.FromSeconds(12));
+        var json = await client.GetStringAsync($"{baseUri}/index.json", cancellationToken).ConfigureAwait(false);
+        using var doc = JsonDocument.Parse(json);
+        var versions = new List<NodeRuntime>();
+        foreach (var item in doc.RootElement.EnumerateArray().Take(80))
+        {
+            if (!item.TryGetProperty("version", out var versionProperty)) continue;
+            var version = versionProperty.GetString()?.TrimStart('v');
+            if (string.IsNullOrWhiteSpace(version)) continue;
+            var lts = item.TryGetProperty("lts", out var ltsProperty) && ltsProperty.ValueKind == JsonValueKind.String
+                ? ltsProperty.GetString() ?? ""
+                : "";
+            versions.Add(new NodeRuntime { Version = version, IsInstalled = false, Lts = lts });
+        }
+        return versions;
     }
 
     public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(CancellationToken cancellationToken = default)

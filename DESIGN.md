@@ -42,8 +42,10 @@ Not installed → Install → Installed / signed out → Sign in
 Actions stay disabled until prerequisites are proven. Detection distinguishes package installation, service registration, process/listener state, account state, and version availability. Unknown is not healthy. After a mutation, the app refreshes authoritative state.
 
 - npm packages require Node.js ≥ 22.14.0 and a working npm executable.
+- Node.js version management uses one target-version selector: installed entries switch immediately, while downloadable entries install through the selected mirror and then become active.
 - Tailscale requires the Windows package, service, and a signed-in Tailnet state.
 - Codex CLI login is verified by its status command; login opens a visible official CLI flow.
+- ChatGPT desktop health is independent of Codex CLI authentication state.
 - OpenCodex Proxy and Codex Relay may be installed without a configured scheduled task.
 - Codex desktop installation and update always open the official Microsoft Store product page.
 

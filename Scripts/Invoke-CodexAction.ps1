@@ -32,9 +32,9 @@ $script:ActionStarted = Get-Date
 $settings = @{
     RelayTaskName = 'Codex Relay'
     ProxyTaskName = 'opencodex-proxy'
-    NodeMirror    = 'https://cdn.npmmirror.com/binaries/node'
-    NpmRegistry   = 'https://registry.npmjs.org/'
-    NetworkMode   = 'system'
+    NodeMirror    = 'https://mirrors.aliyun.com/nodejs-release'
+    NpmRegistry   = 'https://registry.npmjs.org'
+    NetworkMode   = 'auto'
     CustomHttpProxy = ''
 }
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {

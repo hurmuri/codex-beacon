@@ -201,6 +201,15 @@
                                         </StackPanel>
                                     </Grid>
 
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Uid="AccountStatusLabel" Text="登录状态" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" x:Name="CodexAccountStatusText" Text="—" Style="{StaticResource BodyTextStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+
                                     <TextBlock x:Name="CodexPathText" Text="—" Style="{StaticResource MonoCaptionStyle}" MaxLines="1" TextTrimming="CharacterEllipsis" />
 
                                     <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
@@ -298,9 +307,32 @@
                         <TextBlock x:Uid="ProxyModeHeading" Text="代理模式与设置" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
                             <StackPanel Spacing="14">
+                                <Grid ColumnSpacing="18">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="3">
+                                        <TextBlock x:Uid="EffectiveProxyLabel" Text="当前生效路径" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Name="EffectiveProxyModeText" Text="正在检测…" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Name="ConfiguredProxyModeText" Text="—" Style="{StaticResource MonoCaptionStyle}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="3">
+                                        <TextBlock x:Uid="SystemProxyStateLabel" Text="Windows 系统代理" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Name="SystemProxyStatusText" Text="正在检测…" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Name="SystemProxyAddressText" Text="—" Style="{StaticResource MonoCaptionStyle}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="3">
+                                        <TextBlock x:Uid="TunAutoStateLabel" Text="TUN / 自动代理" Style="{StaticResource CaptionTextStyle}" />
+                                        <TextBlock x:Name="TunStatusText" Text="正在检测…" Style="{StaticResource CardTitleStyle}" />
+                                        <TextBlock x:Name="AutoProxyStatusText" Text="—" Style="{StaticResource MonoCaptionStyle}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
                                 <TextBlock x:Uid="ProxyModeHint" Text="选择代理工作模式；切换或填入代理地址后可直接测试连通性，确认无误后点击保存生效。" Style="{StaticResource CaptionTextStyle}" />
                                 <StackPanel Orientation="Horizontal" Spacing="16">
-                                    <ComboBox x:Name="NetworkModePicker" Width="260" SelectedValuePath="Tag">
+                                    <ComboBox x:Name="NetworkModePicker" Width="260" SelectedValuePath="Tag" SelectionChanged="NetworkModePicker_SelectionChanged">
+                                        <ComboBoxItem x:Uid="ProxyModeAuto" Content="自动检测" Tag="auto" />
                                         <ComboBoxItem x:Uid="ProxyModeSystem" Content="使用系统代理" Tag="system" />
                                         <ComboBoxItem x:Uid="ProxyModeTun" Content="使用 TUN 虚拟网卡" Tag="tun" />
                                         <ComboBoxItem x:Uid="ProxyModeCustom" Content="自定义 HTTP 代理" Tag="custom" />
@@ -692,7 +724,7 @@
                 </ScrollViewer>
 
                 <!-- ========================= 依赖管理 ========================= -->
-                <ScrollViewer x:Name="InstallationsPage" Visibility="Collapsed" Padding="28,20,28,36">
+                <ScrollViewer x:Name="InstallationsPage" Visibility="Collapsed" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Padding="28,20,28,36">
                     <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch">
                         <TextBlock x:Uid="InstallationsTitle" Text="依赖管理" Style="{StaticResource PageTitleStyle}" />
                         <TextBlock x:Uid="InstallationsDescription" Text="按 App Installer → WinGet → Microsoft Store，以及 NVM → Node.js → npm 的顺序管理依赖。"
@@ -720,6 +752,7 @@
                                         <FontIcon Grid.Column="1" Glyph="&#xE774;" FontSize="15" Foreground="{StaticResource SignalBrush}" VerticalAlignment="Top" />
                                     </Grid>
                                     <TextBlock x:Name="NodeStatusText" Text="—" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock x:Name="NodeLatestVersionText" Text="最新版本 —" Style="{StaticResource MonoCaptionStyle}" />
                                     <TextBlock x:Name="NodePathText" Text="—" Style="{StaticResource MonoCaptionStyle}" TextWrapping="Wrap" MaxLines="2" />
                                     <TextBlock x:Name="NodeNoteText" Text="—" Style="{StaticResource CaptionTextStyle}" MaxLines="2" />
                                 </StackPanel>
@@ -739,6 +772,7 @@
                                         <FontIcon Grid.Column="1" Glyph="&#xE896;" FontSize="15" Foreground="{StaticResource SignalBrush}" VerticalAlignment="Top" />
                                     </Grid>
                                     <TextBlock x:Name="NpmStatusText" Text="—" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock x:Name="NpmLatestVersionText" Text="最新版本 —" Style="{StaticResource MonoCaptionStyle}" />
                                     <TextBlock x:Name="NpmPathText" Text="—" Style="{StaticResource MonoCaptionStyle}" TextWrapping="Wrap" MaxLines="2" />
                                     <TextBlock x:Name="NpmNoteText" Text="—" Style="{StaticResource CaptionTextStyle}" MaxLines="2" />
                                 </StackPanel>
@@ -758,6 +792,7 @@
                                         <FontIcon Grid.Column="1" Glyph="&#xE8AB;" FontSize="15" Foreground="{StaticResource SignalBrush}" VerticalAlignment="Top" />
                                     </Grid>
                                     <TextBlock x:Name="NvmStatusText" Text="—" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock x:Name="NvmLatestVersionText" Text="最新版本 —" Style="{StaticResource MonoCaptionStyle}" />
                                     <TextBlock x:Name="NvmPathText" Text="—" Style="{StaticResource MonoCaptionStyle}" TextWrapping="Wrap" MaxLines="2" />
                                     <TextBlock x:Name="NvmNoteText" Text="—" Style="{StaticResource CaptionTextStyle}" MaxLines="2" />
                                 </StackPanel>
@@ -766,30 +801,16 @@
 
                         <TextBlock x:Uid="NvmSectionHeading" Text="NVM · Node.js 版本管理" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="16">
-                                <Grid ColumnSpacing="24">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="8">
-                                        <TextBlock x:Uid="NvmSwitchTitle" Text="切换 Node.js 版本" Style="{StaticResource CardTitleStyle}" />
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <ComboBox x:Name="NodeVersionPicker" Style="{StaticResource InputComboBoxStyle}" Width="210"
-                                                      x:Uid="NodeVersionPicker" PlaceholderText="选择已安装版本"
-                                                      ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName" />
-                                            <Button x:Uid="NvmApply" Content="应用切换" Style="{StaticResource QuietButtonStyle}" Click="SwitchNode_Click" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="1" Spacing="8">
-                                        <TextBlock x:Uid="NvmInstallTitle" Text="安装新 Node.js 版本" Style="{StaticResource CardTitleStyle}" />
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBox x:Name="NewNodeVersionBox" Style="{StaticResource InputTextBoxStyle}" Width="170"
-                                                     x:Uid="NewNodeVersionBox" PlaceholderText="例如 24.15.0" />
-                                            <Button x:Uid="NvmInstall" Content="下载安装" Style="{StaticResource QuietButtonStyle}" Click="InstallNode_Click" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Grid>
+                            <StackPanel Spacing="12">
+                                <TextBlock x:Uid="NvmVersionActionTitle" Text="选择目标版本" Style="{StaticResource CardTitleStyle}" />
+                                <TextBlock x:Uid="NvmVersionActionHint" Text="列表包含已安装版本和可下载版本；选择后会自动切换或下载安装。" Style="{StaticResource CaptionTextStyle}" />
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ComboBox x:Name="NodeVersionPicker" Style="{StaticResource InputComboBoxStyle}" Width="420"
+                                              x:Uid="NodeVersionPicker" PlaceholderText="选择 Node.js 版本"
+                                              ItemsSource="{x:Bind NodeVersions}" DisplayMemberPath="DisplayName"
+                                              SelectionChanged="NodeVersionPicker_SelectionChanged" />
+                                    <Button x:Name="NodeVersionActionButton" x:Uid="NvmVersionAction" Content="选择版本" Style="{StaticResource ActionButtonStyle}" Click="ApplyNodeVersion_Click" IsEnabled="False" />
+                                </StackPanel>
                                 <Grid ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto" />
@@ -803,7 +824,7 @@
                             </StackPanel>
                         </Border>
 
-                        <TextBlock x:Uid="ModulesHeading" Text="可选扩展模块" Style="{StaticResource SectionTitleStyle}" />
+                        <TextBlock x:Uid="ModulesHeading" Text="Windows 基础依赖" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}" Padding="0">
                             <ListView x:Name="InstallationList" ItemsSource="{x:Bind InstallableComponents}" SelectionMode="None">
                                 <ListView.ItemTemplate>
@@ -842,8 +863,22 @@
                         <TextBlock x:Uid="DownloadSourcesHeading" Text="下载源" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
                             <StackPanel Spacing="10">
-                                <TextBox x:Name="NodeMirrorBox" x:Uid="NodeMirrorBox" Header="Node.js 下载镜像" Width="520" HorizontalAlignment="Left" />
-                                <TextBox x:Name="NpmRegistryBox" Header="npm Registry" Width="520" HorizontalAlignment="Left" />
+                                <ComboBox x:Name="NodeMirrorPicker" x:Uid="NodeMirrorPicker" Header="Node.js 下载镜像" Width="520" HorizontalAlignment="Left" SelectedValuePath="Tag">
+                                    <ComboBoxItem x:Uid="NodeSourceOfficial" Content="官方 · nodejs.org" Tag="https://nodejs.org/dist" />
+                                    <ComboBoxItem x:Uid="NodeSourceTsinghua" Content="清华大学 TUNA" Tag="https://mirrors.tuna.tsinghua.edu.cn/nodejs-release" />
+                                    <ComboBoxItem x:Uid="NodeSourceAliyun" Content="阿里云" Tag="https://mirrors.aliyun.com/nodejs-release" />
+                                    <ComboBoxItem x:Uid="NodeSourceTencent" Content="腾讯云" Tag="https://mirrors.cloud.tencent.com/nodejs-release" />
+                                    <ComboBoxItem x:Uid="NodeSourceHuawei" Content="华为云" Tag="https://repo.huaweicloud.com/nodejs" />
+                                </ComboBox>
+                                <ComboBox x:Name="NpmRegistryPicker" x:Uid="NpmRegistryPicker" Header="npm Registry（nrm 预设）" Width="520" HorizontalAlignment="Left" SelectedValuePath="Tag">
+                                    <ComboBoxItem x:Uid="NpmSourceOfficial" Content="npm 官方" Tag="https://registry.npmjs.org" />
+                                    <ComboBoxItem x:Uid="NpmSourceYarn" Content="Yarn" Tag="https://registry.yarnpkg.com" />
+                                    <ComboBoxItem x:Uid="NpmSourceTencent" Content="腾讯云" Tag="https://mirrors.cloud.tencent.com/npm" />
+                                    <ComboBoxItem x:Uid="NpmSourceCnpm" Content="CNPM" Tag="https://r.cnpmjs.org" />
+                                    <ComboBoxItem x:Uid="NpmSourceTaobao" Content="淘宝 / npmmirror" Tag="https://registry.npmmirror.com" />
+                                    <ComboBoxItem x:Uid="NpmSourceMirror" Content="npmMirror" Tag="https://skimdb.npmjs.com/registry" />
+                                    <ComboBoxItem x:Uid="NpmSourceHuawei" Content="华为云" Tag="https://repo.huaweicloud.com/repository/npm" />
+                                </ComboBox>
                                 <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。" Style="{StaticResource CaptionTextStyle}" />
                                 <Button x:Uid="SaveDependenciesButton" Content="保存依赖设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
                             </StackPanel>

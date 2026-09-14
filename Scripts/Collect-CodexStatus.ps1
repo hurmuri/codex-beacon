@@ -29,8 +29,8 @@ $script:Separator = [char]0x1F
 $script:Unknown = ''
 $NodeMinimumVersion = '22.14.0'
 $CodexStoreProductId = '9PLM9XGG6VKS'
-$DefaultNodeMirror = 'https://cdn.npmmirror.com/binaries/node'
-$DefaultNpmRegistry = 'https://registry.npmjs.org/'
+$DefaultNodeMirror = 'https://mirrors.aliyun.com/nodejs-release'
+$DefaultNpmRegistry = 'https://registry.npmjs.org'
 
 function Join-Args([object[]]$Values) {
     if (-not $Values) { return '' }
@@ -186,7 +186,7 @@ $settings = @{
     ProxyTaskName = 'opencodex-proxy'
     NodeMirror    = $DefaultNodeMirror
     NpmRegistry   = $DefaultNpmRegistry
-    NetworkMode   = 'system'
+    NetworkMode   = 'auto'
     CustomHttpProxy = ''
 }
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
@@ -233,7 +233,7 @@ if ($nvmCommand) {
     try {
         foreach ($line in (& $nvmCommand.Source list 2>$null)) {
             if ($line -match '^\s*(\*)?\s*v?(\d+\.\d+\.\d+)') {
-                $nodeVersions += [ordered]@{ Version = $matches[2]; IsCurrent = ($matches[1] -eq '*') }
+                $nodeVersions += [ordered]@{ Version = $matches[2]; IsCurrent = ($matches[1] -eq '*'); IsInstalled = $true; Lts = '' }
             }
         }
     } catch { }
@@ -334,9 +334,16 @@ foreach ($candidate in $codexCandidates) {
 
 $codexNpmVersion = $null
 $codexNpmOwner = $null
+$codexNpmExecutable = $null
 foreach ($npm in $script:NpmExecutables) {
     $found = Get-PackageVersion $npm '@openai/codex'
-    if ($found) { $codexNpmVersion = $found; $codexNpmOwner = $npm; break }
+    if ($found) {
+        $codexNpmVersion = $found
+        $codexNpmOwner = $npm
+        $npmDirectory = Split-Path $npm -Parent
+        $codexNpmExecutable = $codexCandidates | Where-Object { (Split-Path $_ -Parent) -eq $npmDirectory } | Select-Object -First 1
+        break
+    }
 }
 
 $codexBundledVersion = $null
@@ -366,7 +373,7 @@ if ($codexNpmVersion) {
     $codexVersion = $codexNpmVersion
     $codexSourceKey = 'DetailCodexNpm'
     $codexSourceArgs = @($codexNpmVersion)
-    $codexResolvedPath = $codexNpmOwner
+    $codexResolvedPath = if ($codexNpmExecutable) { $codexNpmExecutable } else { $codexNpmOwner }
 } elseif ($codexPathVersion) {
     $codexVersion = $codexPathVersion
     $codexSourceKey = 'DetailCodexOnPath'
@@ -385,14 +392,24 @@ if ($codexVersion) {
     # with the desktop app when that is the only one present. The CLI reports
     # sign-in state on stderr, so go through cmd.exe: this script runs with
     # ErrorActionPreference=SilentlyContinue, which would otherwise swallow it.
-$loginCandidates = @($codexCandidates)
-if ($codexBundledExecutable) { $loginCandidates += $codexBundledExecutable }
-foreach ($candidate in @($loginCandidates | Select-Object -Unique | Select-Object -First 1)) {
-    $status = (cmd.exe /c "`"$candidate`" login status 2>&1" | Out-String).Trim()
-        if ($status -match '(?i)not logged in') { $codexAccount = 'SignedOut'; break }
+    $loginCandidates = @()
+    if ($codexResolvedPath -and (Test-Path -LiteralPath $codexResolvedPath) -and $codexResolvedPath -notmatch '(?i)npm(?:\.cmd)?$') {
+        # The executable that supplied the displayed version/path is authoritative.
+        # Only fall back to other copies when that executable cannot be resolved.
+        $loginCandidates += $codexResolvedPath
+    }
+    else {
+        $loginCandidates += $codexCandidates
+        if ($codexBundledExecutable) { $loginCandidates += $codexBundledExecutable }
+    }
+    $sawSignedOut = $false
+    foreach ($candidate in @($loginCandidates | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -Unique)) {
+        $status = (cmd.exe /d /c "`"$candidate`" login status 2>&1" | Out-String).Trim()
+        if ($status -match '(?i)not logged in') { $sawSignedOut = $true; continue }
         if ($status -match '(?i)logged in') { $codexAccount = 'SignedIn'; break }
         $codexAccount = 'Unknown'
     }
+    if ($codexAccount -ne 'SignedIn' -and $sawSignedOut) { $codexAccount = 'SignedOut' }
 }
 
 # --- optional npm modules -------------------------------------------------
@@ -528,12 +545,10 @@ $components += New-Component -Id 'npm' -NameKey 'CompNpmName' -KindKey 'CompNpmK
     -Installed $(if ($npmVersion) { $npmVersion } else { $script:Unknown }) `
     -Manage $false -Running $false -PrereqReady $npmOk
 
-$desktopAccount = if ($desktopPackage -and $codexAccount -in @('SignedIn', 'SignedOut')) { $codexAccount } else { 'Unknown' }
+$desktopAccount = if ($desktopPackage) { 'Unknown' } else { 'NotApplicable' }
 $desktopState = if (-not $desktopPackage) { 'Unavailable' }
-    elseif ($desktopAccount -eq 'SignedOut') { 'Warning' }
     elseif ($desktopRunning) { 'Healthy' } else { 'Stopped' }
 $desktopDetailKey = if (-not $desktopPackage) { 'DetailDesktopMissing' }
-    elseif ($desktopAccount -eq 'SignedOut') { 'DetailDesktopSignedOut' }
     elseif ($desktopRunning) { 'DetailDesktopRunning' } else { 'DetailDesktopStopped' }
 $components += New-Component -Id 'desktop' -NameKey 'CompDesktopName' -KindKey 'CompDesktopKind' `
     -State $desktopState -DetailKey $desktopDetailKey -DetailArgs @() `
@@ -816,6 +831,30 @@ if ($tailJson) {
 
 # --- snapshot -------------------------------------------------------------
 
+# Report configured intent and observable Windows proxy evidence separately.
+$internetSettings = $null
+try { $internetSettings = Get-ItemProperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings' -ErrorAction SilentlyContinue } catch { }
+$systemProxyEnabled = [bool]($internetSettings -and [int]$internetSettings.ProxyEnable -eq 1)
+$systemProxyAddress = if ($systemProxyEnabled) { [string]$internetSettings.ProxyServer } else { '' }
+$autoConfigUrl = if ($internetSettings) { [string]$internetSettings.AutoConfigURL } else { '' }
+$autoDetectEnabled = [bool]($internetSettings -and [int]$internetSettings.AutoDetect -eq 1)
+$tunAdapterName = ''
+try {
+    $tun = Get-NetAdapter -ErrorAction SilentlyContinue | Where-Object {
+        $_.Status -eq 'Up' -and (($_.Name + ' ' + $_.InterfaceDescription) -match '(?i)\b(tun|wintun|tap|clash|mihomo|sing-box)\b')
+    } | Select-Object -First 1
+    if ($tun) { $tunAdapterName = [string]$tun.Name }
+} catch { }
+$environmentProxy = [string]([Environment]::GetEnvironmentVariable('HTTPS_PROXY', 'User'))
+if (-not $environmentProxy) { $environmentProxy = [string]([Environment]::GetEnvironmentVariable('HTTP_PROXY', 'User')) }
+$effectiveProxyMode = if ([string]$settings.NetworkMode -eq 'custom' -and [string]$settings.CustomHttpProxy) { 'custom' }
+    elseif ([string]$settings.NetworkMode -eq 'tun' -and $tunAdapterName) { 'tun' }
+    elseif ($systemProxyEnabled) { 'system' }
+    elseif ($autoConfigUrl -or $autoDetectEnabled) { 'auto' }
+    elseif ($tunAdapterName) { 'tun' }
+    elseif ($environmentProxy) { 'environment' }
+    else { 'direct' }
+
 $networkProbes = @()
 if ($IncludeLatest) {
     $probeProxy = if ($settings.NetworkMode -eq 'custom') { [string]$settings.CustomHttpProxy } else { '' }
@@ -834,6 +873,16 @@ $snapshot = [ordered]@{
     Processes     = $processes
     TailscaleDevices = $tailDevices
     NodeVersions  = $nodeVersions
+    Proxy         = [ordered]@{
+        ConfiguredMode = [string]$settings.NetworkMode
+        EffectiveMode = $effectiveProxyMode
+        SystemProxyEnabled = $systemProxyEnabled
+        SystemProxyAddress = $systemProxyAddress
+        AutoDetectEnabled = $autoDetectEnabled
+        AutoConfigUrl = $autoConfigUrl
+        TunAdapterName = $tunAdapterName
+        EnvironmentProxy = $environmentProxy
+    }
     PublicEgress  = $publicEgress
     Providers     = $providersList
     NetworkProbes = $networkProbes

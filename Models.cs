@@ -61,6 +61,7 @@ public sealed class SystemSnapshot
     public List<ProcessRecord> Processes { get; set; } = [];
     public List<TailnetDevice> TailscaleDevices { get; set; } = [];
     public List<NodeRuntime> NodeVersions { get; set; } = [];
+    public ProxyStatus Proxy { get; set; } = new();
     public List<PublicEgress> PublicEgress { get; set; } = [];
     public List<ModelProviderItem> Providers { get; set; } = [];
     public List<NetworkProbe> NetworkProbes { get; set; } = [];
@@ -145,6 +146,13 @@ public sealed class ComponentStatus
     [JsonIgnore]
     public string InstalledVersionLabel => string.IsNullOrEmpty(InstalledVersion) ? Palette.Dash : InstalledVersion;
     [JsonIgnore] public string LatestVersionLabel => string.IsNullOrEmpty(LatestVersion) ? Palette.Dash : LatestVersion;
+    [JsonIgnore] public string AccountStatusLabel => AccountState switch
+    {
+        "SignedIn" => Localization.Get("AccountSignedIn"),
+        "SignedOut" => Localization.Get("AccountSignedOut"),
+        "Unknown" => Localization.Get("AccountUnknown"),
+        _ => Palette.Dash
+    };
 
     [JsonIgnore]
     public string VersionSummary
@@ -344,7 +352,31 @@ public sealed class NodeRuntime
 {
     public string Version { get; set; } = "";
     public bool IsCurrent { get; set; }
-    public string DisplayName => IsCurrent ? $"{Version} · {Localization.Get("CurrentInUse")}" : Version;
+    public bool IsInstalled { get; set; } = true;
+    public string Lts { get; set; } = "";
+    public string DisplayName
+    {
+        get
+        {
+            var parts = new List<string> { Version };
+            if (IsCurrent) parts.Add(Localization.Get("CurrentInUse"));
+            else if (IsInstalled) parts.Add(Localization.Get("NodeInstalled"));
+            if (!string.IsNullOrWhiteSpace(Lts)) parts.Add($"LTS {Lts}");
+            return string.Join(" · ", parts);
+        }
+    }
+}
+
+public sealed class ProxyStatus
+{
+    public string ConfiguredMode { get; set; } = "system";
+    public string EffectiveMode { get; set; } = "direct";
+    public bool SystemProxyEnabled { get; set; }
+    public string SystemProxyAddress { get; set; } = "";
+    public bool AutoDetectEnabled { get; set; }
+    public string AutoConfigUrl { get; set; } = "";
+    public string TunAdapterName { get; set; } = "";
+    public string EnvironmentProxy { get; set; } = "";
 }
 
 public sealed class TailnetDevice
@@ -393,9 +425,9 @@ public sealed class AppSettings
     public string RelayTaskName { get; set; } = "Codex Relay";
     public string ProxyTaskName { get; set; } = "opencodex-proxy";
     public string Language { get; set; } = Localization.SystemLanguage;
-    public string NodeMirror { get; set; } = "https://cdn.npmmirror.com/binaries/node";
-    public string NpmRegistry { get; set; } = "https://registry.npmjs.org/";
-    public string NetworkMode { get; set; } = "system";
+    public string NodeMirror { get; set; } = "https://mirrors.aliyun.com/nodejs-release";
+    public string NpmRegistry { get; set; } = "https://registry.npmjs.org";
+    public string NetworkMode { get; set; } = "auto";
     public string CustomHttpProxy { get; set; } = "";
     public bool ManagesUserProxyEnvironment { get; set; }
     public string? PreviousHttpProxy { get; set; }
