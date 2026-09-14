@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Corrected the Download Sources layout so labels and full-width selectors align consistently, and rebuilt OpenCodex model visibility as a compact table with one header row and left-aligned switches.
+
 - Completed dependency and OpenCodex operational state:
   - Latest-version refresh now updates bound dependency rows immediately and uses selected Node/npm sources, GitHub, and WinGet fallbacks. NVM plus App Installer, WinGet, Microsoft Store source, Node.js, and npm all display current and latest values.
   - Download-source choices show both the provider name and full URL.

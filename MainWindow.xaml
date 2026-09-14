@@ -528,16 +528,28 @@
                                     <Button x:Uid="RefreshModelsButton" Content="刷新模型列表" Tag="models" Click="OpenCodexAction_Click" Style="{StaticResource QuietButtonStyle}" />
                                     <Button x:Uid="TestModelButton" Content="测试所选模型" Tag="test-model" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                 </StackPanel>
-                                <ListView ItemsSource="{x:Bind OpenCodexModels}" SelectionMode="None" MaxHeight="360">
+                                <Grid Padding="12,8" ColumnSpacing="16" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="132" />
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Uid="ModelVisibilityHeader" Text="在客户端显示" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                                    <TextBlock x:Uid="ModelNameHeader" Grid.Column="1" Text="模型名" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                                    <TextBlock x:Uid="ModelProviderHeader" Grid.Column="2" Text="Provider" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                                </Grid>
+                                <ListView ItemsSource="{x:Bind OpenCodexModels}" SelectionMode="None" MaxHeight="360" Padding="0" HorizontalContentAlignment="Stretch">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Padding="10,8" ColumnSpacing="16">
-                                                <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                                <StackPanel Spacing="2">
-                                                    <TextBlock Text="{Binding Id}" Style="{StaticResource MonoTextStyle}" />
-                                                    <TextBlock Text="{Binding Provider}" Style="{StaticResource CaptionTextStyle}" />
-                                                </StackPanel>
-                                                <ToggleSwitch Grid.Column="1" Header="{Binding VisibilityLabel}" IsOn="{Binding IsVisible, Mode=OneWay}" DataContext="{Binding}" Toggled="OpenCodexModelVisibility_Toggled" />
+                                            <Grid Padding="12,8" ColumnSpacing="16">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="132" />
+                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <ToggleSwitch HorizontalAlignment="Left" VerticalAlignment="Center" OnContent="" OffContent="" IsOn="{Binding IsVisible, Mode=OneWay}" DataContext="{Binding}" Toggled="OpenCodexModelVisibility_Toggled" />
+                                                <TextBlock Grid.Column="1" Text="{Binding Id}" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="2" Text="{Binding Provider}" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             </Grid>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
@@ -804,15 +816,26 @@
                         </Border>
                         <TextBlock x:Uid="DownloadSourcesHeading" Text="下载源" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="10">
-                                <ComboBox x:Name="NodeMirrorPicker" x:Uid="NodeMirrorPicker" Header="Node.js 下载镜像" MaxWidth="820" HorizontalAlignment="Stretch" SelectedValuePath="Tag">
+                            <Grid ColumnSpacing="18" RowSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="168" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock x:Uid="NodeMirrorFieldLabel" Text="Node.js 下载镜像" VerticalAlignment="Center" />
+                                <ComboBox Grid.Column="1" x:Name="NodeMirrorPicker" HorizontalAlignment="Stretch" SelectedValuePath="Tag">
                                     <ComboBoxItem x:Uid="NodeSourceOfficial" Content="官方 · https://nodejs.org/dist" Tag="https://nodejs.org/dist" />
                                     <ComboBoxItem x:Uid="NodeSourceTsinghua" Content="清华大学 TUNA · https://mirrors.tuna.tsinghua.edu.cn/nodejs-release" Tag="https://mirrors.tuna.tsinghua.edu.cn/nodejs-release" />
                                     <ComboBoxItem x:Uid="NodeSourceAliyun" Content="阿里云 · https://mirrors.aliyun.com/nodejs-release" Tag="https://mirrors.aliyun.com/nodejs-release" />
                                     <ComboBoxItem x:Uid="NodeSourceTencent" Content="腾讯云 · https://mirrors.cloud.tencent.com/nodejs-release" Tag="https://mirrors.cloud.tencent.com/nodejs-release" />
                                     <ComboBoxItem x:Uid="NodeSourceHuawei" Content="华为云 · https://repo.huaweicloud.com/nodejs" Tag="https://repo.huaweicloud.com/nodejs" />
                                 </ComboBox>
-                                <ComboBox x:Name="NpmRegistryPicker" x:Uid="NpmRegistryPicker" Header="npm Registry（nrm 预设）" MaxWidth="820" HorizontalAlignment="Stretch" SelectedValuePath="Tag">
+                                <TextBlock x:Uid="NpmRegistryFieldLabel" Grid.Row="1" Text="npm Registry（nrm 预设）" VerticalAlignment="Center" />
+                                <ComboBox Grid.Row="1" Grid.Column="1" x:Name="NpmRegistryPicker" HorizontalAlignment="Stretch" SelectedValuePath="Tag">
                                     <ComboBoxItem x:Uid="NpmSourceOfficial" Content="npm 官方 · https://registry.npmjs.org" Tag="https://registry.npmjs.org" />
                                     <ComboBoxItem x:Uid="NpmSourceYarn" Content="Yarn · https://registry.yarnpkg.com" Tag="https://registry.yarnpkg.com" />
                                     <ComboBoxItem x:Uid="NpmSourceTencent" Content="腾讯云 · https://mirrors.cloud.tencent.com/npm" Tag="https://mirrors.cloud.tencent.com/npm" />
@@ -821,9 +844,11 @@
                                     <ComboBoxItem x:Uid="NpmSourceMirror" Content="npmMirror · https://skimdb.npmjs.com/registry" Tag="https://skimdb.npmjs.com/registry" />
                                     <ComboBoxItem x:Uid="NpmSourceHuawei" Content="华为云 · https://repo.huaweicloud.com/repository/npm" Tag="https://repo.huaweicloud.com/repository/npm" />
                                 </ComboBox>
-                                <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。" Style="{StaticResource CaptionTextStyle}" />
-                                <Button x:Uid="SaveDependenciesButton" Content="保存依赖设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
-                            </StackPanel>
+                                <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="10">
+                                    <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
+                                    <Button x:Uid="SaveDependenciesButton" Content="保存依赖设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
+                                </StackPanel>
+                            </Grid>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>

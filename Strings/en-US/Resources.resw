@@ -502,6 +502,8 @@
   <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
   <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>Save</value></data>
   <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>Download sources</value></data>
+  <data name="NodeMirrorFieldLabel.Text" xml:space="preserve"><value>Node.js download mirror</value></data>
+  <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry (nrm presets)</value></data>
   <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>Save dependency settings</value></data>
   <data name="RelayDescription.Text" xml:space="preserve"><value>Optional mobile bridge extension; manage installation, version, service, and scheduled task here.</value></data>
@@ -527,6 +529,9 @@
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>Version status</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>Check for newer version</value></data>
   <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>Control whether each model appears in client model lists. Changes apply to the running proxy immediately.</value></data>
+  <data name="ModelVisibilityHeader.Text" xml:space="preserve"><value>Show in clients</value></data>
+  <data name="ModelNameHeader.Text" xml:space="preserve"><value>Model</value></data>
+  <data name="ModelProviderHeader.Text" xml:space="preserve"><value>Provider</value></data>
   <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>Manage local proxy routing and model visibility for ChatGPT and Codex CLI</value></data>
   <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>Client proxy status</value></data>
   <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT client</value></data>

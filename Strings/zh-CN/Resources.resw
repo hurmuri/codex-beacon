@@ -501,6 +501,8 @@
   <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy 计划任务</value></data>
   <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>保存</value></data>
   <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>下载源</value></data>
+  <data name="NodeMirrorFieldLabel.Text" xml:space="preserve"><value>Node.js 下载镜像</value></data>
+  <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry（nrm 预设）</value></data>
   <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>保存依赖设置</value></data>
   <data name="RelayDescription.Text" xml:space="preserve"><value>可选的移动端桥接扩展；安装、版本、服务和计划任务均在此页管理。</value></data>
@@ -526,6 +528,9 @@
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>版本状态</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>检查新版本</value></data>
   <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>控制每个模型是否出现在客户端模型列表中；修改后立即同步到运行中的代理。</value></data>
+  <data name="ModelVisibilityHeader.Text" xml:space="preserve"><value>在客户端显示</value></data>
+  <data name="ModelNameHeader.Text" xml:space="preserve"><value>模型名</value></data>
+  <data name="ModelProviderHeader.Text" xml:space="preserve"><value>Provider</value></data>
   <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>统一管理 ChatGPT 客户端与 Codex CLI 的本地代理和模型显示</value></data>
   <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>客户端代理状态</value></data>
   <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT 客户端</value></data>
