@@ -44,7 +44,7 @@ if ($Target -in @('all', 'portable')) {
 
     Write-Host "Compiling Single-file Portable Executable..." -ForegroundColor Cyan
     $launcherOut = Join-Path $repoRoot 'tools\Launcher\out-portable'
-    dotnet publish $launcherProj -c Release -r win-x64 -o $launcherOut
+    if (Test-Path (Join-Path $repoRoot "tools/Launcher/bin")) { [System.IO.Directory]::Delete((Join-Path $repoRoot "tools/Launcher/bin"), $true) }; if (Test-Path (Join-Path $repoRoot "tools/Launcher/obj")) { [System.IO.Directory]::Delete((Join-Path $repoRoot "tools/Launcher/obj"), $true) }; dotnet publish $launcherProj -c Release -r win-x64 -p:LauncherVariant=portable -p:DefineConstants="LAUNCHER_PORTABLE" -o $launcherOut
     $versionedExe = Join-Path (Join-Path $repoRoot 'publish') "CodexBeacon-$version.exe"
     $defaultExe   = Join-Path (Join-Path $repoRoot 'publish') "CodexBeacon.exe"
     Copy-Item "$launcherOut\Launcher.exe" $versionedExe -Force
@@ -57,7 +57,7 @@ if ($Target -in @('all', 'portable')) {
 if ($Target -in @('all', 'slim')) {
     Write-Host "Publishing Slim (Runtime-dependent) App ($version)..." -ForegroundColor Cyan
     $slimOut = Join-Path $repoRoot 'publish\runtime-dependent-win-x64'
-    dotnet publish "$repoRoot\CodexBeacon.csproj" -c Release -r win-x64 --self-contained false -p:WindowsAppSDKSelfContained=false -p:AutoVersionIncrement=false -o $slimOut
+    dotnet publish "$repoRoot\CodexBeacon.csproj" -c Release -r win-x64 --self-contained false -p:WindowsAppSDKSelfContained=true -p:AutoVersionIncrement=false -o $slimOut
     
     Write-Host "Creating slim payload archive..." -ForegroundColor Cyan
     Remove-Item $payloadZip -Force -ErrorAction SilentlyContinue
@@ -65,7 +65,7 @@ if ($Target -in @('all', 'slim')) {
 
     Write-Host "Compiling Single-file Slim Executable..." -ForegroundColor Cyan
     $launcherOut = Join-Path $repoRoot 'tools\Launcher\out-slim'
-    dotnet publish $launcherProj -c Release -r win-x64 -o $launcherOut
+    if (Test-Path (Join-Path $repoRoot "tools/Launcher/bin")) { [System.IO.Directory]::Delete((Join-Path $repoRoot "tools/Launcher/bin"), $true) }; if (Test-Path (Join-Path $repoRoot "tools/Launcher/obj")) { [System.IO.Directory]::Delete((Join-Path $repoRoot "tools/Launcher/obj"), $true) }; dotnet publish $launcherProj -c Release -r win-x64 -p:LauncherVariant=slim -p:DefineConstants="LAUNCHER_SLIM" -o $launcherOut
     $slimVersionedExe = Join-Path (Join-Path $repoRoot 'publish') "CodexBeacon-$version-slim.exe"
     Copy-Item "$launcherOut\Launcher.exe" $slimVersionedExe -Force
     Copy-Item "$launcherOut\Launcher.exe" "$artifactsDir\CodexBeacon-$version-slim.exe" -Force

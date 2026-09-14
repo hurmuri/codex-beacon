@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Security.AccessControl;
@@ -179,10 +179,10 @@ public sealed class SystemService
         return char.ConvertFromUtf32(first) + char.ConvertFromUtf32(second);
     }
 
-    public static async Task<Dictionary<string, string>> QueryLatestVersionsAsync(CancellationToken cancellationToken = default)
+    public static async Task<Dictionary<string, string>> QueryLatestVersionsAsync(string? proxyAddress = null, CancellationToken cancellationToken = default)
     {
         var results = new Dictionary<string, string>();
-        using var client = CreateConfiguredHttpClient(null, QuickHttpTimeout);
+        using var client = CreateConfiguredHttpClient(proxyAddress, QuickHttpTimeout);
 
         var desktopTask = Task.Run(async () =>
         {

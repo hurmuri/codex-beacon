@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -19,7 +19,10 @@
   <data name="AwaitingFirstSample.Text" xml:space="preserve"><value>等待首次采样</value></data>
   <data name="RefreshNow.Text" xml:space="preserve"><value>立即刷新</value></data>
   <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>ChatGPT 客户端与 Codex CLI</value></data>
-  <data name="VersionLabel.Text" xml:space="preserve"><value>版本</value></data>
+    <data name="VersionLabel.Text" xml:space="preserve"><value>版本</value></data>
+  <data name="CurrentVersionLabel.Text" xml:space="preserve"><value>当前版本</value></data>
+  <data name="VersionUpToDate" xml:space="preserve"><value>已是最新</value></data>
+  <data name="VersionUpdateAvailable" xml:space="preserve"><value>可升级</value></data>
   <data name="ActionInstall.Content" xml:space="preserve"><value>安装</value></data>
   <data name="ActionLogin.Content" xml:space="preserve"><value>登录</value></data>
   <data name="ActionStart.Content" xml:space="preserve"><value>启动</value></data>
@@ -95,7 +98,7 @@
   <data name="NvmMirrorHint.Text" xml:space="preserve"><value>nodejs.org 在部分网络下不可达。镜像可在本页下方修改，失败时会自动回退到官方源。</value></data>
   <data name="ModulesHeading.Text" xml:space="preserve"><value>安装渠道与基础依赖</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>当前版本</value></data>
-  <data name="LatestVersionLabel.Text" xml:space="preserve"><value>已知最新版本</value></data>
+  <data name="LatestVersionLabel.Text" xml:space="preserve"><value>最新版本</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>安装</value></data>
   <data name="UpgradePackageButton.Content" xml:space="preserve"><value>升级</value></data>
 

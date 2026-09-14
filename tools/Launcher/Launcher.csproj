@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
@@ -12,13 +12,12 @@
     <ApplicationIcon>..\..\Assets\app-icon.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <LauncherVariant Condition="'$(LauncherVariant)' == ''">portable</LauncherVariant>
+    <DefineConstants Condition="'$(LauncherVariant)' == 'slim'">$(DefineConstants);LAUNCHER_SLIM</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="payload.zip" Condition="Exists('payload.zip')" />
   </ItemGroup>
-  <!-- Mirror the application version into the launcher. The launcher uses it as
-       the extraction stamp for its embedded payload, so reading (not bumping)
-       keeps the stamp tied to the payload instead of advancing the version. -->
   <PropertyGroup>
     <AutoVersionIncrement>false</AutoVersionIncrement>
   </PropertyGroup>

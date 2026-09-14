@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -171,13 +171,13 @@ public sealed partial class MainWindow : Window
             });
 
             // 任务 2.3：远端最新版本并发检测
-            if (includeLatest)
+            _ = Task.Run(async () =>
             {
-                _ = Task.Run(async () =>
+                try
                 {
-                    try
+                    var latestMap = await SystemService.QueryLatestVersionsAsync(proxyAddress).ConfigureAwait(false);
+                    if (latestMap.Count > 0)
                     {
-                        var latestMap = await SystemService.QueryLatestVersionsAsync().ConfigureAwait(false);
                         DispatcherQueue.TryEnqueue(() =>
                         {
                             foreach (var (compKey, latestVer) in latestMap)
@@ -187,11 +187,12 @@ public sealed partial class MainWindow : Window
                                 if (match is not null) match.LatestVersion = latestVer;
                             }
                             UpdateSpecializedComponentCards();
+                            
                         });
                     }
-                    catch { }
-                });
-            }
+                }
+                catch { }
+            });
 
             // 任务 2.4：OpenCodex 模型拉取
             if (snapshot.Components.Any(x => x.Id == "opencodex" && x.IsRunning))
@@ -347,6 +348,35 @@ public sealed partial class MainWindow : Window
         foreach (var item in items) collection.Add(item);
     }
 
+    private static void UpdateVersionBadge(ComponentStatus component, Border badgeBorder, TextBlock badgeText)
+    {
+        if (string.IsNullOrWhiteSpace(component.LatestVersion) || component.LatestVersion == Palette.Dash)
+        {
+            badgeBorder.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        badgeBorder.Visibility = Visibility.Visible;
+        if (!component.IsInstalled)
+        {
+            badgeBorder.Background = Palette.NeutralBgBrush;
+            badgeText.Foreground = Palette.NeutralFgBrush;
+            badgeText.Text = Localization.Get("StatusUnavailable");
+        }
+        else if (component.CanUpgrade)
+        {
+            badgeBorder.Background = Palette.InfoBgBrush;
+            badgeText.Foreground = Palette.InfoFgBrush;
+            badgeText.Text = Localization.Get("VersionUpdateAvailable");
+        }
+        else
+        {
+            badgeBorder.Background = Palette.HealthyBgBrush;
+            badgeText.Foreground = Palette.HealthyFgBrush;
+            badgeText.Text = Localization.Get("VersionUpToDate");
+        }
+    }
+
     private void UpdateSpecializedComponentCards()
     {
         var desktop = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "desktop");
@@ -355,7 +385,9 @@ public sealed partial class MainWindow : Window
             DesktopStatusBadgeText.Text = desktop.StatusLabel;
             DesktopStatusBadgeBorder.Background = desktop.StatusBackground;
             DesktopStatusBadgeText.Foreground = desktop.StatusForeground;
-            DesktopVersionText.Text = desktop.VersionSummary;
+            DesktopCurrentVersionText.Text = desktop.InstalledVersionLabel;
+            DesktopLatestVersionText.Text = desktop.LatestVersionLabel;
+            UpdateVersionBadge(desktop, DesktopUpdateBadgeBorder, DesktopUpdateBadgeText);
             DesktopPathText.Text = string.IsNullOrWhiteSpace(desktop.Path) ? Localization.Get("DesktopStorePathFallback") : desktop.Path;
             DesktopStartButton.IsEnabled = desktop.CanStart;
             DesktopStopButton.IsEnabled = desktop.CanStop;
@@ -386,7 +418,9 @@ public sealed partial class MainWindow : Window
             CodexStatusBadgeText.Text = codex.StatusLabel;
             CodexStatusBadgeBorder.Background = codex.StatusBackground;
             CodexStatusBadgeText.Foreground = codex.StatusForeground;
-            CodexVersionText.Text = codex.VersionSummary;
+            CodexCurrentVersionText.Text = codex.InstalledVersionLabel;
+            CodexLatestVersionText.Text = codex.LatestVersionLabel;
+            UpdateVersionBadge(codex, CodexUpdateBadgeBorder, CodexUpdateBadgeText);
             CodexPathText.Text = string.IsNullOrWhiteSpace(codex.Path) ? Localization.Get("CodexPathFallback") : codex.Path;
             CodexLoginButton.IsEnabled = codex.IsInstalled;
             CodexUpgradeButton.IsEnabled = codex.CanUpgrade;
@@ -718,7 +752,8 @@ public sealed partial class MainWindow : Window
         SetStatus(Localization.Format("CheckingComponentUpdate", compId));
         try
         {
-            var latestMap = await SystemService.QueryLatestVersionsAsync();
+            var proxyAddress = _settings.NetworkMode == "custom" ? _settings.CustomHttpProxy : null;
+            var latestMap = await SystemService.QueryLatestVersionsAsync(proxyAddress);
             if (latestMap.TryGetValue(compId, out var latestVer))
             {
                 var match = CoreComponents.Concat(InstallableComponents)

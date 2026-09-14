@@ -1,11 +1,20 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
+using System.Security.Cryptography;
 
 namespace CodexBeaconLauncher;
 
 static class Program
 {
+#if LAUNCHER_SLIM
+    private const string VariantName = "slim";
+    private const string AppDirName = "app-slim";
+#else
+    private const string VariantName = "portable";
+    private const string AppDirName = "app-portable";
+#endif
+
     [STAThread]
     static void Main()
     {
@@ -21,10 +30,12 @@ static class Program
                 return;
             }
 
-            var appDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", "app-portable");
+            var appDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", AppDirName);
             var targetExe = Path.Combine(appDir, "CodexBeacon.exe");
             var stampFile = Path.Combine(appDir, "version.stamp");
-            var currentStamp = ResolveStamp(assembly);
+
+            using var stream = assembly.GetManifestResourceStream(resourceName)!;
+            var currentStamp = ResolveStamp(assembly, stream);
 
             if (!File.Exists(targetExe) || !File.Exists(stampFile) || File.ReadAllText(stampFile) != currentStamp)
             {
@@ -33,7 +44,6 @@ static class Program
                     try { Directory.Delete(appDir, true); } catch { }
                 }
                 Directory.CreateDirectory(appDir);
-                using var stream = assembly.GetManifestResourceStream(resourceName)!;
                 using var archive = new ZipArchive(stream, ZipArchiveMode.Read);
                 archive.ExtractToDirectory(appDir, true);
                 File.WriteAllText(stampFile, currentStamp);
@@ -52,11 +62,6 @@ static class Program
         }
     }
 
-    // Hands the application the path of the single-file launcher that produced this
-    // run. The application cannot infer it - it executes from the extracted
-    // app-portable copy - but the updater needs it to replace the install package
-    // in place. The launcher has already exited by the time the app runs, so that
-    // file is never locked and can be overwritten without elevation.
     static void Start(string executablePath)
     {
         var launcherPath = Environment.ProcessPath;
@@ -68,19 +73,26 @@ static class Program
         });
     }
 
-    // The extraction stamp must change whenever the embedded payload is rebuilt,
-    // so a fresh launcher always re-expands its app-portable copy. The assembly
-    // informational version is set by build/AutoVersion.targets; we fall back to
-    // the numeric assembly version when that attribute is absent.
-    static string ResolveStamp(Assembly assembly)
+    static string ResolveStamp(Assembly assembly, Stream stream)
     {
         var informational = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-        if (!string.IsNullOrWhiteSpace(informational))
+        var version = !string.IsNullOrWhiteSpace(informational)
+            ? (informational.IndexOf('+') >= 0 ? informational[..informational.IndexOf('+')] : informational)
+            : assembly.GetName().Version?.ToString() ?? "dev";
+
+        string hashPrefix;
+        try
         {
-            var plus = informational.IndexOf('+');
-            return plus >= 0 ? informational[..plus] : informational;
+            using var sha = SHA256.Create();
+            var hash = sha.ComputeHash(stream);
+            hashPrefix = Convert.ToHexString(hash)[..12];
+            stream.Position = 0; // Rewind for extraction
+        }
+        catch
+        {
+            hashPrefix = stream.Length.ToString("X");
         }
 
-        return assembly.GetName().Version?.ToString() ?? "dev";
+        return $"{version}-{VariantName}-{hashPrefix}";
     }
 }

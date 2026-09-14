@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -21,6 +21,19 @@ internal static class Palette
     private static readonly Color NeutralForeground = Color.FromArgb(255, 83, 97, 113);
     private static readonly Color DangerBackground = Color.FromArgb(255, 255, 240, 238);
     private static readonly Color DangerForeground = Color.FromArgb(255, 180, 35, 24);
+    private static readonly Color InfoBackground = Color.FromArgb(255, 224, 242, 254);
+    private static readonly Color InfoForeground = Color.FromArgb(255, 3, 105, 161);
+
+    public static SolidColorBrush HealthyBgBrush => new(HealthyBackground);
+    public static SolidColorBrush HealthyFgBrush => new(HealthyForeground);
+    public static SolidColorBrush WarningBgBrush => new(WarningBackground);
+    public static SolidColorBrush WarningFgBrush => new(WarningForeground);
+    public static SolidColorBrush NeutralBgBrush => new(NeutralBackground);
+    public static SolidColorBrush NeutralFgBrush => new(NeutralForeground);
+    public static SolidColorBrush DangerBgBrush => new(DangerBackground);
+    public static SolidColorBrush DangerFgBrush => new(DangerForeground);
+    public static SolidColorBrush InfoBgBrush => new(InfoBackground);
+    public static SolidColorBrush InfoFgBrush => new(InfoForeground);
 
     public static SolidColorBrush Background(string state) => state switch
     {

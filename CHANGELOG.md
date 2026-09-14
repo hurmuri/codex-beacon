@@ -1,10 +1,17 @@
-# Changelog
+﻿# Changelog
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and releases use [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
 ### Fixed
+
+- Fixed single-file runtime packaging and Windows App Runtime missing dialog:
+  - Resolved the 'Required components of the Windows App Runtime are missing Version 1.8' prompt in the Slim build by packaging with WindowsAppSDKSelfContained=true, bundling WinUI 3 native assets while maintaining framework-dependent .NET runtime.
+  - Separated extraction cache targets between Portable (app-portable) and Slim (app-slim) with distinct payload content signatures, eliminating extraction collisions and file-lock conflicts when launching both variants.
+- Enhanced version presentation and automatic update checks for ChatGPT Desktop and Codex CLI:
+  - Restructured cards to display explicit, dedicated rows for 'Current Version' (当前版本) and 'Latest Version' (最新版本), accompanied by status badges ('Up to date' / 'Update available').
+  - Enabled automatic background latest-version querying during status refresh with proxy support, plus added an on-card 'Check for updates' button for the desktop app.
 
 - Fixed ChatGPT desktop client upgrade workflow from the Overview page:
   - Resolved an issue where clicking 'Store install/upgrade' failed to update the client because WinGet reports 'No available upgrade found' for msstore packages whose version metadata is marked as Unknown, or triggers '0x80073d02' when processes are active.

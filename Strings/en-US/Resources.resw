@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
   <resheader name="version"><value>2.0</value></resheader>
@@ -19,7 +19,10 @@
   <data name="AwaitingFirstSample.Text" xml:space="preserve"><value>Awaiting first sample</value></data>
   <data name="RefreshNow.Text" xml:space="preserve"><value>Refresh now</value></data>
   <data name="ServiceStatusHeading.Text" xml:space="preserve"><value>ChatGPT client and Codex CLI</value></data>
-  <data name="VersionLabel.Text" xml:space="preserve"><value>Version</value></data>
+    <data name="VersionLabel.Text" xml:space="preserve"><value>Version</value></data>
+  <data name="CurrentVersionLabel.Text" xml:space="preserve"><value>Current version</value></data>
+  <data name="VersionUpToDate" xml:space="preserve"><value>Up to date</value></data>
+  <data name="VersionUpdateAvailable" xml:space="preserve"><value>Update available</value></data>
   <data name="ActionInstall.Content" xml:space="preserve"><value>Install</value></data>
   <data name="ActionLogin.Content" xml:space="preserve"><value>Sign in</value></data>
   <data name="ActionStart.Content" xml:space="preserve"><value>Start</value></data>
@@ -96,7 +99,7 @@
 
   <data name="ModulesHeading.Text" xml:space="preserve"><value>Install channels and base dependencies</value></data>
   <data name="InstalledVersionLabel.Text" xml:space="preserve"><value>Installed version</value></data>
-  <data name="LatestVersionLabel.Text" xml:space="preserve"><value>Latest known version</value></data>
+  <data name="LatestVersionLabel.Text" xml:space="preserve"><value>Latest version</value></data>
   <data name="InstallPackageButton.Content" xml:space="preserve"><value>Install</value></data>
   <data name="UpgradePackageButton.Content" xml:space="preserve"><value>Upgrade</value></data>
 
