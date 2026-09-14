@@ -116,18 +116,18 @@
   <data name="NvmVersionAction.Content" xml:space="preserve"><value>选择版本</value></data>
   <data name="NodeMirrorPicker.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="NpmRegistryPicker.Header" xml:space="preserve"><value>npm Registry（nrm 预设）</value></data>
-  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>官方 · nodejs.org</value></data>
-  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>清华大学 TUNA</value></data>
-  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>阿里云</value></data>
-  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>腾讯云</value></data>
-  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>华为云</value></data>
-  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm 官方</value></data>
-  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn</value></data>
-  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>腾讯云</value></data>
-  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM</value></data>
-  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>淘宝 / npmmirror</value></data>
-  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror</value></data>
-  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>华为云</value></data>
+  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>官方 · https://nodejs.org/dist</value></data>
+  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>清华大学 TUNA · https://mirrors.tuna.tsinghua.edu.cn/nodejs-release</value></data>
+  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>阿里云 · https://mirrors.aliyun.com/nodejs-release</value></data>
+  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>腾讯云 · https://mirrors.cloud.tencent.com/nodejs-release</value></data>
+  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>华为云 · https://repo.huaweicloud.com/nodejs</value></data>
+  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm 官方 · https://registry.npmjs.org</value></data>
+  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn · https://registry.yarnpkg.com</value></data>
+  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>腾讯云 · https://mirrors.cloud.tencent.com/npm</value></data>
+  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM · https://r.cnpmjs.org</value></data>
+  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>淘宝 / npmmirror · https://registry.npmmirror.com</value></data>
+  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror · https://skimdb.npmjs.com/registry</value></data>
+  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>华为云 · https://repo.huaweicloud.com/repository/npm</value></data>
   <data name="LatestVersionValue" xml:space="preserve"><value>最新版本 {0}</value></data>
   <data name="NodeInstalled" xml:space="preserve"><value>已安装</value></data>
   <data name="SelectVersionAction" xml:space="preserve"><value>选择版本</value></data>
@@ -489,7 +489,7 @@
   <data name="EditProviderButton.Content" xml:space="preserve"><value>编辑</value></data>
   <data name="DeleteProviderButton.Content" xml:space="preserve"><value>删除</value></data>
   <data name="ProviderTestHint.Text" xml:space="preserve"><value>默认联通测试模型为 gpt-5.4，也可选择 gpt-5.5。</value></data>
-  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>独立管理 OpenCodex 的依赖、版本、服务、Provider、模型和 Codex 集成。</value></data>
+  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>管理 OpenCodex 版本、服务、客户端代理状态和模型显示。</value></data>
   <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>服务与版本</value></data>
   <data name="AwaitingDetection.Text" xml:space="preserve"><value>等待检测</value></data>
   <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>集成状态：—</value></data>
@@ -525,7 +525,21 @@
   <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex 本地代理服务</value></data>
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>版本状态</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>检查新版本</value></data>
-  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>从本地 OpenCodex 服务中读取已注册与路由模型，可直接选择模型发起连通性验证。</value></data>
+  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>控制每个模型是否出现在客户端模型列表中；修改后立即同步到运行中的代理。</value></data>
+  <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>统一管理 ChatGPT 客户端与 Codex CLI 的本地代理和模型显示</value></data>
+  <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>客户端代理状态</value></data>
+  <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT 客户端</value></data>
+  <data name="SetChatGptProxyButton.Content" xml:space="preserve"><value>设为 ChatGPT 代理</value></data>
+  <data name="SetCodexProxyButton.Content" xml:space="preserve"><value>设为 Codex 代理</value></data>
+  <data name="ModelVisible" xml:space="preserve"><value>在客户端中显示</value></data>
+  <data name="ModelHidden" xml:space="preserve"><value>已从客户端隐藏</value></data>
+  <data name="OpenCodexProxyCurrent" xml:space="preserve"><value>OpenCodex 代理已生效</value></data>
+  <data name="OpenCodexProxyInactive" xml:space="preserve"><value>当前未使用 OpenCodex 代理</value></data>
+  <data name="OpenCodexCurrentProvider" xml:space="preserve"><value>当前生效 Provider：{0}</value></data>
+  <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>当前生效 Provider：无法获取</value></data>
+  <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>模型 {0} 已显示。</value></data>
+  <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>模型 {0} 已隐藏。</value></data>
+  <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex 已启动，并已重新打开 ChatGPT 客户端。</value></data>
   <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>请选择模型进行测试</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>版本与后台服务控制</value></data>
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale 本机网络服务</value></data>

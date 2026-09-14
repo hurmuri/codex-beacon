@@ -425,19 +425,41 @@ $proxyTaskKey = Get-TaskStateKey $settings.ProxyTaskName
 $openCodexModels = @()
 $openCodexProviders = @()
 $openCodexIntegration = ''
+$openCodexProviderName = ''
+$disabledOpenCodexModels = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
+try {
+    $openCodexConfigPath = Join-Path $env:USERPROFILE '.opencodex\config.json'
+    if (Test-Path -LiteralPath $openCodexConfigPath) {
+        $openCodexConfig = Get-Content -Raw -LiteralPath $openCodexConfigPath -Encoding UTF8 | ConvertFrom-Json
+        foreach ($selector in @($openCodexConfig.disabledModels)) {
+            if ($selector) { [void]$disabledOpenCodexModels.Add([string]$selector) }
+        }
+    }
+} catch { }
 if ($openCodexVersion) {
     $openCodexCommand = Get-Command opencodex -ErrorAction SilentlyContinue
     if ($openCodexCommand) {
         try {
             $modelJson = & $openCodexCommand.Source models list --json 2>$null | Out-String | ConvertFrom-Json
             foreach ($entry in @($modelJson.models)) {
-                if ($entry.model) { $openCodexModels += [ordered]@{ Id=[string]$entry.model; Provider=[string]$entry.provider } }
+                if ($entry.model) {
+                    $providerId = [string]$entry.provider
+                    $modelId = [string]$entry.model
+                    $selector = if ($providerId) { "$providerId/$modelId" } else { $modelId }
+                    $openCodexModels += [ordered]@{
+                        Id=$modelId
+                        Provider=$providerId
+                        IsVisible=(-not $disabledOpenCodexModels.Contains($selector))
+                    }
+                }
             }
         } catch { }
         try {
             $providerJson = & $openCodexCommand.Source provider list --json 2>$null | Out-String | ConvertFrom-Json
             foreach ($entry in @($providerJson.configured)) {
-                $openCodexProviders += [ordered]@{ Id=[string]$entry.name; Name=[string]$entry.name; BaseUrl=[string]$entry.baseUrl; Enabled=$true }
+                $isDefault = [bool]$entry.isDefault
+                $openCodexProviders += [ordered]@{ Id=[string]$entry.name; Name=[string]$entry.name; BaseUrl=[string]$entry.baseUrl; Enabled=$true; IsDefault=$isDefault }
+                if ($isDefault) { $openCodexProviderName = [string]$entry.name }
             }
         } catch { }
         try {
@@ -519,7 +541,7 @@ $components += New-Component -Id 'winget' -NameKey 'CompWingetName' -KindKey 'Co
 $components += New-Component -Id 'msstore' -NameKey 'CompStoreName' -KindKey 'CompStoreKind' `
     -State $(if ($msstoreAvailable) { 'Healthy' } else { 'Unavailable' }) `
     -DetailKey $(if ($msstoreAvailable) { 'DetailStoreReady' } else { 'DetailStoreMissing' }) -DetailArgs @() `
-    -Installed $(if ($msstoreAvailable) { 'available' } else { $script:Unknown }) -Manage $false -Running $false
+    -Installed $(if ($msstoreAvailable -and $appInstaller) { [string]$appInstaller.Version } else { $script:Unknown }) -Manage $false -Running $false
 
 $components += New-Component -Id 'nvm' -NameKey 'CompNvmName' -KindKey 'CompNvmKind' `
     -State $(if ($nvmCommand) { 'Healthy' } else { 'Unavailable' }) `
@@ -889,6 +911,7 @@ $snapshot = [ordered]@{
     OpenCodexModels = $openCodexModels
     OpenCodexProviders = $openCodexProviders
     OpenCodexIntegration = $openCodexIntegration
+    OpenCodexProviderName = $openCodexProviderName
     NodeMirror    = [string]$settings.NodeMirror
     NpmRegistry   = $npmRegistry
     NodeMinimumVersion = $NodeMinimumVersion

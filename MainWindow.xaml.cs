@@ -36,10 +36,11 @@ public sealed partial class MainWindow : Window
     public ObservableCollection<TailnetDevice> TailnetDevices { get; } = [];
     public ObservableCollection<NodeRuntime> NodeVersions { get; } = [];
     public ObservableCollection<PublicEgress> PublicEgressRoutes { get; } = [];
-    public ObservableCollection<ModelProviderItem> ModelProviders { get; } = [];
-    public ObservableCollection<ProviderProfile> ProviderProfiles { get; } = [];
+    private ObservableCollection<ModelProviderItem> ModelProviders { get; } = [];
+    private ObservableCollection<ProviderProfile> ProviderProfiles { get; } = [];
     public ObservableCollection<NetworkProbe> NetworkProbes { get; } = [];
     public ObservableCollection<OpenCodexModel> OpenCodexModels { get; } = [];
+    public ObservableCollection<OpenCodexModel> VisibleOpenCodexModels { get; } = [];
     public ObservableCollection<ComponentStatus> OpenCodexComponents { get; } = [];
 
     /// <summary>Nav tag to restore after the language-switch window reload.</summary>
@@ -68,8 +69,6 @@ public sealed partial class MainWindow : Window
         if (NetworkModePicker.SelectedIndex < 0) NetworkModePicker.SelectedValue = "auto";
         CustomHttpProxyBox.Text = _settings.CustomHttpProxy;
         UpdateNetworkModeControls();
-        Replace(ProviderProfiles, _systemService.LoadProviders());
-        UpdateProviderEmptyState();
         LanguagePicker.SelectedValue = _settings.Language;
         if (LanguagePicker.SelectedIndex < 0) LanguagePicker.SelectedValue = Localization.SystemLanguage;
         _initializingLanguage = false;
@@ -188,7 +187,8 @@ public sealed partial class MainWindow : Window
             {
                 try
                 {
-                    var latestMap = await SystemService.QueryLatestVersionsAsync(proxyAddress).ConfigureAwait(false);
+                    var latestMap = await SystemService.QueryLatestVersionsAsync(
+                        proxyAddress, _settings.NodeMirror, _settings.NpmRegistry).ConfigureAwait(false);
                     if (latestMap.Count > 0)
                     {
                         DispatcherQueue.TryEnqueue(() =>
@@ -230,8 +230,8 @@ public sealed partial class MainWindow : Window
                         {
                             DispatcherQueue.TryEnqueue(() =>
                             {
-                                Replace(OpenCodexModels, models);
-                                if (OpenCodexModelPicker.SelectedItem is null && OpenCodexModels.Count > 0)
+                                ApplyOpenCodexModels(models);
+                                if (OpenCodexModelPicker.SelectedItem is null && VisibleOpenCodexModels.Count > 0)
                                     OpenCodexModelPicker.SelectedIndex = 0;
                             });
                         }
@@ -307,14 +307,9 @@ public sealed partial class MainWindow : Window
         }
         Replace(NodeVersions, snapshot.NodeVersions.OrderByDescending(x => x.IsCurrent)
             .ThenByDescending(x => Version.TryParse(x.Version, out var version) ? version : new Version()));
-        Replace(ModelProviders, snapshot.Providers);
         if (snapshot.NetworkProbes.Count > 0) Replace(NetworkProbes, snapshot.NetworkProbes);
-        Replace(OpenCodexModels, snapshot.OpenCodexModels);
-        OpenCodexIntegrationText.Text = string.IsNullOrWhiteSpace(snapshot.OpenCodexIntegration)
-            ? Localization.Get("OpenCodexIntegrationNone")
-            : snapshot.OpenCodexIntegration == "current"
-                ? Localization.Get("OpenCodexIntegrationCurrent")
-                : Localization.Format("OpenCodexIntegrationState", snapshot.OpenCodexIntegration);
+        ApplyOpenCodexModels(snapshot.OpenCodexModels);
+        ApplyOpenCodexClientRoute(snapshot.OpenCodexIntegration, snapshot.OpenCodexProviderName);
         if (snapshot.PublicEgress.Count > 0) Replace(PublicEgressRoutes, snapshot.PublicEgress);
 
         OverallMessageText.Text = Localization.Get(snapshot.OverallKey);
@@ -332,19 +327,6 @@ public sealed partial class MainWindow : Window
         ApplyProxyStatus(snapshot.Proxy);
         UpdateRuntimeVersionDisplays();
         UpdateSpecializedComponentCards();
-
-        // 更新当前主路由提示
-        var activeProvider = snapshot.Providers.FirstOrDefault(x => x.IsActive);
-        if (activeProvider is not null)
-        {
-            ActiveProviderBannerText.Text = activeProvider.Id == "opencodex"
-                ? Localization.Get("ProviderBannerOpencodex")
-                : $"{activeProvider.Name} ({activeProvider.BaseUrl})";
-        }
-        else
-        {
-            ActiveProviderBannerText.Text = Localization.Get("ProviderBannerOpenAI");
-        }
 
         if (NodeVersionPicker.SelectedItem is null && NodeVersions.Count > 0) NodeVersionPicker.SelectedIndex = 0;
 
@@ -423,6 +405,32 @@ public sealed partial class MainWindow : Window
     {
         collection.Clear();
         foreach (var item in items) collection.Add(item);
+    }
+
+    private void ApplyOpenCodexModels(IEnumerable<OpenCodexModel> models)
+    {
+        var ordered = models.OrderBy(x => x.Provider).ThenBy(x => x.Id).ToList();
+        Replace(OpenCodexModels, ordered);
+        Replace(VisibleOpenCodexModels, ordered.Where(x => x.IsVisible));
+    }
+
+    private void ApplyOpenCodexClientRoute(string integrationState, string providerName)
+    {
+        var active = integrationState.Equals("current", StringComparison.OrdinalIgnoreCase);
+        var stateText = Localization.Get(active ? "OpenCodexProxyCurrent" : "OpenCodexProxyInactive");
+        var providerText = string.IsNullOrWhiteSpace(providerName)
+            ? Localization.Get("OpenCodexProviderUnknown")
+            : Localization.Format("OpenCodexCurrentProvider", providerName);
+        ChatGptProxyStateText.Text = stateText;
+        CodexProxyStateText.Text = stateText;
+        ChatGptProviderText.Text = providerText;
+        CodexProviderText.Text = providerText;
+        ChatGptProviderText.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        CodexProviderText.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        ChatGptIntegrateButton.Visibility = active ? Visibility.Collapsed : Visibility.Visible;
+        CodexIntegrateButton.Visibility = active ? Visibility.Collapsed : Visibility.Visible;
+        ChatGptIntegrateButton.IsEnabled = !active;
+        CodexIntegrateButton.IsEnabled = !active;
     }
 
     private static void UpdateVersionBadge(ComponentStatus component, Border badgeBorder, TextBlock badgeText)
@@ -516,13 +524,18 @@ public sealed partial class MainWindow : Window
         if (openCodex is not null)
         {
             OpenCodexStatusBadgeText.Text = openCodex.StatusLabel;
-            OpenCodexVersionText.Text = openCodex.VersionSummary;
+            OpenCodexCurrentVersionText.Text = openCodex.InstalledVersionLabel;
+            OpenCodexLatestVersionText.Text = openCodex.LatestVersionLabel;
             OpenCodexDetailText.Text = openCodex.Detail;
             OpenCodexInstallButton.IsEnabled = openCodex.CanInstall;
             OpenCodexUpgradeButton.IsEnabled = openCodex.CanUpgrade;
             OpenCodexStartButton.IsEnabled = openCodex.CanStart;
             OpenCodexStopButton.IsEnabled = openCodex.CanStop;
-            OpenCodexIntegrateButton.IsEnabled = openCodex.IsInstalled;
+            if (!openCodex.IsInstalled)
+            {
+                ChatGptIntegrateButton.Visibility = Visibility.Collapsed;
+                CodexIntegrateButton.Visibility = Visibility.Collapsed;
+            }
         }
 
         var tailscale = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "tailscale");
@@ -540,7 +553,8 @@ public sealed partial class MainWindow : Window
         if (relay is not null)
         {
             RelayStatusBadgeText.Text = relay.StatusLabel;
-            RelayVersionText.Text = relay.VersionSummary;
+            RelayCurrentVersionText.Text = relay.InstalledVersionLabel;
+            RelayLatestVersionText.Text = relay.LatestVersionLabel;
             RelayInstallButton.IsEnabled = relay.CanInstall;
             RelayUpgradeButton.IsEnabled = relay.CanUpgrade;
             RelayStartButton.IsEnabled = relay.CanStart;
@@ -654,7 +668,6 @@ public sealed partial class MainWindow : Window
         DashboardPage.Visibility = tag == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         ProcessesPage.Visibility = tag == "processes" ? Visibility.Visible : Visibility.Collapsed;
         NetworkPage.Visibility = tag == "network" ? Visibility.Visible : Visibility.Collapsed;
-        ProvidersPage.Visibility = tag == "providers" ? Visibility.Visible : Visibility.Collapsed;
         OpenCodexPage.Visibility = tag == "opencodex" ? Visibility.Visible : Visibility.Collapsed;
         TailscalePage.Visibility = tag == "tailscale" ? Visibility.Visible : Visibility.Collapsed;
         InstallationsPage.Visibility = tag == "installations" ? Visibility.Visible : Visibility.Collapsed;
@@ -700,12 +713,6 @@ public sealed partial class MainWindow : Window
     {
         if (sender is not FrameworkElement { Tag: string action }) return;
         await ExecuteActionAsync("tailscale", action, null, Localization.Format("RunningAction", ActionName(action), "Tailscale"));
-    }
-
-    private async void SwitchProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string providerId }) return;
-        await ExecuteActionAsync("provider", "use", providerId, Localization.Format("SwitchingProvider", providerId));
     }
 
     private void NodeVersionPicker_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -814,8 +821,7 @@ public sealed partial class MainWindow : Window
         SetStatus(Localization.Get("ProviderDeleted"));
     }
 
-    private void UpdateProviderEmptyState()
-        => ProviderEmptyState.Visibility = ProviderProfiles.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    private void UpdateProviderEmptyState() { }
 
     private async void TestProvider_Click(object sender, RoutedEventArgs e)
     {
@@ -861,7 +867,8 @@ public sealed partial class MainWindow : Window
         try
         {
             var proxyAddress = _settings.NetworkMode == "custom" ? _settings.CustomHttpProxy : null;
-            var latestMap = await SystemService.QueryLatestVersionsAsync(proxyAddress);
+            var latestMap = await SystemService.QueryLatestVersionsAsync(
+                proxyAddress, _settings.NodeMirror, _settings.NpmRegistry);
             if (latestMap.TryGetValue(compId, out var latestVer))
             {
                 var match = CoreComponents.Concat(InstallableComponents).Concat(RuntimeComponents)
@@ -957,6 +964,16 @@ public sealed partial class MainWindow : Window
         var model = action == "test-model" && OpenCodexModelPicker.SelectedItem is OpenCodexModel selected
             ? $"{selected.Provider}\u001F{selected.Id}" : null;
         await ExecuteActionAsync("opencodex", action, model, Localization.Format("RunningAction", ActionName(action), "OpenCodex"));
+    }
+
+    private async void OpenCodexModelVisibility_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleSwitch { IsLoaded: true, DataContext: OpenCodexModel model } toggle || _refreshBusy || _actionBusy) return;
+        if (toggle.IsOn == model.IsVisible) return;
+        var action = toggle.IsOn ? "show-model" : "hide-model";
+        if (!await ExecuteActionAsync("opencodex", action, model.Selector,
+                Localization.Format("RunningAction", ActionName(action), model.DisplayName)))
+            toggle.IsOn = model.IsVisible;
     }
 
     private async void RelayAction_Click(object sender, RoutedEventArgs e)

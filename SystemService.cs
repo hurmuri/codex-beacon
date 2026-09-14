@@ -179,10 +179,21 @@ public sealed class SystemService
         return char.ConvertFromUtf32(first) + char.ConvertFromUtf32(second);
     }
 
-    public static async Task<Dictionary<string, string>> QueryLatestVersionsAsync(string? proxyAddress = null, CancellationToken cancellationToken = default)
+    public static async Task<Dictionary<string, string>> QueryLatestVersionsAsync(
+        string? proxyAddress = null,
+        string? nodeMirror = null,
+        string? npmRegistry = null,
+        CancellationToken cancellationToken = default)
     {
         var results = new Dictionary<string, string>();
         using var client = CreateConfiguredHttpClient(proxyAddress, QuickHttpTimeout);
+        var nodeBase = Uri.TryCreate(nodeMirror, UriKind.Absolute, out var parsedNodeMirror)
+            ? parsedNodeMirror.ToString().TrimEnd('/')
+            : "https://nodejs.org/dist";
+        var npmBase = Uri.TryCreate(npmRegistry, UriKind.Absolute, out var parsedNpmRegistry)
+            ? parsedNpmRegistry.ToString().TrimEnd('/')
+            : "https://registry.npmjs.org";
+        string NpmLatestUrl(string packageName) => $"{npmBase}/{Uri.EscapeDataString(packageName)}/latest";
 
         var desktopTask = Task.Run(async () =>
         {
@@ -205,7 +216,7 @@ public sealed class SystemService
         {
             try
             {
-                var json = await client.GetStringAsync("https://registry.npmjs.org/@openai/codex/latest", cancellationToken).ConfigureAwait(false);
+                var json = await client.GetStringAsync(NpmLatestUrl("@openai/codex"), cancellationToken).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(json);
                 if (doc.RootElement.TryGetProperty("version", out var ver))
                 {
@@ -220,7 +231,7 @@ public sealed class SystemService
         {
             try
             {
-                var json = await client.GetStringAsync("https://registry.npmjs.org/@bitkyc08/opencodex/latest", cancellationToken).ConfigureAwait(false);
+                var json = await client.GetStringAsync(NpmLatestUrl("@bitkyc08/opencodex"), cancellationToken).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(json);
                 if (doc.RootElement.TryGetProperty("version", out var ver))
                 {
@@ -235,7 +246,7 @@ public sealed class SystemService
         {
             try
             {
-                var json = await client.GetStringAsync("https://registry.npmjs.org/codex-relay/latest", cancellationToken).ConfigureAwait(false);
+                var json = await client.GetStringAsync(NpmLatestUrl("codex-relay"), cancellationToken).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(json);
                 if (doc.RootElement.TryGetProperty("version", out var ver))
                 {
@@ -271,13 +282,19 @@ public sealed class SystemService
                 if (!string.IsNullOrWhiteSpace(version)) lock (results) results["nvm"] = version;
             }
             catch { }
+            lock (results)
+            {
+                if (results.ContainsKey("nvm")) return;
+            }
+            var wingetVersion = await QueryWingetLatestAsync("CoreyButler.NVMforWindows", cancellationToken).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(wingetVersion)) lock (results) results["nvm"] = wingetVersion;
         }, cancellationToken);
 
         var nodeTask = Task.Run(async () =>
         {
             try
             {
-                var json = await client.GetStringAsync("https://nodejs.org/dist/index.json", cancellationToken).ConfigureAwait(false);
+                var json = await client.GetStringAsync($"{nodeBase}/index.json", cancellationToken).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(json);
                 var version = doc.RootElement[0].GetProperty("version").GetString()?.TrimStart('v');
                 if (!string.IsNullOrWhiteSpace(version)) lock (results) results["node"] = version;
@@ -289,7 +306,7 @@ public sealed class SystemService
         {
             try
             {
-                var json = await client.GetStringAsync("https://registry.npmjs.org/npm/latest", cancellationToken).ConfigureAwait(false);
+                var json = await client.GetStringAsync(NpmLatestUrl("npm"), cancellationToken).ConfigureAwait(false);
                 using var doc = JsonDocument.Parse(json);
                 var version = doc.RootElement.GetProperty("version").GetString();
                 if (!string.IsNullOrWhiteSpace(version)) lock (results) results["npm"] = version;
@@ -297,8 +314,34 @@ public sealed class SystemService
             catch { }
         }, cancellationToken);
 
-        await Task.WhenAll(desktopTask, codexTask, openCodexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask).ConfigureAwait(false);
+        var windowsDependenciesTask = Task.Run(async () =>
+        {
+            var version = await QueryWingetLatestAsync("Microsoft.AppInstaller", cancellationToken).ConfigureAwait(false);
+            if (string.IsNullOrWhiteSpace(version)) return;
+            lock (results)
+            {
+                results["appinstaller"] = version;
+                results["winget"] = version;
+                results["msstore"] = version;
+            }
+        }, cancellationToken);
+
+        await Task.WhenAll(desktopTask, codexTask, openCodexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask, windowsDependenciesTask).ConfigureAwait(false);
         return results;
+    }
+
+    private static async Task<string?> QueryWingetLatestAsync(string packageId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var outcome = await RunAsync("winget.exe",
+                ["show", "--id", packageId, "--exact", "--source", "winget", "--accept-source-agreements", "--disable-interactivity"],
+                TimeSpan.FromSeconds(15), null, null, cancellationToken).ConfigureAwait(false);
+            if (outcome.ExitCode != 0) return null;
+            var match = Regex.Match(outcome.Output, @"(?im)^\s*(?:Version|版本)\s*:\s*([^\s]+)");
+            return match.Success ? match.Groups[1].Value.Trim().TrimStart('v') : null;
+        }
+        catch { return null; }
     }
 
     public static async Task<List<NodeRuntime>> QueryNodeVersionCatalogAsync(
@@ -327,6 +370,21 @@ public sealed class SystemService
     public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(CancellationToken cancellationToken = default)
     {
         var list = new List<OpenCodexModel>();
+        var disabled = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        try
+        {
+            var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".opencodex", "config.json");
+            using var config = JsonDocument.Parse(File.ReadAllText(configPath));
+            if (config.RootElement.TryGetProperty("disabledModels", out var disabledModels))
+            {
+                foreach (var entry in disabledModels.EnumerateArray())
+                {
+                    var selector = entry.GetString();
+                    if (!string.IsNullOrWhiteSpace(selector)) disabled.Add(selector);
+                }
+            }
+        }
+        catch { }
         try
         {
             var outcome = await RunAsync("opencodex", new[] { "models", "list", "--json" }, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
@@ -341,7 +399,8 @@ public sealed class SystemService
                         var provider = item.TryGetProperty("provider", out var p) ? p.GetString() : null;
                         if (!string.IsNullOrWhiteSpace(model))
                         {
-                            list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "" });
+                            var selector = string.IsNullOrWhiteSpace(provider) ? model : $"{provider}/{model}";
+                            list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabled.Contains(selector) });
                         }
                     }
                 }

@@ -116,18 +116,18 @@
   <data name="NvmVersionAction.Content" xml:space="preserve"><value>Select version</value></data>
   <data name="NodeMirrorPicker.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="NpmRegistryPicker.Header" xml:space="preserve"><value>npm Registry (nrm presets)</value></data>
-  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>Official · nodejs.org</value></data>
-  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>Tsinghua TUNA</value></data>
-  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>Alibaba Cloud</value></data>
-  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud</value></data>
-  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud</value></data>
-  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm official</value></data>
-  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn</value></data>
-  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud</value></data>
-  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM</value></data>
-  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>Taobao / npmmirror</value></data>
-  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror</value></data>
-  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud</value></data>
+  <data name="NodeSourceOfficial.Content" xml:space="preserve"><value>Official · https://nodejs.org/dist</value></data>
+  <data name="NodeSourceTsinghua.Content" xml:space="preserve"><value>Tsinghua TUNA · https://mirrors.tuna.tsinghua.edu.cn/nodejs-release</value></data>
+  <data name="NodeSourceAliyun.Content" xml:space="preserve"><value>Alibaba Cloud · https://mirrors.aliyun.com/nodejs-release</value></data>
+  <data name="NodeSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud · https://mirrors.cloud.tencent.com/nodejs-release</value></data>
+  <data name="NodeSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud · https://repo.huaweicloud.com/nodejs</value></data>
+  <data name="NpmSourceOfficial.Content" xml:space="preserve"><value>npm official · https://registry.npmjs.org</value></data>
+  <data name="NpmSourceYarn.Content" xml:space="preserve"><value>Yarn · https://registry.yarnpkg.com</value></data>
+  <data name="NpmSourceTencent.Content" xml:space="preserve"><value>Tencent Cloud · https://mirrors.cloud.tencent.com/npm</value></data>
+  <data name="NpmSourceCnpm.Content" xml:space="preserve"><value>CNPM · https://r.cnpmjs.org</value></data>
+  <data name="NpmSourceTaobao.Content" xml:space="preserve"><value>Taobao / npmmirror · https://registry.npmmirror.com</value></data>
+  <data name="NpmSourceMirror.Content" xml:space="preserve"><value>npmMirror · https://skimdb.npmjs.com/registry</value></data>
+  <data name="NpmSourceHuawei.Content" xml:space="preserve"><value>Huawei Cloud · https://repo.huaweicloud.com/repository/npm</value></data>
   <data name="LatestVersionValue" xml:space="preserve"><value>Latest version {0}</value></data>
   <data name="NodeInstalled" xml:space="preserve"><value>Installed</value></data>
   <data name="SelectVersionAction" xml:space="preserve"><value>Select version</value></data>
@@ -490,7 +490,7 @@
   <data name="EditProviderButton.Content" xml:space="preserve"><value>Edit</value></data>
   <data name="DeleteProviderButton.Content" xml:space="preserve"><value>Delete</value></data>
   <data name="ProviderTestHint.Text" xml:space="preserve"><value>The default connectivity-test model is gpt-5.4; gpt-5.5 is also available.</value></data>
-  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>Manage OpenCodex dependencies, version, service, providers, models, and Codex integration here.</value></data>
+  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>Manage the OpenCodex version, service, client proxy state, and model visibility.</value></data>
   <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>Service and version</value></data>
   <data name="AwaitingDetection.Text" xml:space="preserve"><value>Awaiting detection</value></data>
   <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>Integration: —</value></data>
@@ -526,7 +526,21 @@
   <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex local proxy service</value></data>
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>Version status</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>Check for newer version</value></data>
-  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>Reads models registered and routed by the local OpenCodex service; pick one to run a connectivity check.</value></data>
+  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>Control whether each model appears in client model lists. Changes apply to the running proxy immediately.</value></data>
+  <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>Manage local proxy routing and model visibility for ChatGPT and Codex CLI</value></data>
+  <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>Client proxy status</value></data>
+  <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT client</value></data>
+  <data name="SetChatGptProxyButton.Content" xml:space="preserve"><value>Use for ChatGPT</value></data>
+  <data name="SetCodexProxyButton.Content" xml:space="preserve"><value>Use for Codex</value></data>
+  <data name="ModelVisible" xml:space="preserve"><value>Shown in clients</value></data>
+  <data name="ModelHidden" xml:space="preserve"><value>Hidden from clients</value></data>
+  <data name="OpenCodexProxyCurrent" xml:space="preserve"><value>OpenCodex proxy is active</value></data>
+  <data name="OpenCodexProxyInactive" xml:space="preserve"><value>OpenCodex proxy is not active</value></data>
+  <data name="OpenCodexCurrentProvider" xml:space="preserve"><value>Active provider: {0}</value></data>
+  <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>Active provider: unavailable</value></data>
+  <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>Model {0} is now shown.</value></data>
+  <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>Model {0} is now hidden.</value></data>
+  <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex is running and the ChatGPT client has been reopened.</value></data>
   <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>Pick a model to test</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>Version and background service control</value></data>
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale local network service</value></data>

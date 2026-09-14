@@ -10,15 +10,14 @@ Codex Beacon should feel like a focused Windows 11 Settings page for local Codex
 - **Dependencies** — App Installer/WinGet/Store and NVM/Node.js/npm/Registry prerequisite chains.
 - **Codex processes** — Codex-related processes, executable versions, paths, ownership, and guarded recovery controls.
 - **Network** — ChatGPT and CLI reachability, system/TUN/HTTP proxy state, evidence-backed active routes, and machine public egress.
-- **Providers** — provider CRUD, activation, default model, protected key entry, and layered connectivity tests.
-- **OpenCodex** — independent installation, service health, providers, static/live models, tests, synchronization, and Codex integration state.
+- **OpenCodex** — independent installation, service health, active provider, per-model visibility, tests, synchronization, and ChatGPT/Codex integration state.
 - **Tailscale** — independent service, sign-in, local-node, and Tailnet inventory.
 - **Codex Relay** — independent optional install, service, listener, login, and pairing state.
 - **Settings / About & updates** — application-wide preferences plus the preserved Codex Beacon version, release notes, update check, download, verification, and restart surface.
 
 This order is canonical in `NavigationView`. Network is a dedicated page. The overview is not a generic dashboard and contains only the two core products. Dense inventories remain native list rows rather than nested cards. See [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) for the functional contract.
 
-Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, provider configuration under Providers, and scheduled-task/service names under OpenCodex or Codex Relay. The global Settings page does not duplicate those controls.
+Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, OpenCodex provider/model state under OpenCodex, and scheduled-task/service names under OpenCodex or Codex Relay. The global Settings page does not duplicate those controls.
 
 ## Native component policy
 
@@ -27,7 +26,6 @@ Component settings stay with their owner: runtime mirrors and Registry under Dep
 - `InfoBar` owns persistent context, warnings, and source disclosures.
 - `CommandBar` and `AppBarButton` own grouped service actions.
 - `ListView`, `ComboBox`, `TextBox`, `NumberBox`, `ContentDialog`, `ProgressRing`, and `ProgressBar` retain platform behavior and focus visuals.
-- Provider secrets use a password-style control, hidden by default, with an explicitly labelled reveal interaction. A saved key may repopulate the masked control, while lists show only `Key saved`. The raw value never appears in status text, logs, diagnostics, errors, or command lines.
 - Custom borders are limited to status pills and table containment. Do not build a parallel card component library.
 
 ## State-driven workflow

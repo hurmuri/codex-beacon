@@ -1,6 +1,6 @@
 ﻿param(
     [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','opencodex','relay','tailscale','all','provider')][string]$Component,
-    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','models','test-model','store')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','integrate-chatgpt','integrate-codex','models','test-model','show-model','hide-model','store')][string]$Action,
     [string]$Version = '',
     [string]$SettingsPath = ''
 )
@@ -259,6 +259,39 @@ function Set-Task([string]$Name, [string]$Mode) {
     else { Stop-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue }
 }
 
+function Test-LocalPort([int]$Port) {
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $wait = $client.BeginConnect('127.0.0.1', $Port, $null, $null)
+        return ($wait.AsyncWaitHandle.WaitOne(500) -and $client.Connected)
+    } catch { return $false } finally { $client.Close() }
+}
+
+function Start-CodexDesktop {
+    Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
+}
+
+function Restart-OpenCodexService {
+    $task = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
+    $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+    if ($task) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
+    elseif ($opencodex) { try { & $opencodex.Source service stop 2>$null | Out-Null } catch { } }
+    Stop-ServiceProcesses 'opencodex' | Out-Null
+    Start-Sleep -Milliseconds 800
+    if ($task) { Start-ScheduledTask -TaskName $settings.ProxyTaskName }
+    elseif ($opencodex) {
+        $output = & $opencodex.Source service start 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
+    }
+    else { throw 'PROXY_MISSING' }
+
+    foreach ($attempt in 1..30) {
+        if ((Test-LocalPort 10100) -or (Test-LocalPort 51863)) { return }
+        Start-Sleep -Milliseconds 500
+    }
+    throw 'OPENCODEX_START_TIMEOUT'
+}
+
 try {
     # --- provider switching ------------------------------------------------
     if ($Component -eq 'provider' -and $Action -eq 'use-stored') {
@@ -394,14 +427,31 @@ try {
         } else { throw 'NVM_UNSUPPORTED' }
     }
 
-    if ($Component -eq 'opencodex' -and $Action -in @('integrate','models','test-model')) {
+    if ($Component -eq 'opencodex' -and $Action -in @('show-model','hide-model')) {
         $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
         if (-not $opencodex) { throw 'PROXY_MISSING' }
-        if ($Action -eq 'integrate') {
-            $details = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-            Write-Result -Success $true -MessageKey 'ActionOpenCodexIntegrated' -Details $details
-        }
+        if ($Version -notmatch '^[^\s/]+/.+$') { throw 'OPENCODEX_MODEL_REQUIRED' }
+        $verb = if ($Action -eq 'show-model') { 'enable' } else { 'disable' }
+        $details = & $opencodex.Source models $verb $Version --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+        $messageKey = if ($Action -eq 'show-model') { 'ActionOpenCodexModelShown' } else { 'ActionOpenCodexModelHidden' }
+        Write-Result -Success $true -MessageKey $messageKey -MessageArgs @($Version) -Details $details
+    }
+
+    if ($Component -eq 'opencodex' -and $Action -in @('integrate','integrate-chatgpt','integrate-codex')) {
+        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
+        Stop-CodexDesktop | Out-Null
+        $details = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+        Restart-OpenCodexService
+        Start-CodexDesktop
+        Write-Result -Success $true -MessageKey 'ActionOpenCodexClientsRestarted' -Details $details
+    }
+
+    if ($Component -eq 'opencodex' -and $Action -in @('models','test-model')) {
+        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
         if ($Action -eq 'models') {
             $details = & $opencodex.Source models list --json 2>&1 | Out-String
             if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
@@ -413,6 +463,17 @@ try {
         $details = & $opencodex.Source provider test $providerName --json 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
         Write-Result -Success $true -MessageKey 'ProviderTestSucceeded' -MessageArgs @($Version) -Details 'OpenCodex provider test succeeded.'
+    }
+
+    if ($Component -eq 'opencodex' -and $Action -in @('install','upgrade','start','restart')) {
+        Stop-CodexDesktop | Out-Null
+        $details = ''
+        if ($Action -in @('install','upgrade')) {
+            $details = Invoke-NpmInstall '@bitkyc08/opencodex' $false
+        }
+        Restart-OpenCodexService
+        Start-CodexDesktop
+        Write-Result -Success $true -MessageKey 'ActionOpenCodexClientsRestarted' -Details $details
     }
 
     # --- desktop client ----------------------------------------------------
@@ -581,6 +642,8 @@ catch {
         '^CODEX_MISSING$' { Write-Result -Success $false -MessageKey 'ActionCodexMissing' -Details $reason }
         '^CODEX_NOT_A_SERVICE$' { Write-Result -Success $false -MessageKey 'ActionCodexNotAService' -Details $reason }
         '^PROXY_MISSING$' { Write-Result -Success $false -MessageKey 'ActionProxyMissing' -Details $reason }
+        '^OPENCODEX_START_TIMEOUT$' { Write-Result -Success $false -MessageKey 'ActionFailed' -Details 'OpenCodex did not open a listener within 15 seconds.' }
+        '^OPENCODEX_MODEL_REQUIRED$' { Write-Result -Success $false -MessageKey 'ActionFailed' -Details 'A valid provider/model selector is required.' }
         '^BULK_INSTALL_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionBulkInstallUnsupported' -Details $reason }
         '^CONFIG_MISSING$' { Write-Result -Success $false -MessageKey 'ActionConfigMissing' -Details $reason }
         '^RELAY_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }

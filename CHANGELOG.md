@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Completed dependency and OpenCodex operational state:
+  - Latest-version refresh now updates bound dependency rows immediately and uses selected Node/npm sources, GitHub, and WinGet fallbacks. NVM plus App Installer, WinGet, Microsoft Store source, Node.js, and npm all display current and latest values.
+  - Download-source choices show both the provider name and full URL.
+  - Removed the standalone Providers page. OpenCodex now shows whether its proxy is active for ChatGPT and Codex CLI, reports the active provider, and offers client-specific integration actions when inactive.
+  - OpenCodex models now expose per-model visibility switches backed by `models enable/disable`; hidden models remain available for re-enabling.
+  - OpenCodex install, start, upgrade, integration, and restart actions close all allowlisted ChatGPT/Codex processes, restart the proxy, wait for its listener, and reopen the ChatGPT client. Codex Relay now presents current and latest versions as separate fields.
+
 - Clarified core product state and dependency/network workflows:
   - Codex Beacon now enforces one active app instance. Starting it again closes the previous window and force-stops it only when a graceful close does not finish, then launches the new instance. The single-file launcher performs the replacement before updating its extraction cache.
   - Codex CLI now shows an explicit signed-in, signed-out, or unverifiable account state; the login action is disabled after a verified sign-in. Login checks now follow the resolved npm CLI path instead of borrowing state from a different bundled executable.

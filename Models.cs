@@ -1,4 +1,6 @@
 ﻿using System.Text.Json.Serialization;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -70,6 +72,7 @@ public sealed class SystemSnapshot
     public string NodeMirror { get; set; } = "";
     public string NpmRegistry { get; set; } = "";
     public string OpenCodexIntegration { get; set; } = "";
+    public string OpenCodexProviderName { get; set; } = "";
     public string NodeMinimumVersion { get; set; } = "22.14.0";
     public string CodexStoreProductId { get; set; } = "";
     public string? Error { get; set; }
@@ -100,7 +103,10 @@ public sealed class OpenCodexModel
 {
     public string Id { get; set; } = "";
     public string Provider { get; set; } = "";
+    public bool IsVisible { get; set; } = true;
+    [JsonIgnore] public string Selector => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Provider}/{Id}";
     [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Id} · {Provider}";
+    [JsonIgnore] public string VisibilityLabel => Localization.Get(IsVisible ? "ModelVisible" : "ModelHidden");
 }
 
 public sealed class OpenCodexProvider
@@ -109,10 +115,12 @@ public sealed class OpenCodexProvider
     public string Name { get; set; } = "";
     public string BaseUrl { get; set; } = "";
     public bool Enabled { get; set; }
+    public bool IsDefault { get; set; }
 }
 
-public sealed class ComponentStatus
+public sealed class ComponentStatus : INotifyPropertyChanged
 {
+    private string _latestVersion = "";
     public string Id { get; set; } = "";
     public string NameKey { get; set; } = "";
     public string KindKey { get; set; } = "";
@@ -123,7 +131,19 @@ public sealed class ComponentStatus
     public string EvidenceArgs { get; set; } = "";
     public string Path { get; set; } = "";
     public string InstalledVersion { get; set; } = "";
-    public string LatestVersion { get; set; } = "";
+    public string LatestVersion
+    {
+        get => _latestVersion;
+        set
+        {
+            if (_latestVersion == value) return;
+            _latestVersion = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(LatestVersionLabel));
+            OnPropertyChanged(nameof(VersionSummary));
+            OnPropertyChanged(nameof(CanUpgrade));
+        }
+    }
     public bool IsInstalled { get; set; }
     public bool IsRunning { get; set; }
     public string AccountState { get; set; } = "NotApplicable";
@@ -228,6 +248,10 @@ public sealed class ComponentStatus
         "msstore" => "Microsoft Store",
         _ => "GitHub"
     };
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
 
 public sealed class ProcessRecord
