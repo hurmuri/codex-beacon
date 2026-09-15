@@ -1032,6 +1032,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ProgressRing x:Name="BusyRing" Width="16" Height="16" IsActive="False" />
             <TextBlock x:Name="StatusText" Grid.Column="1" x:Uid="StatusReady" Text="准备就绪"
@@ -1040,7 +1041,13 @@
             <ProgressBar x:Name="OperationProgressBar" Grid.Column="2" Width="150" Height="4" Margin="12,0" Visibility="Collapsed" />
             <Button x:Name="CancelButton" Grid.Column="3" x:Uid="CancelRunning" Content="取消" Visibility="Collapsed"
                     Style="{StaticResource ActionButtonStyle}" Margin="0,0,12,0" Click="CancelRunning_Click" />
-            <TextBlock x:Name="RefreshAgeText" Grid.Column="4" x:Uid="StatusNotRefreshed" Text="尚未刷新"
+            <Button Grid.Column="4" x:Name="OpenLogsButton" Style="{StaticResource QuietButtonStyle}" Margin="0,0,12,0" Click="OpenLogs_Click">
+                <StackPanel Orientation="Horizontal" Spacing="7">
+                    <FontIcon Glyph="&#xE9D5;" FontSize="13" />
+                    <TextBlock x:Uid="OpenLogsLabel" Text="日志" />
+                </StackPanel>
+            </Button>
+            <TextBlock x:Name="RefreshAgeText" Grid.Column="5" x:Uid="StatusNotRefreshed" Text="尚未刷新"
                        Style="{StaticResource MonoCaptionStyle}" VerticalAlignment="Center" />
         </Grid>
     </Grid>

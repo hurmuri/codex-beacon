@@ -26,6 +26,7 @@ public sealed partial class MainWindow : Window
     private UpdateCheckResult? _updateCheck;
     private string? _pendingUpdatePath;
     private CancellationTokenSource? _actionCancellation;
+    private LogWindow? _logWindow;
     private AppSettings _settings;
     private readonly HashSet<string> _installedNodeVersions = new(StringComparer.OrdinalIgnoreCase);
 
@@ -103,7 +104,13 @@ public sealed partial class MainWindow : Window
             await RefreshAsync(false);
         };
         Activated += MainWindow_Activated;
-        Closed += (_, _) => { _timer.Stop(); _actionCancellation?.Cancel(); };
+        Closed += (_, _) =>
+        {
+            _timer.Stop();
+            _actionCancellation?.Cancel();
+            _logWindow?.Close();
+            AppLog.Info("Application", "Main window closed.");
+        };
     }
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
@@ -243,6 +250,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             SetStatus(Localization.Format("RefreshFailed", ex.Message));
+            AppLog.Error("Refresh", ex.ToString());
         }
         finally
         {
@@ -592,19 +600,29 @@ public sealed partial class MainWindow : Window
         _actionCancellation = new CancellationTokenSource();
         UpdateBusyUi();
         SetStatus(busyMessage);
+        AppLog.Info("Action", $"Started: component={component}, action={action}{(string.IsNullOrWhiteSpace(version) ? string.Empty : $", target={version}")}");
         OperationProgressBar.Visibility = Visibility.Visible;
         OperationProgressBar.IsIndeterminate = true;
 
         ActionResult? result = null;
         try
         {
-            var progress = new Progress<string>(SetStatus);
-            var operationProgress = new Progress<OperationProgress>(ApplyOperationProgress);
+            var progress = new Progress<string>(line =>
+            {
+                SetStatus(line);
+                AppLog.Info(component, line);
+            });
+            var operationProgress = new Progress<OperationProgress>(progressState =>
+            {
+                ApplyOperationProgress(progressState);
+                AppLog.Info(component, FormatOperationProgress(progressState));
+            });
             result = await _systemService.InvokeActionAsync(component, action, version, progress, _actionCancellation.Token, operationProgress);
         }
         catch (Exception ex)
         {
-            SetStatus(Localization.Format("RefreshFailed", ex.Message));
+            SetStatus(Localization.Get("ActionFailedSeeLogs"));
+            AppLog.Error(component, ex.ToString());
         }
         finally
         {
@@ -617,7 +635,10 @@ public sealed partial class MainWindow : Window
         }
 
         if (result is null) return false;
-        SetStatus(result.DisplayText);
+        SetStatus(result.Success ? result.Summary : Localization.Format("ActionFailedWithLog", result.Message));
+        AppLog.Write(result.Success ? "INFO" : "ERROR", component, result.Summary);
+        if (!string.IsNullOrWhiteSpace(result.Details))
+            AppLog.Write(result.Success ? "INFO" : "ERROR", component, result.Details);
         if (!result.Success) return false;
 
         await Task.Delay(600);
@@ -636,6 +657,11 @@ public sealed partial class MainWindow : Window
             OperationProgressBar.Value = Math.Clamp(percent, 0, 100);
         }
 
+        SetStatus(FormatOperationProgress(progress));
+    }
+
+    private static string FormatOperationProgress(OperationProgress progress)
+    {
         var parts = new List<string> { progress.Stage };
         if (progress.TotalBytes is long total && total > 0)
             parts.Add($"{FormatBytes(progress.BytesReceived)} / {FormatBytes(total)}");
@@ -645,7 +671,7 @@ public sealed partial class MainWindow : Window
         if (progress.EtaSeconds is double eta && eta >= 0) parts.Add($"ETA {eta:0}s");
         if (!string.IsNullOrWhiteSpace(progress.Source)) parts.Add(progress.Source);
         if (!string.IsNullOrWhiteSpace(progress.Message)) parts.Add(progress.Message);
-        SetStatus(string.Join(" · ", parts));
+        return string.Join(" · ", parts);
     }
 
     private async void Refresh_Click(object sender, RoutedEventArgs e) => await RefreshAsync(true);
@@ -656,6 +682,17 @@ public sealed partial class MainWindow : Window
     {
         _actionCancellation?.Cancel();
         SetStatus(Localization.Get("Cancelling"));
+        AppLog.Warning("Action", "Cancellation requested by the user.");
+    }
+
+    private void OpenLogs_Click(object sender, RoutedEventArgs e)
+    {
+        if (_logWindow is null)
+        {
+            _logWindow = new LogWindow();
+            _logWindow.Closed += (_, _) => _logWindow = null;
+        }
+        _logWindow.Activate();
     }
 
     private void Nav_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
@@ -1100,6 +1137,7 @@ public sealed partial class MainWindow : Window
             {
                 SetUpdateStatus(Localization.Format(
                     "UpdateCheckFailed", Or(check.ErrorDetail ?? string.Empty)));
+                AppLog.Warning("Update", check.ErrorDetail ?? "Update check did not succeed.");
                 ClearUpdateSurface(keepNotes: false);
                 return;
             }
@@ -1118,6 +1156,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             SetUpdateStatus(Localization.Format("UpdateCheckFailed", ex.Message));
+            AppLog.Error("Update", ex.ToString());
         }
         finally
         {
@@ -1273,10 +1312,12 @@ public sealed partial class MainWindow : Window
         catch (OperationCanceledException)
         {
             SetUpdateStatus(Localization.Get("ActionCanceled"));
+            AppLog.Warning("Update", "Application update download was cancelled.");
         }
         catch (Exception ex)
         {
             SetUpdateStatus(Localization.Format("UpdateDownloadFailed", ex.Message));
+            AppLog.Error("Update", ex.ToString());
         }
         finally
         {

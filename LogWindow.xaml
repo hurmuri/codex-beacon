@@ -1,0 +1,46 @@
+<Window
+    x:Class="CodexBeacon.LogWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Background="{StaticResource CanvasBrush}" Padding="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock x:Uid="LogWindowHeading" Text="应用日志" Style="{StaticResource PageTitleStyle}" />
+                <TextBlock x:Uid="LogWindowDescription" Text="安装、升级、服务控制与应用错误会按时间追加到这里。" Style="{StaticResource CaptionTextStyle}" Margin="0,4,0,0" />
+            </StackPanel>
+            <Button Grid.Column="1" x:Uid="CopyLogsButton" Content="复制全部" Style="{StaticResource QuietButtonStyle}" Click="CopyLogs_Click" VerticalAlignment="Center" />
+            <Button Grid.Column="2" x:Uid="OpenLogFolderButton" Content="打开日志目录" Style="{StaticResource QuietButtonStyle}" Click="OpenLogFolder_Click" VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,16,0,10" Padding="12,8">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="LogPathText" Style="{StaticResource MonoCaptionStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" x:Name="LogStatusText" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <TextBox Grid.Row="2" x:Name="LogTextBox" IsReadOnly="True" AcceptsReturn="True" TextWrapping="NoWrap"
+                 FontFamily="{StaticResource MonoFontFamily}" FontSize="12" Padding="12"
+                 ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                 AutomationProperties.Name="Application log output" />
+
+        <TextBlock Grid.Row="3" x:Uid="LogPrivacyHint" Text="敏感字段会在写入前自动隐藏；日志保存在当前用户的本机目录。"
+                   Style="{StaticResource CaptionTextStyle}" Margin="0,10,0,0" />
+    </Grid>
+</Window>

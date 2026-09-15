@@ -12,6 +12,7 @@ public partial class App : Application
     {
         Localization.Initialize();
         InitializeComponent();
+        AppLog.Info("Application", "Codex Beacon process started.");
         UnhandledException += (_, e) =>
         {
             WriteCrashLog(e.Exception);
@@ -81,11 +82,12 @@ public partial class App : Application
 
     private static void WriteCrashLog(Exception exception)
     {
+        AppLog.Error("Application", exception.ToString());
         try
         {
             var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon");
             Directory.CreateDirectory(directory);
-            File.WriteAllText(Path.Combine(directory, "crash.log"), $"{DateTimeOffset.Now:O}\n{exception}");
+            File.WriteAllText(Path.Combine(directory, "crash.log"), $"{DateTimeOffset.Now:O}\n{AppLog.Sanitize(exception.ToString())}");
         }
         catch { }
     }

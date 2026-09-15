@@ -585,4 +585,15 @@
   <!-- QA fix round addendum -->
   <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>Built-in and detected providers (incl. OpenCodex local proxy)</value></data>
   <data name="NpmRegistryHint.Text" xml:space="preserve"><value>Applied via --registry when installing or upgrading Codex CLI and Relay; separate from the system-wide npm config.</value></data>
+  <data name="OpenLogsLabel.Text" xml:space="preserve"><value>Logs</value></data>
+  <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon logs</value></data>
+  <data name="LogWindowHeading.Text" xml:space="preserve"><value>Application logs</value></data>
+  <data name="LogWindowDescription.Text" xml:space="preserve"><value>Install, upgrade, service-control, and application errors are appended here by time.</value></data>
+  <data name="CopyLogsButton.Content" xml:space="preserve"><value>Copy all</value></data>
+  <data name="OpenLogFolderButton.Content" xml:space="preserve"><value>Open log folder</value></data>
+  <data name="LogPrivacyHint.Text" xml:space="preserve"><value>Sensitive fields are hidden before writing; logs stay in the current user's local folder.</value></data>
+  <data name="LogLineCount" xml:space="preserve"><value>{0} lines</value></data>
+  <data name="LogsCopied" xml:space="preserve"><value>All logs copied</value></data>
+  <data name="ActionFailedSeeLogs" xml:space="preserve"><value>The action failed. Full details were written to the application log.</value></data>
+  <data name="ActionFailedWithLog" xml:space="preserve"><value>{0}. Full details were written to the application log.</value></data>
 </root>

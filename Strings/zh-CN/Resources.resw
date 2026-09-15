@@ -584,4 +584,15 @@
   <!-- QA fix round addendum -->
   <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>系统预置与已检测 Provider (含 OpenCodex 本地代理)</value></data>
   <data name="NpmRegistryHint.Text" xml:space="preserve"><value>安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。</value></data>
+  <data name="OpenLogsLabel.Text" xml:space="preserve"><value>日志</value></data>
+  <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon 日志</value></data>
+  <data name="LogWindowHeading.Text" xml:space="preserve"><value>应用日志</value></data>
+  <data name="LogWindowDescription.Text" xml:space="preserve"><value>安装、升级、服务控制与应用错误会按时间追加到这里。</value></data>
+  <data name="CopyLogsButton.Content" xml:space="preserve"><value>复制全部</value></data>
+  <data name="OpenLogFolderButton.Content" xml:space="preserve"><value>打开日志目录</value></data>
+  <data name="LogPrivacyHint.Text" xml:space="preserve"><value>敏感字段会在写入前自动隐藏；日志保存在当前用户的本机目录。</value></data>
+  <data name="LogLineCount" xml:space="preserve"><value>{0} 行</value></data>
+  <data name="LogsCopied" xml:space="preserve"><value>已复制全部日志</value></data>
+  <data name="ActionFailedSeeLogs" xml:space="preserve"><value>操作失败，详细过程已写入应用日志。</value></data>
+  <data name="ActionFailedWithLog" xml:space="preserve"><value>{0}。详细过程已写入应用日志。</value></data>
 </root>

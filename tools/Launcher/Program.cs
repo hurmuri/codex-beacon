@@ -21,6 +21,7 @@ static class Program
     {
         try
         {
+            WriteLauncherLog("INFO", $"Launcher started ({VariantName}).");
             using var startupMutex = new Mutex(false, StartupMutexName);
             var ownsMutex = false;
             try
@@ -39,13 +40,22 @@ static class Program
         }
         catch (Exception ex)
         {
-            try
-            {
-                var log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", "launcher.log");
-                File.WriteAllText(log, ex.ToString());
-            }
-            catch { }
+            WriteLauncherLog("ERROR", ex.ToString());
         }
+    }
+
+    static void WriteLauncherLog(string level, string message)
+    {
+        try
+        {
+            var directory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon");
+            Directory.CreateDirectory(directory);
+            var log = Path.Combine(directory, "app.log");
+            var safe = message.Replace("\r\n", "\n").Replace('\r', '\n');
+            foreach (var line in safe.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                File.AppendAllText(log, $"{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff zzz} [{level}] [Launcher] {line}{Environment.NewLine}");
+        }
+        catch { }
     }
 
     static void LaunchPayload()

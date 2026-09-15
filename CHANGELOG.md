@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Added a unified append-only application log window for action output, npm progress, launcher failures, and application errors. OpenCodex upgrades now stop the running proxy before npm replaces its bundled executable, stream each npm output line, and verify the installed package before reporting failure.
+
 - Corrected the Download Sources layout so labels and full-width selectors align consistently, and rebuilt OpenCodex model visibility as a compact table with one header row and left-aligned switches.
   - Aligned OpenCodex model catalog with the live dashboard catalog by querying live runtime models directly instead of static configuration entries, and fixed selector resolution for native OpenAI models.
 

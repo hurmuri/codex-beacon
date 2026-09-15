@@ -105,9 +105,11 @@ function Invoke-TrackedCommand {
     & $File @Arguments 2>&1 | ForEach-Object {
         $line = [string]$_
         [void]$lines.Add($line)
+        Write-Progress-Line (Protect-Output $line)
         $percent = $null
         $received = 0L
         $total = $null
+        $currentStage = $Stage
         if ($line -match '(\d+(?:\.\d+)?)\s*(KB|MB|GB)\s*/\s*(\d+(?:\.\d+)?)\s*(KB|MB|GB)') {
             $received = Convert-DownloadSize ([double]$matches[1]) $matches[2]
             $total = Convert-DownloadSize ([double]$matches[3]) $matches[4]
@@ -115,9 +117,12 @@ function Invoke-TrackedCommand {
         } elseif ($line -match '(\d{1,3})(?:\.\d+)?\s*%') {
             $percent = [double]$matches[1]
         }
-        Write-Progress-Event -Stage $Stage -Source $Source -Percent $percent -BytesReceived $received -TotalBytes $total
+        if ($line -match '(?i)added|changed|removed|audited|up to date|postinstall') { $currentStage = 'Installing' }
+        elseif ($line -match '(?i)warn') { $currentStage = 'Warning' }
+        Write-Progress-Event -Stage $currentStage -Source $Source -Percent $percent -BytesReceived $received -TotalBytes $total
     }
-    return [pscustomobject]@{ ExitCode=$LASTEXITCODE; Output=($lines -join "`r`n") }
+    $exitCode = $LASTEXITCODE
+    return [pscustomobject]@{ ExitCode=$exitCode; Output=($lines -join "`r`n") }
 }
 
 function Write-Result {
@@ -169,7 +174,25 @@ function Invoke-NpmInstall([string]$PackageName, [bool]$RelayLocal) {
         $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','-g',"$PackageName@latest") + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
     }
     $output = $run.Output
-    if ($run.ExitCode -ne 0) { throw $output.Trim() }
+    if ($run.ExitCode -ne 0) {
+        $prefixArgs = if ($RelayLocal) { @('--prefix', $relayApp) } else { @('-g') }
+        $installedVersion = ''
+        $latestVersion = ''
+        try {
+            $listArgs = @('list') + $prefixArgs + @($PackageName, '--depth=0', '--json')
+            $installedJson = & $script:NpmExecutable @listArgs 2>$null | Out-String | ConvertFrom-Json
+            $dependency = $installedJson.dependencies.PSObject.Properties[$PackageName]
+            if ($dependency) { $installedVersion = [string]$dependency.Value.version }
+            $viewArgs = @('view', "$PackageName@latest", 'version') + $registryArgs
+            $latestVersion = (& $script:NpmExecutable @viewArgs 2>$null | Out-String).Trim()
+        } catch { }
+        if ($installedVersion -and $latestVersion -and $installedVersion -eq $latestVersion) {
+            Write-Progress-Line "npm returned exit code $($run.ExitCode), but verification confirms $PackageName $installedVersion is installed."
+        } else {
+            throw $output.Trim()
+        }
+    }
+    Write-Progress-Line "Verified $PackageName installation."
     Write-Progress-Event -Stage 'Completed' -Source ([string]$settings.NpmRegistry) -Message $PackageName -Percent 100
     return $output.Trim()
 }
@@ -290,6 +313,21 @@ function Restart-OpenCodexService {
         Start-Sleep -Milliseconds 500
     }
     throw 'OPENCODEX_START_TIMEOUT'
+}
+
+function Stop-OpenCodexForPackageUpdate {
+    Write-Progress-Event -Stage 'Stopping service' -Source 'OpenCodex' -Message 'Releasing package files'
+    $task = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
+    $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+    if ($task) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
+    elseif ($opencodex) { try { & $opencodex.Source service stop 2>$null | Out-Null } catch { } }
+    $stopped = Stop-ServiceProcesses 'opencodex'
+    Write-Progress-Line "Stopped OpenCodex service processes: $stopped"
+    foreach ($attempt in 1..20) {
+        if (-not (Test-LocalPort 10100) -and -not (Test-LocalPort 51863)) { return }
+        Start-Sleep -Milliseconds 250
+    }
+    throw 'OPENCODEX_STOP_TIMEOUT'
 }
 
 try {
@@ -430,7 +468,7 @@ try {
     if ($Component -eq 'opencodex' -and $Action -in @('show-model','hide-model')) {
         $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
         if (-not $opencodex) { throw 'PROXY_MISSING' }
-        if ($Version -notmatch '^[^\s/]+/.+$') { throw 'OPENCODEX_MODEL_REQUIRED' }
+        if ([string]::IsNullOrWhiteSpace($Version)) { throw 'OPENCODEX_MODEL_REQUIRED' }
         $verb = if ($Action -eq 'show-model') { 'enable' } else { 'disable' }
         $details = & $opencodex.Source models $verb $Version --json 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
@@ -466,13 +504,26 @@ try {
     }
 
     if ($Component -eq 'opencodex' -and $Action -in @('install','upgrade','start','restart')) {
-        Stop-CodexDesktop | Out-Null
+        $closedClients = Stop-CodexDesktop
+        Write-Progress-Line "Closed Codex and ChatGPT processes: $closedClients"
         $details = ''
+        $installError = ''
         if ($Action -in @('install','upgrade')) {
-            $details = Invoke-NpmInstall '@bitkyc08/opencodex' $false
+            Stop-OpenCodexForPackageUpdate
+            try { $details = Invoke-NpmInstall '@bitkyc08/opencodex' $false }
+            catch { $installError = $_.Exception.Message }
         }
-        Restart-OpenCodexService
+        try {
+            Write-Progress-Event -Stage 'Starting service' -Source 'OpenCodex' -Message 'Waiting for health check'
+            Restart-OpenCodexService
+        } catch {
+            $restartError = $_.Exception.Message
+            if ($installError) { throw ($installError + "`r`nOpenCodex restart failed: " + $restartError) }
+            throw
+        }
         Start-CodexDesktop
+        Write-Progress-Line 'OpenCodex is healthy; ChatGPT/Codex client restart completed.'
+        if ($installError) { throw $installError }
         Write-Result -Success $true -MessageKey 'ActionOpenCodexClientsRestarted' -Details $details
     }
 
