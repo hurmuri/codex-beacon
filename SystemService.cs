@@ -367,12 +367,20 @@ public sealed class SystemService
         return versions;
     }
 
-    public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(CancellationToken cancellationToken = default)
+    public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(
+        string? providerId = null, CancellationToken cancellationToken = default)
     {
         var list = new List<OpenCodexModel>();
         try
         {
-            var liveOutcome = await RunAsync("opencodex", new[] { "models", "live", "--json" }, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
+            var liveArguments = new List<string> { "models", "live" };
+            if (!string.IsNullOrWhiteSpace(providerId))
+            {
+                liveArguments.Add("--provider");
+                liveArguments.Add(providerId);
+            }
+            liveArguments.Add("--json");
+            var liveOutcome = await RunAsync("opencodex", liveArguments, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
             if (!string.IsNullOrWhiteSpace(liveOutcome.Output) && liveOutcome.Output.TrimStart().StartsWith("["))
             {
                 using var doc = JsonDocument.Parse(liveOutcome.Output);
@@ -392,7 +400,7 @@ public sealed class SystemService
                         });
                     }
                 }
-                if (list.Count > 0) return list;
+                if (list.Count > 0 || !string.IsNullOrWhiteSpace(providerId)) return list;
             }
         }
         catch { }
@@ -426,7 +434,8 @@ public sealed class SystemService
                         if (!string.IsNullOrWhiteSpace(model))
                         {
                             var selector = string.IsNullOrWhiteSpace(provider) || provider.Equals("openai", StringComparison.OrdinalIgnoreCase) ? model : $"{provider}/{model}";
-                            list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabledSet.Contains(selector) });
+                            if (string.IsNullOrWhiteSpace(providerId) || providerId.Equals(provider, StringComparison.OrdinalIgnoreCase))
+                                list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabledSet.Contains(selector) });
                         }
                     }
                 }

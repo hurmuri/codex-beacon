@@ -1,5 +1,6 @@
 ﻿﻿using System.Text.Json.Serialization;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
@@ -116,6 +117,22 @@ public sealed class OpenCodexProvider
     public string BaseUrl { get; set; } = "";
     public bool Enabled { get; set; }
     public bool IsDefault { get; set; }
+}
+
+public sealed class OpenCodexProviderGroup
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string BaseUrl { get; set; } = "";
+    public bool IsDefault { get; set; }
+    public ObservableCollection<OpenCodexModel> Models { get; } = [];
+
+    [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
+    [JsonIgnore] public string Summary => Localization.Format(
+        IsDefault ? "OpenCodexProviderModelCountDefault" : "OpenCodexProviderModelCount",
+        Models.Count,
+        Models.Count(model => model.IsVisible));
+    [JsonIgnore] public bool AllModelsVisible => Models.Count > 0 && Models.All(model => model.IsVisible);
 }
 
 public sealed class ComponentStatus : INotifyPropertyChanged

@@ -26,6 +26,8 @@ public partial class App : Application
             ReplaceExistingInstance();
             _window = new MainWindow();
             _window.Activate();
+            if (StartupService.IsBackgroundLaunch)
+                ((MainWindow)_window).HideToTray();
         }
         catch (Exception ex)
         {

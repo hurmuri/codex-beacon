@@ -400,6 +400,13 @@
   <data name="VersionCard.Description" xml:space="preserve"><value>Codex Beacon 自身的构建版本与安装包类型</value></data>
   <data name="AutoUpdateCard.Header" xml:space="preserve"><value>自动检查更新</value></data>
   <data name="AutoUpdateCard.Description" xml:space="preserve"><value>启动后自动查询最新版本，发现新版本时在窗口顶部提示</value></data>
+  <data name="StartupCard.Header" xml:space="preserve"><value>开机自启</value></data>
+  <data name="StartupCard.Description" xml:space="preserve"><value>登录 Windows 后仅在系统托盘中启动 Codex Beacon</value></data>
+  <data name="StartupEnabledStatus" xml:space="preserve"><value>已启用开机自启；下次登录 Windows 时将在系统托盘中启动。</value></data>
+  <data name="StartupDisabledStatus" xml:space="preserve"><value>已关闭开机自启。</value></data>
+  <data name="StartupUpdateFailed" xml:space="preserve"><value>更新开机自启失败：{0}</value></data>
+  <data name="TrayOpen" xml:space="preserve"><value>打开 Codex Beacon</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>退出</value></data>
   <data name="UpdateActionCard.Header" xml:space="preserve"><value>检查与安装</value></data>
   <data name="UpdateActionCard.Description" xml:space="preserve"><value>始终使用官方 GitHub Releases 渠道，不使用任何第三方镜像</value></data>
   <data name="CheckUpdateButton.Content" xml:space="preserve"><value>检查更新</value></data>
@@ -544,6 +551,20 @@
   <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>当前生效 Provider：无法获取</value></data>
   <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>模型 {0} 已显示。</value></data>
   <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>模型 {0} 已隐藏。</value></data>
+  <data name="OpenCodexModelTestTitle.Text" xml:space="preserve"><value>模型连通测试</value></data>
+  <data name="OpenCodexModelTestHint.Text" xml:space="preserve"><value>从当前已显示的模型中选择一个进行提供方连通测试。</value></data>
+  <data name="OpenCodexProviderModelsHint.Text" xml:space="preserve"><value>每个 Provider 独立读取目录并管理模型显示；OpenCodex 可能复用约 5 分钟的短期模型缓存。</value></data>
+  <data name="OpenCodexProviderModelsEmpty.Text" xml:space="preserve"><value>尚未发现已配置的 Provider。</value></data>
+  <data name="RefreshProviderModelsButton.Content" xml:space="preserve"><value>刷新此 Provider</value></data>
+  <data name="ProviderModelsToggle.Header" xml:space="preserve"><value>全部在客户端显示</value></data>
+  <data name="OpenCodexProviderModelCount" xml:space="preserve"><value>{0} 个模型 · {1} 个已显示</value></data>
+  <data name="OpenCodexProviderModelCountDefault" xml:space="preserve"><value>默认 Provider · {0} 个模型 · {1} 个已显示</value></data>
+  <data name="RefreshingOpenCodexProviderModels" xml:space="preserve"><value>正在读取 {0} 的模型目录…</value></data>
+  <data name="ActionOpenCodexProviderModelsRefreshed" xml:space="preserve"><value>已读取 {0}：{1} 个模型。</value></data>
+  <data name="ActionOpenCodexProviderModelsShown" xml:space="preserve"><value>Provider {0} 下的模型已全部显示。</value></data>
+  <data name="ActionOpenCodexProviderModelsHidden" xml:space="preserve"><value>Provider {0} 下的模型已全部隐藏。</value></data>
+  <data name="ActionShowModelsName" xml:space="preserve"><value>显示模型</value></data>
+  <data name="ActionHideModelsName" xml:space="preserve"><value>隐藏模型</value></data>
   <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex 已启动，并已重新打开 ChatGPT 客户端。</value></data>
   <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>请选择模型进行测试</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>版本与后台服务控制</value></data>

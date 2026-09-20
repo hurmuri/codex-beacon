@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Moved OpenCodex to the second navigation position, added a persistent system tray icon with open and exit actions, and added a Windows startup setting that launches Codex Beacon directly into the tray.
+
+- Reorganized OpenCodex model management by provider. Each provider now has its own catalog read action, model list, all-model visibility switch, and per-model visibility controls, while the UI documents OpenCodex's short-lived runtime catalog cache.
+
 - Added a unified append-only application log window for action output, npm progress, launcher failures, and application errors. OpenCodex upgrades now stop the running proxy before npm replaces its bundled executable, stream each npm output line, and verify the installed package before reporting failure.
 
 - Corrected the Download Sources layout so labels and full-width selectors align consistently, and rebuilt OpenCodex model visibility as a compact table with one header row and left-aligned switches.

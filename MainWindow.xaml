@@ -37,6 +37,9 @@
                 <NavigationViewItem x:Uid="NavDashboard" Content="总览" Tag="dashboard" IsSelected="True">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
+                <NavigationViewItem Content="OpenCodex" Tag="opencodex">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE950;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
                 <NavigationViewItem x:Uid="NavDependencies" Content="依赖管理" Tag="installations">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE896;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
@@ -45,9 +48,6 @@
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="NavNetwork" Content="网络与代理" Tag="network">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE968;" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
-                <NavigationViewItem Content="OpenCodex" Tag="opencodex">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE950;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
                 <NavigationViewItem x:Uid="NavTailscale" Content="Tailscale" Tag="tailscale">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xEC27;" /></NavigationViewItem.Icon>
@@ -518,44 +518,79 @@
                             </Border>
                         </Grid>
 
-                        <!-- 可用模型与测试 -->
-                        <TextBlock x:Uid="AvailableModelsHeading" Text="可用模型与连通测试" Style="{StaticResource SectionTitleStyle}" />
+                        <!-- 按 Provider 管理模型与测试 -->
+                        <TextBlock x:Uid="AvailableModelsHeading" Text="Provider 模型管理" Style="{StaticResource SectionTitleStyle}" />
                         <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="12">
-                                <TextBlock x:Uid="OpenCodexModelsHint" Text="控制每个模型是否出现在客户端模型列表中；修改后立即同步到运行中的代理。" Style="{StaticResource CaptionTextStyle}" />
-                                <StackPanel Orientation="Horizontal" Spacing="12">
-                                    <ComboBox x:Uid="OpenCodexModelPicker" x:Name="OpenCodexModelPicker" Width="480" ItemsSource="{x:Bind VisibleOpenCodexModels}" DisplayMemberPath="DisplayName" PlaceholderText="请选择模型进行测试" />
-                                    <Button x:Uid="RefreshModelsButton" Content="刷新模型列表" Tag="models" Click="OpenCodexAction_Click" Style="{StaticResource QuietButtonStyle}" />
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Spacing="3">
+                                    <TextBlock x:Uid="OpenCodexModelTestTitle" Text="模型连通测试" Style="{StaticResource CardTitleStyle}" />
+                                    <TextBlock x:Uid="OpenCodexModelTestHint" Text="从当前已显示的模型中选择一个进行提供方连通测试。" Style="{StaticResource CaptionTextStyle}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                    <ComboBox x:Uid="OpenCodexModelPicker" x:Name="OpenCodexModelPicker" MinWidth="360" MaxWidth="520" ItemsSource="{x:Bind VisibleOpenCodexModels}" DisplayMemberPath="DisplayName" PlaceholderText="请选择模型进行测试" />
                                     <Button x:Uid="TestModelButton" Content="测试所选模型" Tag="test-model" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
                                 </StackPanel>
-                                <Grid Padding="12,8" ColumnSpacing="16" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="132" />
-                                        <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock x:Uid="ModelVisibilityHeader" Text="在客户端显示" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
-                                    <TextBlock x:Uid="ModelNameHeader" Grid.Column="1" Text="模型名" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
-                                    <TextBlock x:Uid="ModelProviderHeader" Grid.Column="2" Text="Provider" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
-                                </Grid>
-                                <ListView ItemsSource="{x:Bind OpenCodexModels}" SelectionMode="None" MaxHeight="360" Padding="0" HorizontalContentAlignment="Stretch">
-                                    <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                            <Grid Padding="12,8" ColumnSpacing="16">
+                            </Grid>
+                        </Border>
+
+                        <TextBlock x:Uid="OpenCodexProviderModelsHint" Text="每个 Provider 独立读取目录并管理模型显示；OpenCodex 可能复用短期模型缓存。" Style="{StaticResource CaptionTextStyle}" Margin="0,12,0,0" />
+                        <TextBlock x:Uid="OpenCodexProviderModelsEmpty" x:Name="OpenCodexProviderModelsEmpty" Text="尚未发现已配置的 Provider。" Style="{StaticResource CaptionTextStyle}" Margin="0,12,0,0" Visibility="Collapsed" />
+                        <ItemsRepeater ItemsSource="{x:Bind OpenCodexProviderGroups}" Margin="0,12,0,0">
+                            <ItemsRepeater.Layout>
+                                <StackLayout Spacing="12" />
+                            </ItemsRepeater.Layout>
+                            <ItemsRepeater.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource PanelStyle}">
+                                        <StackPanel Spacing="12">
+                                            <Grid ColumnSpacing="12">
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="132" />
-                                                    <ColumnDefinition Width="2*" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Spacing="3">
+                                                    <TextBlock Text="{Binding DisplayName}" Style="{StaticResource CardTitleStyle}" />
+                                                    <TextBlock Text="{Binding Summary}" Style="{StaticResource CaptionTextStyle}" />
+                                                    <TextBlock Text="{Binding BaseUrl}" Style="{StaticResource MonoCaptionStyle}" TextTrimming="CharacterEllipsis" />
+                                                </StackPanel>
+                                                <Button Grid.Column="1" x:Uid="RefreshProviderModelsButton" Content="刷新此 Provider" Click="OpenCodexProviderModels_Refresh" Style="{StaticResource QuietButtonStyle}" VerticalAlignment="Center" />
+                                                <ToggleSwitch Grid.Column="2" x:Uid="ProviderModelsToggle" Header="全部在客户端显示" OnContent="" OffContent="" IsOn="{Binding AllModelsVisible, Mode=OneWay}" Toggled="OpenCodexProviderVisibility_Toggled" VerticalAlignment="Center" />
+                                            </Grid>
+                                            <Grid Padding="12,8" ColumnSpacing="16" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="148" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <ToggleSwitch HorizontalAlignment="Left" VerticalAlignment="Center" OnContent="" OffContent="" IsOn="{Binding IsVisible, Mode=OneWay}" DataContext="{Binding}" Toggled="OpenCodexModelVisibility_Toggled" />
-                                                <TextBlock Grid.Column="1" Text="{Binding Id}" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2" Text="{Binding Provider}" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock x:Uid="ModelVisibilityHeader" Text="在客户端显示" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
+                                                <TextBlock x:Uid="ModelNameHeader" Grid.Column="1" Text="模型名" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
                                             </Grid>
-                                        </DataTemplate>
-                                    </ListView.ItemTemplate>
-                                </ListView>
-                            </StackPanel>
-                        </Border>
+                                            <ItemsRepeater ItemsSource="{Binding Models}">
+                                                <ItemsRepeater.Layout>
+                                                    <StackLayout Spacing="0" />
+                                                </ItemsRepeater.Layout>
+                                                <ItemsRepeater.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Padding="12,7" ColumnSpacing="16">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="148" />
+                                                                <ColumnDefinition Width="*" />
+                                                            </Grid.ColumnDefinitions>
+                                                            <ToggleSwitch HorizontalAlignment="Left" VerticalAlignment="Center" OnContent="" OffContent="" IsOn="{Binding IsVisible, Mode=OneWay}" Toggled="OpenCodexModelVisibility_Toggled" />
+                                                            <TextBlock Grid.Column="1" Text="{Binding Id}" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsRepeater.ItemTemplate>
+                                            </ItemsRepeater>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsRepeater.ItemTemplate>
+                        </ItemsRepeater>
 
                         <!-- 计划任务设置 -->
                         <TextBlock x:Uid="ServiceSettingsHeading" Text="服务设置" Style="{StaticResource SectionTitleStyle}" />
@@ -929,6 +964,9 @@
                                 </toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="RefreshIntervalCard" Header="自动刷新间隔" Description="5–300 秒" IsClickEnabled="False">
                                     <NumberBox x:Name="RefreshSecondsBox" Style="{StaticResource InputNumberBoxStyle}" Width="150" Minimum="5" Maximum="300" SpinButtonPlacementMode="Compact" />
+                                </toolkit:SettingsCard>
+                                <toolkit:SettingsCard x:Uid="StartupCard" Header="开机自启" Description="登录 Windows 后仅在系统托盘中启动 Codex Beacon" IsClickEnabled="False">
+                                    <ToggleSwitch x:Name="StartupToggle" OnContent="" OffContent="" Toggled="StartupToggle_Toggled" />
                                 </toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="SaveChangesCard" Header="保存更改" Description="立即生效并存储在本机" IsClickEnabled="False">
                                     <Button x:Uid="SaveButton" Content="保存设置" Style="{StaticResource QuietButtonStyle}" Click="SaveSettings_Click" />

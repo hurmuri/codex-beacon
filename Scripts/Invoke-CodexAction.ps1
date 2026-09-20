@@ -476,6 +476,17 @@ try {
         Write-Result -Success $true -MessageKey $messageKey -MessageArgs @($Version) -Details $details
     }
 
+    if ($Component -eq 'opencodex' -and $Action -in @('show-provider-models','hide-provider-models')) {
+        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
+        if (-not $opencodex) { throw 'PROXY_MISSING' }
+        if ($Version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') { throw 'OPENCODEX_PROVIDER_REQUIRED' }
+        $state = if ($Action -eq 'show-provider-models') { 'on' } else { 'off' }
+        $details = & $opencodex.Source models provider $Version $state --json 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
+        $messageKey = if ($Action -eq 'show-provider-models') { 'ActionOpenCodexProviderModelsShown' } else { 'ActionOpenCodexProviderModelsHidden' }
+        Write-Result -Success $true -MessageKey $messageKey -MessageArgs @($Version) -Details $details
+    }
+
     if ($Component -eq 'opencodex' -and $Action -in @('integrate','integrate-chatgpt','integrate-codex')) {
         $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
         if (-not $opencodex) { throw 'PROXY_MISSING' }

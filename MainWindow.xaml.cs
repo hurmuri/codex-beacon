@@ -6,6 +6,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WinRT.Interop;
 using Windows.Graphics;
 
 namespace CodexBeacon;
@@ -22,11 +23,13 @@ public sealed partial class MainWindow : Window
     private bool _loaded;
     private bool _initializingLanguage = true;
     private bool _initializingUpdate = true;
+    private bool _initializingStartup = true;
     private bool _updateBusy;
     private UpdateCheckResult? _updateCheck;
     private string? _pendingUpdatePath;
     private CancellationTokenSource? _actionCancellation;
     private LogWindow? _logWindow;
+    private readonly TrayIcon _trayIcon;
     private AppSettings _settings;
     private readonly HashSet<string> _installedNodeVersions = new(StringComparer.OrdinalIgnoreCase);
 
@@ -42,6 +45,8 @@ public sealed partial class MainWindow : Window
     public ObservableCollection<NetworkProbe> NetworkProbes { get; } = [];
     public ObservableCollection<OpenCodexModel> OpenCodexModels { get; } = [];
     public ObservableCollection<OpenCodexModel> VisibleOpenCodexModels { get; } = [];
+    public ObservableCollection<OpenCodexProvider> OpenCodexProviders { get; } = [];
+    public ObservableCollection<OpenCodexProviderGroup> OpenCodexProviderGroups { get; } = [];
     public ObservableCollection<ComponentStatus> OpenCodexComponents { get; } = [];
 
     /// <summary>Nav tag to restore after the language-switch window reload.</summary>
@@ -80,6 +85,8 @@ public sealed partial class MainWindow : Window
         ProjectPackageText.Text = AppPackageText.Text;
         AutoUpdateToggle.IsOn = _settings.AutoCheckUpdates;
         _initializingUpdate = false;
+        StartupToggle.IsOn = StartupService.IsEnabled;
+        _initializingStartup = false;
         SetUpdateStatus(Localization.Get("UpdateIdle"));
 
         ExtendsContentIntoTitleBar = true;
@@ -96,6 +103,11 @@ public sealed partial class MainWindow : Window
             NavigateTo(pendingTag);
         }
 
+        _trayIcon = new TrayIcon(
+            WindowNative.GetWindowHandle(this),
+            ShowFromTray,
+            ExitFromTray);
+
         _timer = DispatcherQueue.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(_settings.RefreshSeconds);
         _timer.Tick += async (_, _) =>
@@ -106,6 +118,7 @@ public sealed partial class MainWindow : Window
         Activated += MainWindow_Activated;
         Closed += (_, _) =>
         {
+            _trayIcon.Dispose();
             _timer.Stop();
             _actionCancellation?.Cancel();
             _logWindow?.Close();
@@ -115,12 +128,27 @@ public sealed partial class MainWindow : Window
 
     private async void MainWindow_Activated(object sender, WindowActivatedEventArgs args)
     {
+        await EnsureStartedAsync();
+    }
+
+    internal void HideToTray() => TrayIcon.HideWindow(WindowNative.GetWindowHandle(this));
+
+    private async Task EnsureStartedAsync()
+    {
         if (_loaded) return;
         _loaded = true;
         await RefreshAsync(true);
         _timer.Start();
         if (_settings.AutoCheckUpdates) _ = CheckForUpdatesAsync(true);
     }
+
+    private void ShowFromTray()
+    {
+        TrayIcon.ShowWindow(WindowNative.GetWindowHandle(this));
+        Activate();
+    }
+
+    private void ExitFromTray() => Close();
 
     // ------------------------------------------------------------------ status
 
@@ -237,7 +265,7 @@ public sealed partial class MainWindow : Window
                         {
                             DispatcherQueue.TryEnqueue(() =>
                             {
-                                ApplyOpenCodexModels(models);
+                                ApplyOpenCodexCatalog(models, OpenCodexProviders);
                                 if (OpenCodexModelPicker.SelectedItem is null && VisibleOpenCodexModels.Count > 0)
                                     OpenCodexModelPicker.SelectedIndex = 0;
                             });
@@ -316,7 +344,7 @@ public sealed partial class MainWindow : Window
         Replace(NodeVersions, snapshot.NodeVersions.OrderByDescending(x => x.IsCurrent)
             .ThenByDescending(x => Version.TryParse(x.Version, out var version) ? version : new Version()));
         if (snapshot.NetworkProbes.Count > 0) Replace(NetworkProbes, snapshot.NetworkProbes);
-        ApplyOpenCodexModels(snapshot.OpenCodexModels);
+        ApplyOpenCodexCatalog(snapshot.OpenCodexModels, snapshot.OpenCodexProviders);
         ApplyOpenCodexClientRoute(snapshot.OpenCodexIntegration, snapshot.OpenCodexProviderName);
         if (snapshot.PublicEgress.Count > 0) Replace(PublicEgressRoutes, snapshot.PublicEgress);
 
@@ -415,11 +443,47 @@ public sealed partial class MainWindow : Window
         foreach (var item in items) collection.Add(item);
     }
 
-    private void ApplyOpenCodexModels(IEnumerable<OpenCodexModel> models)
+    private void ApplyOpenCodexCatalog(
+        IEnumerable<OpenCodexModel> models,
+        IEnumerable<OpenCodexProvider> providers)
     {
         var ordered = models.OrderBy(x => x.Provider).ThenBy(x => x.Id).ToList();
+        var providerList = providers
+            .GroupBy(provider => provider.Id, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderByDescending(provider => provider.IsDefault)
+            .ThenBy(provider => provider.Name)
+            .ToList();
+        Replace(OpenCodexProviders, providerList);
         Replace(OpenCodexModels, ordered);
         Replace(VisibleOpenCodexModels, ordered.Where(x => x.IsVisible));
+
+        var providerById = providerList.ToDictionary(provider => provider.Id, StringComparer.OrdinalIgnoreCase);
+        var providerIds = providerList.Select(provider => provider.Id)
+            .Concat(ordered.Select(model => model.Provider))
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(id => providerById.TryGetValue(id, out var provider) && provider.IsDefault)
+            .ThenBy(id => providerById.TryGetValue(id, out var provider) ? provider.Name : id)
+            .ToList();
+        var groups = providerIds.Select(id =>
+        {
+            providerById.TryGetValue(id, out var provider);
+            var group = new OpenCodexProviderGroup
+            {
+                Id = id,
+                Name = provider?.Name ?? id,
+                BaseUrl = provider?.BaseUrl ?? "",
+                IsDefault = provider?.IsDefault == true
+            };
+            foreach (var model in ordered.Where(model => model.Provider.Equals(id, StringComparison.OrdinalIgnoreCase)))
+                group.Models.Add(model);
+            return group;
+        });
+        Replace(OpenCodexProviderGroups, groups);
+        OpenCodexProviderModelsEmpty.Visibility = OpenCodexProviderGroups.Count == 0
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private void ApplyOpenCodexClientRoute(string integrationState, string providerName)
@@ -1013,6 +1077,44 @@ public sealed partial class MainWindow : Window
             toggle.IsOn = model.IsVisible;
     }
 
+    private async void OpenCodexProviderModels_Refresh(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: OpenCodexProviderGroup group } || _refreshBusy || _actionBusy) return;
+        _actionBusy = true;
+        UpdateBusyUi();
+        SetStatus(Localization.Format("RefreshingOpenCodexProviderModels", group.DisplayName));
+        try
+        {
+            var refreshed = await SystemService.FetchOpenCodexModelsAsync(group.Id);
+            var merged = OpenCodexModels
+                .Where(model => !model.Provider.Equals(group.Id, StringComparison.OrdinalIgnoreCase))
+                .Concat(refreshed)
+                .ToList();
+            ApplyOpenCodexCatalog(merged, OpenCodexProviders);
+            SetStatus(Localization.Format("ActionOpenCodexProviderModelsRefreshed", group.DisplayName, refreshed.Count));
+        }
+        catch (Exception ex)
+        {
+            SetStatus(Localization.Format("RefreshFailed", ex.Message));
+            AppLog.Error("OpenCodex", ex.ToString());
+        }
+        finally
+        {
+            _actionBusy = false;
+            UpdateBusyUi();
+        }
+    }
+
+    private async void OpenCodexProviderVisibility_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (sender is not ToggleSwitch { IsLoaded: true, DataContext: OpenCodexProviderGroup group } toggle || _refreshBusy || _actionBusy) return;
+        if (group.Models.Count == 0 || toggle.IsOn == group.AllModelsVisible) return;
+        var action = toggle.IsOn ? "show-provider-models" : "hide-provider-models";
+        if (!await ExecuteActionAsync("opencodex", action, group.Id,
+                Localization.Format("RunningAction", ActionName(action), group.DisplayName)))
+            toggle.IsOn = group.AllModelsVisible;
+    }
+
     private async void RelayAction_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string action }) return;
@@ -1055,6 +1157,27 @@ public sealed partial class MainWindow : Window
         }
         await RefreshAsync(true);
         SetStatus(Localization.Get("SettingsSaved"));
+    }
+
+    private void StartupToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_initializingStartup) return;
+        try
+        {
+            StartupService.SetEnabled(StartupToggle.IsOn);
+            SetStatus(Localization.Get(StartupToggle.IsOn ? "StartupEnabledStatus" : "StartupDisabledStatus"));
+            AppLog.Info("Startup", StartupToggle.IsOn
+                ? "Windows startup registration enabled."
+                : "Windows startup registration disabled.");
+        }
+        catch (Exception ex)
+        {
+            _initializingStartup = true;
+            StartupToggle.IsOn = StartupService.IsEnabled;
+            _initializingStartup = false;
+            SetStatus(Localization.Format("StartupUpdateFailed", ex.Message));
+            AppLog.Error("Startup", ex.ToString());
+        }
     }
 
     private AppSettings PersistSettings(string? language, string? skippedVersion = null)
@@ -1451,6 +1574,8 @@ public sealed partial class MainWindow : Window
         "restart" => Localization.Get("ActionRestartName"),
         "install" => Localization.Get("ActionInstallName"),
         "upgrade" => Localization.Get("ActionUpgradeName"),
+        "show-model" or "show-provider-models" => Localization.Get("ActionShowModelsName"),
+        "hide-model" or "hide-provider-models" => Localization.Get("ActionHideModelsName"),
         "login" => Localization.Get("ActionLoginName"),
         "store" => Localization.Get("ActionStoreName"),
         _ => Localization.Get("ActionProcessName")

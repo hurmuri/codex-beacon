@@ -17,7 +17,7 @@ static class Program
 #endif
 
     [STAThread]
-    static void Main()
+    static void Main(string[] args)
     {
         try
         {
@@ -31,7 +31,7 @@ static class Program
                 if (!ownsMutex) throw new TimeoutException("Timed out waiting to replace the previous Codex Beacon instance.");
 
                 StopExistingInstances();
-                LaunchPayload();
+                LaunchPayload(args.Contains("--background", StringComparer.OrdinalIgnoreCase));
             }
             finally
             {
@@ -58,7 +58,7 @@ static class Program
         catch { }
     }
 
-    static void LaunchPayload()
+    static void LaunchPayload(bool background)
     {
         var assembly = Assembly.GetExecutingAssembly();
         var resourceName = assembly.GetManifestResourceNames().FirstOrDefault(n => n.EndsWith("payload.zip"));
@@ -66,7 +66,7 @@ static class Program
         {
             // Fallback to local sibling directory if available
             var localExe = Path.Combine(AppContext.BaseDirectory, "CodexBeacon.exe");
-            if (File.Exists(localExe)) { Start(localExe); return; }
+            if (File.Exists(localExe)) { Start(localExe, background); return; }
             return;
         }
 
@@ -89,7 +89,7 @@ static class Program
             File.WriteAllText(stampFile, currentStamp);
         }
 
-        Start(targetExe);
+        Start(targetExe, background);
     }
 
     static void StopExistingInstances()
@@ -118,10 +118,11 @@ static class Program
         }
     }
 
-    static void Start(string executablePath)
+    static void Start(string executablePath, bool background)
     {
         var launcherPath = Environment.ProcessPath;
         var arguments = string.IsNullOrWhiteSpace(launcherPath) ? string.Empty : $"--launcher \"{launcherPath}\"";
+        if (background) arguments = $"{arguments} --background".Trim();
         Process.Start(new ProcessStartInfo(executablePath)
         {
             UseShellExecute = true,

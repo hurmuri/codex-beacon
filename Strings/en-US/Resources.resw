@@ -401,6 +401,13 @@
   <data name="VersionCard.Description" xml:space="preserve"><value>Codex Beacon's own build version and package type</value></data>
   <data name="AutoUpdateCard.Header" xml:space="preserve"><value>Check for updates automatically</value></data>
   <data name="AutoUpdateCard.Description" xml:space="preserve"><value>Query the latest release after startup and show a banner when one is available</value></data>
+  <data name="StartupCard.Header" xml:space="preserve"><value>Start with Windows</value></data>
+  <data name="StartupCard.Description" xml:space="preserve"><value>Start Codex Beacon in the system tray after you sign in to Windows</value></data>
+  <data name="StartupEnabledStatus" xml:space="preserve"><value>Startup enabled. Codex Beacon will start in the system tray after your next Windows sign-in.</value></data>
+  <data name="StartupDisabledStatus" xml:space="preserve"><value>Startup disabled.</value></data>
+  <data name="StartupUpdateFailed" xml:space="preserve"><value>Could not update startup: {0}</value></data>
+  <data name="TrayOpen" xml:space="preserve"><value>Open Codex Beacon</value></data>
+  <data name="TrayExit" xml:space="preserve"><value>Exit</value></data>
   <data name="UpdateActionCard.Header" xml:space="preserve"><value>Check and install</value></data>
   <data name="UpdateActionCard.Description" xml:space="preserve"><value>Always uses the official GitHub Releases channel, never a third-party mirror</value></data>
   <data name="CheckUpdateButton.Content" xml:space="preserve"><value>Check for updates</value></data>
@@ -545,6 +552,20 @@
   <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>Active provider: unavailable</value></data>
   <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>Model {0} is now shown.</value></data>
   <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>Model {0} is now hidden.</value></data>
+  <data name="OpenCodexModelTestTitle.Text" xml:space="preserve"><value>Model connectivity test</value></data>
+  <data name="OpenCodexModelTestHint.Text" xml:space="preserve"><value>Choose one currently visible model for a provider connectivity test.</value></data>
+  <data name="OpenCodexProviderModelsHint.Text" xml:space="preserve"><value>Read and manage each provider independently. OpenCodex may reuse its model cache for about five minutes.</value></data>
+  <data name="OpenCodexProviderModelsEmpty.Text" xml:space="preserve"><value>No configured providers were found.</value></data>
+  <data name="RefreshProviderModelsButton.Content" xml:space="preserve"><value>Refresh provider</value></data>
+  <data name="ProviderModelsToggle.Header" xml:space="preserve"><value>Show all in clients</value></data>
+  <data name="OpenCodexProviderModelCount" xml:space="preserve"><value>{0} models · {1} shown</value></data>
+  <data name="OpenCodexProviderModelCountDefault" xml:space="preserve"><value>Default provider · {0} models · {1} shown</value></data>
+  <data name="RefreshingOpenCodexProviderModels" xml:space="preserve"><value>Reading the {0} model catalog…</value></data>
+  <data name="ActionOpenCodexProviderModelsRefreshed" xml:space="preserve"><value>Read {0}: {1} models.</value></data>
+  <data name="ActionOpenCodexProviderModelsShown" xml:space="preserve"><value>All models under provider {0} are now shown.</value></data>
+  <data name="ActionOpenCodexProviderModelsHidden" xml:space="preserve"><value>All models under provider {0} are now hidden.</value></data>
+  <data name="ActionShowModelsName" xml:space="preserve"><value>show models</value></data>
+  <data name="ActionHideModelsName" xml:space="preserve"><value>hide models</value></data>
   <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex is running and the ChatGPT client has been reopened.</value></data>
   <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>Pick a model to test</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>Version and background service control</value></data>
