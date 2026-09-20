@@ -24,6 +24,7 @@ public sealed partial class MainWindow : Window
     private bool _initializingLanguage = true;
     private bool _initializingUpdate = true;
     private bool _initializingStartup = true;
+    private bool _allowClose;
     private bool _updateBusy;
     private UpdateCheckResult? _updateCheck;
     private string? _pendingUpdatePath;
@@ -116,6 +117,13 @@ public sealed partial class MainWindow : Window
             await RefreshAsync(false);
         };
         Activated += MainWindow_Activated;
+        AppWindow.Closing += (_, args) =>
+        {
+            if (_allowClose) return;
+            args.Cancel = true;
+            HideToTray();
+            AppLog.Info("Tray", "Main window hidden to the system tray.");
+        };
         Closed += (_, _) =>
         {
             _trayIcon.Dispose();
@@ -133,6 +141,12 @@ public sealed partial class MainWindow : Window
 
     internal void HideToTray() => TrayIcon.HideWindow(WindowNative.GetWindowHandle(this));
 
+    internal void CloseForReload()
+    {
+        _allowClose = true;
+        Close();
+    }
+
     private async Task EnsureStartedAsync()
     {
         if (_loaded) return;
@@ -148,7 +162,11 @@ public sealed partial class MainWindow : Window
         Activate();
     }
 
-    private void ExitFromTray() => Close();
+    private void ExitFromTray()
+    {
+        _allowClose = true;
+        Close();
+    }
 
     // ------------------------------------------------------------------ status
 
@@ -1504,6 +1522,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        _allowClose = true;
         Close();
     }
 

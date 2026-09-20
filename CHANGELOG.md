@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- Closing the main window now hides Codex Beacon to the system tray. The background process and tray icon remain active until Exit is selected from the tray menu; internal language reloads and application updates still close cleanly.
+
 - Moved OpenCodex to the second navigation position, added a persistent system tray icon with open and exit actions, and added a Windows startup setting that launches Codex Beacon directly into the tray.
 
 - Reorganized OpenCodex model management by provider. Each provider now has its own catalog read action, model list, all-model visibility switch, and per-model visibility controls, while the UI documents OpenCodex's short-lived runtime catalog cache.

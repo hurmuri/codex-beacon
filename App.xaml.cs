@@ -75,11 +75,11 @@ public partial class App : Application
         }
     }
 
-    internal void ReloadMainWindow(Window previousWindow)
+    internal void ReloadMainWindow(MainWindow previousWindow)
     {
         _window = new MainWindow();
         _window.Activate();
-        previousWindow.Close();
+        previousWindow.CloseForReload();
     }
 
     private static void WriteCrashLog(Exception exception)
