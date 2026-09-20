@@ -42,6 +42,8 @@ Codex Beacon is a Windows-only WinUI 3 application. Keep platform integration in
 
 ## Verification & Release Rules
 
+The detailed and authoritative packaging workflow is maintained in `PACKAGING.md`.
+
 Every code modification must go through a complete inspection, single-file build, changelog update, and GitHub synchronization cycle:
 
 1. Code Inspection & Verification (修改自检):

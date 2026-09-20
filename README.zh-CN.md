@@ -117,6 +117,8 @@ Node.js、npm、NVM、Tailscale、OpenCodex 与 Codex Relay 都不是启动 Code
 
 从源码构建需要 Windows 10 1809 或更高版本，以及 .NET 10 SDK。
 
+双版本单文件打包、验证和发布流程以 [PACKAGING.md](PACKAGING.md) 为准。
+
 ```powershell
 dotnet build .\CodexBeacon.csproj -c Release
 dotnet run --project .\CodexBeacon.csproj

@@ -122,6 +122,8 @@ The self-contained directory is currently about 214 MB and compresses to about 8
 
 Building requires x64 Windows 10 1809 or later and the .NET 10 SDK.
 
+The authoritative dual single-file packaging and release workflow is documented in [PACKAGING.md](PACKAGING.md).
+
 ```powershell
 dotnet build .\CodexBeacon.csproj -c Release
 dotnet run --project .\CodexBeacon.csproj
