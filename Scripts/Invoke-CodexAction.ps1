@@ -1,6 +1,6 @@
 ﻿param(
-    [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','opencodex','relay','tailscale','all','provider')][string]$Component,
-    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','use-stored','integrate','integrate-chatgpt','integrate-codex','models','test-model','show-model','hide-model','store')][string]$Action,
+    [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','relay','tailscale','all')][string]$Component,
+    [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','store')][string]$Action,
     [string]$Version = '',
     [string]$SettingsPath = ''
 )
@@ -31,7 +31,7 @@ $script:ActionStarted = Get-Date
 
 $settings = @{
     RelayTaskName = 'Codex Relay'
-    ProxyTaskName = 'opencodex-proxy'
+
     NodeMirror    = 'https://mirrors.aliyun.com/nodejs-release'
     NpmRegistry   = 'https://registry.npmjs.org'
     NetworkMode   = 'auto'
@@ -40,7 +40,7 @@ $settings = @{
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     try {
         $saved = Get-Content -Raw -LiteralPath $SettingsPath -Encoding UTF8 | ConvertFrom-Json
-        foreach ($name in @('RelayTaskName', 'ProxyTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
+        foreach ($name in @('RelayTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
             if ($saved.$name) { $settings[$name] = $saved.$name }
         }
     } catch { }
@@ -260,13 +260,12 @@ function Stop-CodexDesktop {
 }
 
 function Stop-ServiceProcesses([string]$Target = 'all') {
-    $patterns = @('codex-relay-service\.cmd','codex-relay-service-launcher\.vbs','node_modules[\\/]codex-relay[\\/]dist[\\/]cli\.js','@bitkyc08[\\/]opencodex','opencodex-proxy')
+    $patterns = @('codex-relay-service\.cmd','codex-relay-service-launcher\.vbs','node_modules[\\/]codex-relay[\\/]dist[\\/]cli\.js')
     $count = 0
     foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)) {
         $identity = "$($p.Name) $($p.ExecutablePath) $($p.CommandLine)"
         if ($identity -match 'CodexBeacon|CodexServiceManager|OpenAI\.Codex') { continue }
         if ($Target -eq 'relay' -and $identity -notmatch 'codex-relay') { continue }
-        if ($Target -eq 'opencodex' -and $identity -notmatch 'opencodex') { continue }
         if ($patterns | Where-Object { $identity -match $_ }) {
             Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
             $count++
@@ -294,137 +293,7 @@ function Start-CodexDesktop {
     Start-Process 'shell:AppsFolder\OpenAI.Codex_2p2nqsd0c76g0!App'
 }
 
-function Restart-OpenCodexService {
-    $task = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
-    $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-    if ($task) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
-    elseif ($opencodex) { try { & $opencodex.Source service stop 2>$null | Out-Null } catch { } }
-    Stop-ServiceProcesses 'opencodex' | Out-Null
-    Start-Sleep -Milliseconds 800
-    if ($task) { Start-ScheduledTask -TaskName $settings.ProxyTaskName }
-    elseif ($opencodex) {
-        $output = & $opencodex.Source service start 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-    }
-    else { throw 'PROXY_MISSING' }
-
-    foreach ($attempt in 1..30) {
-        if ((Test-LocalPort 10100) -or (Test-LocalPort 51863)) { return }
-        Start-Sleep -Milliseconds 500
-    }
-    throw 'OPENCODEX_START_TIMEOUT'
-}
-
-function Stop-OpenCodexForPackageUpdate {
-    Write-Progress-Event -Stage 'Stopping service' -Source 'OpenCodex' -Message 'Releasing package files'
-    $task = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
-    $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-    if ($task) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
-    elseif ($opencodex) { try { & $opencodex.Source service stop 2>$null | Out-Null } catch { } }
-    $stopped = Stop-ServiceProcesses 'opencodex'
-    Write-Progress-Line "Stopped OpenCodex service processes: $stopped"
-    foreach ($attempt in 1..20) {
-        if (-not (Test-LocalPort 10100) -and -not (Test-LocalPort 51863)) { return }
-        Start-Sleep -Milliseconds 250
-    }
-    throw 'OPENCODEX_STOP_TIMEOUT'
-}
-
 try {
-    # --- provider switching ------------------------------------------------
-    if ($Component -eq 'provider' -and $Action -eq 'use-stored') {
-        $providersPath = Join-Path $env:USERPROFILE '.CodexBeacon\providers.json'
-        if (-not (Test-Path -LiteralPath $providersPath)) { throw 'PROVIDER_STORE_MISSING' }
-        $providerId = $Version.Trim()
-        $savedProviders = @(Get-Content -Raw -LiteralPath $providersPath -Encoding UTF8 | ConvertFrom-Json)
-        $savedProvider = @($savedProviders | Where-Object { $_.Id -eq $providerId } | Select-Object -First 1)
-        if ($savedProvider.Count -eq 0) { throw 'PROVIDER_NOT_FOUND' }
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        $provider = $savedProvider[0]
-        $adapter = if ([string]$provider.WireApi -eq 'chat') { 'openai-chat' } else { 'openai-responses' }
-        Write-Progress-Event -Stage 'Configuring' -Source 'OpenCodex' -Message $providerId
-        $addOutput = & $opencodex.Source provider add $providerId --adapter $adapter --base-url ([string]$provider.BaseUrl) --default-model ([string]$provider.TestModel) --set-default --force --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $addOutput.Trim() }
-        if ([string]$provider.ApiKey) {
-            try {
-                $accountJson = & $opencodex.Source account list $providerId --json 2>$null | Out-String | ConvertFrom-Json
-                foreach ($account in @($accountJson.accounts | Where-Object { $_.label -eq 'Codex Beacon' })) {
-                    & $opencodex.Source account remove $providerId ([string]$account.id) --yes --json 2>$null | Out-Null
-                }
-            } catch { }
-            $keyOutput = ([string]$provider.ApiKey) | & $opencodex.Source account add-key $providerId --label 'Codex Beacon' --json 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) {
-                $safeKeyOutput = $keyOutput.Replace([string]$provider.ApiKey, '<redacted>')
-                throw (Protect-Output $safeKeyOutput.Trim())
-            }
-        }
-        $integrationOutput = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $integrationOutput.Trim() }
-        Write-Progress-Event -Stage 'Completed' -Source 'OpenCodex' -Message $providerId -Percent 100
-        Write-Result -Success $true -MessageKey 'ActionProviderSwitched' -MessageArgs @($providerId) -Details 'Provider configured through OpenCodex.'
-    }
-
-    if ($Component -eq 'provider' -and $Action -eq 'use') {
-        $configPath = Join-Path $env:USERPROFILE '.codex\config.toml'
-        if (-not (Test-Path -LiteralPath $configPath)) { throw 'CONFIG_MISSING' }
-        $providerToSet = $Version.Trim()
-        # Local proxy providers are only reachable through openai_base_url, so that
-        # key has to exist in the file, not merely be rewritten when present.
-        $isLocalProxy = $providerToSet -eq 'opencodex'
-        $proxyBaseUrl = 'http://127.0.0.1:10100/v1'
-        $keepsModelProvider = $providerToSet -notin @('custom', 'default', '')
-
-        $lines = @(Get-Content -LiteralPath $configPath -Encoding UTF8)
-        $newLines = @()
-        $modelProviderIndex = -1
-        $sawModelProvider = $false
-        $sawBaseUrl = $false
-        foreach ($line in $lines) {
-            $trimmed = $line.Trim()
-            if ($trimmed -match '^model_provider\s*=') {
-                $sawModelProvider = $true
-                if ($keepsModelProvider) {
-                    $modelProviderIndex = $newLines.Count
-                    $newLines += ('model_provider = "' + $providerToSet + '"')
-                }
-                continue
-            }
-            # openai_base_url is managed by whichever provider is selected, so
-            # drop stale local-proxy injections when switching away from them.
-            if ($trimmed -match '^openai_base_url\s*=') {
-                $sawBaseUrl = $true
-                if ($isLocalProxy) { $newLines += ('openai_base_url = "' + $proxyBaseUrl + '"') }
-                continue
-            }
-            $newLines += $line
-        }
-
-        if (-not $sawModelProvider -and $keepsModelProvider) {
-            $newLines = @('model_provider = "' + $providerToSet + '"') + $newLines
-            $modelProviderIndex = 0
-        }
-
-        if ($isLocalProxy -and -not $sawBaseUrl) {
-            # Insert directly below model_provider, but never past the first
-            # section header - a top-level key placed inside a table is invalid.
-            $limit = $newLines.Count
-            for ($i = 0; $i -lt $newLines.Count; $i++) {
-                if ($newLines[$i].Trim().StartsWith('[')) { $limit = $i; break }
-            }
-            $insertAt = 0
-            if ($modelProviderIndex -ge 0) { $insertAt = [Math]::Min($modelProviderIndex + 1, $limit) }
-            $rebuilt = @()
-            if ($insertAt -gt 0) { $rebuilt += $newLines[0..($insertAt - 1)] }
-            $rebuilt += ('openai_base_url = "' + $proxyBaseUrl + '"')
-            if ($insertAt -lt $newLines.Count) { $rebuilt += $newLines[$insertAt..($newLines.Count - 1)] }
-            $newLines = $rebuilt
-        }
-
-        [System.IO.File]::WriteAllText($configPath, ($newLines -join "`r`n"), (New-Object System.Text.UTF8Encoding($false)))
-        Write-Result -Success $true -MessageKey 'ActionProviderSwitched' -MessageArgs @($providerToSet) -Details 'config.toml updated'
-    }
-
     # --- App Installer / WinGet / Microsoft Store -------------------------
     if ($Component -in @('appinstaller','winget')) {
         Start-Process 'ms-windows-store://pdp/?ProductId=9NBLGGH4NNS1'
@@ -463,79 +332,6 @@ try {
             $output = Invoke-Nvm -NvmExecutable $nvm.Source -Arguments @('use', $Version)
             Write-Result -Success $true -MessageKey 'ActionNvmNodeSwitched' -MessageArgs @($Version) -Details $output
         } else { throw 'NVM_UNSUPPORTED' }
-    }
-
-    if ($Component -eq 'opencodex' -and $Action -in @('show-model','hide-model')) {
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        if ([string]::IsNullOrWhiteSpace($Version)) { throw 'OPENCODEX_MODEL_REQUIRED' }
-        $verb = if ($Action -eq 'show-model') { 'enable' } else { 'disable' }
-        $details = & $opencodex.Source models $verb $Version --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        $messageKey = if ($Action -eq 'show-model') { 'ActionOpenCodexModelShown' } else { 'ActionOpenCodexModelHidden' }
-        Write-Result -Success $true -MessageKey $messageKey -MessageArgs @($Version) -Details $details
-    }
-
-    if ($Component -eq 'opencodex' -and $Action -in @('show-provider-models','hide-provider-models')) {
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        if ($Version -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$') { throw 'OPENCODEX_PROVIDER_REQUIRED' }
-        $state = if ($Action -eq 'show-provider-models') { 'on' } else { 'off' }
-        $details = & $opencodex.Source models provider $Version $state --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        $messageKey = if ($Action -eq 'show-provider-models') { 'ActionOpenCodexProviderModelsShown' } else { 'ActionOpenCodexProviderModelsHidden' }
-        Write-Result -Success $true -MessageKey $messageKey -MessageArgs @($Version) -Details $details
-    }
-
-    if ($Component -eq 'opencodex' -and $Action -in @('integrate','integrate-chatgpt','integrate-codex')) {
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        Stop-CodexDesktop | Out-Null
-        $details = & $opencodex.Source integration native codex on --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        Restart-OpenCodexService
-        Start-CodexDesktop
-        Write-Result -Success $true -MessageKey 'ActionOpenCodexClientsRestarted' -Details $details
-    }
-
-    if ($Component -eq 'opencodex' -and $Action -in @('models','test-model')) {
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        if ($Action -eq 'models') {
-            $details = & $opencodex.Source models list --json 2>&1 | Out-String
-            if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-            Write-Result -Success $true -MessageKey 'ActionOpenCodexModelsRefreshed' -Details 'Model catalog refreshed.'
-        }
-        $parts = $Version -split ([string][char]0x1F), 2
-        $providerName = if ($parts.Count -gt 1) { $parts[0] } else { '' }
-        if (-not $providerName) { throw 'OPENCODEX_MODEL_REQUIRED' }
-        $details = & $opencodex.Source provider test $providerName --json 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        Write-Result -Success $true -MessageKey 'ProviderTestSucceeded' -MessageArgs @($Version) -Details 'OpenCodex provider test succeeded.'
-    }
-
-    if ($Component -eq 'opencodex' -and $Action -in @('install','upgrade','start','restart')) {
-        $closedClients = Stop-CodexDesktop
-        Write-Progress-Line "Closed Codex and ChatGPT processes: $closedClients"
-        $details = ''
-        $installError = ''
-        if ($Action -in @('install','upgrade')) {
-            Stop-OpenCodexForPackageUpdate
-            try { $details = Invoke-NpmInstall '@bitkyc08/opencodex' $false }
-            catch { $installError = $_.Exception.Message }
-        }
-        try {
-            Write-Progress-Event -Stage 'Starting service' -Source 'OpenCodex' -Message 'Waiting for health check'
-            Restart-OpenCodexService
-        } catch {
-            $restartError = $_.Exception.Message
-            if ($installError) { throw ($installError + "`r`nOpenCodex restart failed: " + $restartError) }
-            throw
-        }
-        Start-CodexDesktop
-        Write-Progress-Line 'OpenCodex is healthy; ChatGPT/Codex client restart completed.'
-        if ($installError) { throw $installError }
-        Write-Result -Success $true -MessageKey 'ActionOpenCodexClientsRestarted' -Details $details
     }
 
     # --- desktop client ----------------------------------------------------
@@ -622,13 +418,11 @@ try {
     if ($Action -in @('install', 'upgrade')) {
         $package = switch ($Component) {
             'codex' { '@openai/codex' }
-            'opencodex' { '@bitkyc08/opencodex' }
             'relay' { 'codex-relay' }
             default { throw 'BULK_INSTALL_UNSUPPORTED' }
         }
         $details = Invoke-NpmInstall $package ($Component -eq 'relay')
         $hintKey = switch ($Component) {
-            'opencodex' { 'ActionHintProxyStart' }
             'relay' { 'ActionHintRelayStart' }
             default { '' }
         }
@@ -638,16 +432,12 @@ try {
     # --- bulk recovery -----------------------------------------------------
     if ($Component -eq 'all') {
         $relayTask = Get-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue
-        $proxyTask = Get-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue
         if ($relayTask) { Stop-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue }
         elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { try { Invoke-Relay @('stop') | Out-Null } catch { } }
-        if ($proxyTask) { Stop-ScheduledTask -TaskName $settings.ProxyTaskName -ErrorAction SilentlyContinue }
-        elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { try { & opencodex service stop 2>$null | Out-Null } catch { } }
+
         $count = Stop-ServiceProcesses
         if ($Action -eq 'restart') {
             $started = @()
-            if ($proxyTask) { Start-ScheduledTask -TaskName $settings.ProxyTaskName; $started += 'OpenCodex' }
-            elseif (Get-Command opencodex -ErrorAction SilentlyContinue) { & opencodex service start 2>$null | Out-Null; if ($LASTEXITCODE -eq 0) { $started += 'OpenCodex' } }
             if ($relayTask) { Start-ScheduledTask -TaskName $settings.RelayTaskName; $started += 'Relay' }
             elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { Invoke-Relay @('--bg') | Out-Null; $started += 'Relay' }
             $startedLabel = if ($started.Count -gt 0) { $started -join ', ' } else { 'none' }
@@ -656,8 +446,8 @@ try {
         Write-Result -Success $true -MessageKey 'ActionServicesTerminated' -MessageArgs @($count)
     }
 
-    # --- opencodex / relay service control ---------------------------------
-    $taskName = if ($Component -eq 'relay') { $settings.RelayTaskName } else { $settings.ProxyTaskName }
+    # --- relay service control ---------------------------------------------
+    $taskName = $settings.RelayTaskName
     $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
 
     if ($Component -eq 'relay' -and -not $task) {
@@ -666,17 +456,6 @@ try {
         elseif ($Action -eq 'restart') { Invoke-Relay @('stop') | Out-Null; Start-Sleep -Milliseconds 500; $details = Invoke-Relay @('--bg'); Write-Result -Success $true -MessageKey 'ActionRelayRestarted' -Details $details }
         else { throw 'RELAY_UNSUPPORTED' }
     }
-
-    if ($Component -eq 'opencodex' -and -not $task) {
-        $opencodex = Get-Command opencodex -ErrorAction SilentlyContinue
-        if (-not $opencodex) { throw 'PROXY_MISSING' }
-        $subcommand = if ($Action -eq 'restart') { 'restart' } else { $Action }
-        $details = & $opencodex.Source service $subcommand 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $details.Trim() }
-        $messageKey = switch ($Action) { 'start' { 'ActionProxyStarted' } 'stop' { 'ActionProxyStopped' } default { 'ActionProxyRestarted' } }
-        Write-Result -Success $true -MessageKey $messageKey -Details $details
-    }
-
     if ($Action -eq 'start') { Set-Task $taskName 'start'; Write-Result -Success $true -MessageKey 'ActionTaskStarted' -MessageArgs @($taskName) }
     elseif ($Action -eq 'stop') { Set-Task $taskName 'stop'; Stop-ServiceProcesses $Component | Out-Null; Write-Result -Success $true -MessageKey 'ActionTaskStopped' -MessageArgs @($taskName) }
     elseif ($Action -eq 'restart') {
@@ -703,11 +482,7 @@ catch {
         '^WINGET_MISSING_TAILSCALE$' { Write-Result -Success $false -MessageKey 'ActionWingetMissingTailscale' -Details $reason }
         '^CODEX_MISSING$' { Write-Result -Success $false -MessageKey 'ActionCodexMissing' -Details $reason }
         '^CODEX_NOT_A_SERVICE$' { Write-Result -Success $false -MessageKey 'ActionCodexNotAService' -Details $reason }
-        '^PROXY_MISSING$' { Write-Result -Success $false -MessageKey 'ActionProxyMissing' -Details $reason }
-        '^OPENCODEX_START_TIMEOUT$' { Write-Result -Success $false -MessageKey 'ActionFailed' -Details 'OpenCodex did not open a listener within 15 seconds.' }
-        '^OPENCODEX_MODEL_REQUIRED$' { Write-Result -Success $false -MessageKey 'ActionFailed' -Details 'A valid provider/model selector is required.' }
         '^BULK_INSTALL_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionBulkInstallUnsupported' -Details $reason }
-        '^CONFIG_MISSING$' { Write-Result -Success $false -MessageKey 'ActionConfigMissing' -Details $reason }
         '^RELAY_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
         '^TAILSCALE_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
         '^DESKTOP_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }

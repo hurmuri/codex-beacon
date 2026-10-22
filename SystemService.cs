@@ -1,8 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Security.AccessControl;
-using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -227,21 +224,6 @@ public sealed class SystemService
             catch { }
         }, cancellationToken);
 
-        var openCodexTask = Task.Run(async () =>
-        {
-            try
-            {
-                var json = await client.GetStringAsync(NpmLatestUrl("@bitkyc08/opencodex"), cancellationToken).ConfigureAwait(false);
-                using var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("version", out var ver))
-                {
-                    var v = ver.GetString();
-                    if (!string.IsNullOrEmpty(v)) lock (results) results["opencodex"] = v;
-                }
-            }
-            catch { }
-        }, cancellationToken);
-
         var relayTask = Task.Run(async () =>
         {
             try
@@ -326,7 +308,7 @@ public sealed class SystemService
             }
         }, cancellationToken);
 
-        await Task.WhenAll(desktopTask, codexTask, openCodexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask, windowsDependenciesTask).ConfigureAwait(false);
+        await Task.WhenAll(desktopTask, codexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask, windowsDependenciesTask).ConfigureAwait(false);
         return results;
     }
 
@@ -367,91 +349,9 @@ public sealed class SystemService
         return versions;
     }
 
-    public static async Task<List<OpenCodexModel>> FetchOpenCodexModelsAsync(
-        string? providerId = null, CancellationToken cancellationToken = default)
-    {
-        var list = new List<OpenCodexModel>();
-        try
-        {
-            var liveArguments = new List<string> { "models", "live" };
-            if (!string.IsNullOrWhiteSpace(providerId))
-            {
-                liveArguments.Add("--provider");
-                liveArguments.Add(providerId);
-            }
-            liveArguments.Add("--json");
-            var liveOutcome = await RunAsync("opencodex", liveArguments, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(liveOutcome.Output) && liveOutcome.Output.TrimStart().StartsWith("["))
-            {
-                using var doc = JsonDocument.Parse(liveOutcome.Output);
-                foreach (var item in doc.RootElement.EnumerateArray())
-                {
-                    var model = item.TryGetProperty("id", out var idProp) ? idProp.GetString()
-                        : (item.TryGetProperty("model", out var mProp) ? mProp.GetString() : null);
-                    var provider = item.TryGetProperty("provider", out var pProp) ? pProp.GetString() : null;
-                    var disabled = item.TryGetProperty("disabled", out var dProp) && dProp.GetBoolean();
-                    if (!string.IsNullOrWhiteSpace(model))
-                    {
-                        list.Add(new OpenCodexModel
-                        {
-                            Id = model,
-                            Provider = provider ?? "",
-                            IsVisible = !disabled
-                        });
-                    }
-                }
-                if (list.Count > 0 || !string.IsNullOrWhiteSpace(providerId)) return list;
-            }
-        }
-        catch { }
-        var disabledSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        try
-        {
-            var configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".opencodex", "config.json");
-            using var config = JsonDocument.Parse(File.ReadAllText(configPath));
-            if (config.RootElement.TryGetProperty("disabledModels", out var disabledModels))
-            {
-                foreach (var entry in disabledModels.EnumerateArray())
-                {
-                    var selector = entry.GetString();
-                    if (!string.IsNullOrWhiteSpace(selector)) disabledSet.Add(selector);
-                }
-            }
-        }
-        catch { }
-        try
-        {
-            var outcome = await RunAsync("opencodex", new[] { "models", "list", "--json" }, QuickHttpTimeout, null, null, cancellationToken).ConfigureAwait(false);
-            if (!string.IsNullOrWhiteSpace(outcome.Output))
-            {
-                using var doc = JsonDocument.Parse(outcome.Output);
-                if (doc.RootElement.TryGetProperty("models", out var arr))
-                {
-                    foreach (var item in arr.EnumerateArray())
-                    {
-                        var model = item.TryGetProperty("model", out var m) ? m.GetString() : null;
-                        var provider = item.TryGetProperty("provider", out var p) ? p.GetString() : null;
-                        if (!string.IsNullOrWhiteSpace(model))
-                        {
-                            var selector = string.IsNullOrWhiteSpace(provider) || provider.Equals("openai", StringComparison.OrdinalIgnoreCase) ? model : $"{provider}/{model}";
-                            if (string.IsNullOrWhiteSpace(providerId) || providerId.Equals(provider, StringComparison.OrdinalIgnoreCase))
-                                list.Add(new OpenCodexModel { Id = model, Provider = provider ?? "", IsVisible = !disabledSet.Contains(selector) });
-                        }
-                    }
-                }
-            }
-        }
-        catch { }
-        return list;
-    }
-
     private readonly string _scriptDirectory = Path.Combine(AppContext.BaseDirectory, "Scripts");
     public static string SettingsPath { get; } = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexBeacon", "settings.json");
-    public static string ProviderDirectory { get; } = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".CodexBeacon");
-    public static string ProvidersPath { get; } = Path.Combine(ProviderDirectory, "providers.json");
-
     private readonly string _settingsPath = SettingsPath;
 
     public AppSettings LoadSettings()
@@ -497,104 +397,6 @@ public sealed class SystemService
         next.ManagesUserProxyEnvironment = false;
         next.PreviousHttpProxy = null;
         next.PreviousHttpsProxy = null;
-    }
-
-    public IReadOnlyList<ProviderProfile> LoadProviders()
-    {
-        try
-        {
-            if (!File.Exists(ProvidersPath)) return [];
-            return JsonSerializer.Deserialize<List<ProviderProfile>>(File.ReadAllText(ProvidersPath), JsonOptions) ?? [];
-        }
-        catch
-        {
-            // A malformed or inaccessible secret store is reported as empty. Never
-            // include its contents in an exception message or diagnostic payload.
-            return [];
-        }
-    }
-
-    public void SaveProviders(IEnumerable<ProviderProfile> providers)
-    {
-        EnsurePrivateProviderDirectory();
-        var temporaryPath = Path.Combine(ProviderDirectory, $"providers.{Guid.NewGuid():N}.tmp");
-        try
-        {
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(providers, JsonOptions), new UTF8Encoding(false));
-            ApplyCurrentUserFileAcl(temporaryPath);
-            File.Move(temporaryPath, ProvidersPath, true);
-            ApplyCurrentUserFileAcl(ProvidersPath);
-        }
-        finally
-        {
-            try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); } catch { }
-        }
-    }
-
-    public static async Task<ActionResult> TestProviderAsync(
-        ProviderProfile provider, string model, CancellationToken cancellationToken = default)
-    {
-        if (string.IsNullOrWhiteSpace(provider.ApiKey))
-            return new() { Success = false, MessageKey = "ProviderKeyMissing" };
-
-        try
-        {
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", provider.ApiKey);
-            var baseUrl = provider.BaseUrl.Trim().TrimEnd('/');
-            var usesChat = provider.WireApi.Equals("chat", StringComparison.OrdinalIgnoreCase)
-                || provider.WireApi.Contains("chat.completions", StringComparison.OrdinalIgnoreCase);
-            var endpoint = baseUrl.EndsWith("/v1", StringComparison.OrdinalIgnoreCase)
-                ? $"{baseUrl}/{(usesChat ? "chat/completions" : "responses")}"
-                : $"{baseUrl}/v1/{(usesChat ? "chat/completions" : "responses")}";
-            var payload = usesChat
-                ? JsonSerializer.Serialize(new { model, messages = new[] { new { role = "user", content = "Reply with OK." } }, max_tokens = 16 })
-                : JsonSerializer.Serialize(new { model, input = "Reply with OK.", max_output_tokens = 16 });
-            using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-            using var response = await client.PostAsync(endpoint, content, cancellationToken).ConfigureAwait(false);
-            return response.IsSuccessStatusCode
-                ? new() { Success = true, MessageKey = "ProviderTestSucceeded", MessageArgs = model }
-                : new() { Success = false, MessageKey = "ProviderTestFailed", MessageArgs = $"HTTP {(int)response.StatusCode}" };
-        }
-        catch (OperationCanceledException)
-        {
-            return new() { Success = false, MessageKey = "ActionCanceled" };
-        }
-        catch (Exception ex)
-        {
-            return new() { Success = false, MessageKey = "ProviderTestFailed", MessageArgs = SafeError(ex.Message) };
-        }
-    }
-
-    private static void EnsurePrivateProviderDirectory()
-    {
-        Directory.CreateDirectory(ProviderDirectory);
-        var directory = new DirectoryInfo(ProviderDirectory);
-        if ((directory.Attributes & FileAttributes.ReparsePoint) != 0)
-            throw new IOException("The provider directory cannot be a symbolic link or junction.");
-        directory.Attributes |= FileAttributes.Hidden;
-
-        var identity = WindowsIdentity.GetCurrent().User
-            ?? throw new InvalidOperationException("Unable to resolve the current Windows user.");
-        var security = new DirectorySecurity();
-        security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-        security.AddAccessRule(new FileSystemAccessRule(
-            identity,
-            FileSystemRights.FullControl,
-            InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-            PropagationFlags.None,
-            AccessControlType.Allow));
-        directory.SetAccessControl(security);
-    }
-
-    private static void ApplyCurrentUserFileAcl(string path)
-    {
-        var identity = WindowsIdentity.GetCurrent().User
-            ?? throw new InvalidOperationException("Unable to resolve the current Windows user.");
-        var security = new FileSecurity();
-        security.SetAccessRuleProtection(isProtected: true, preserveInheritance: false);
-        security.AddAccessRule(new FileSystemAccessRule(identity, FileSystemRights.FullControl, AccessControlType.Allow));
-        new FileInfo(path).SetAccessControl(security);
     }
 
     public async Task<SystemSnapshot> CollectAsync(bool includeLatest, CancellationToken cancellationToken = default)

@@ -183,7 +183,6 @@ function New-Component {
 
 $settings = @{
     RelayTaskName = 'Codex Relay'
-    ProxyTaskName = 'opencodex-proxy'
     NodeMirror    = $DefaultNodeMirror
     NpmRegistry   = $DefaultNpmRegistry
     NetworkMode   = 'auto'
@@ -192,7 +191,7 @@ $settings = @{
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     try {
         $saved = Get-Content -Raw -LiteralPath $SettingsPath -Encoding UTF8 | ConvertFrom-Json
-        foreach ($name in @('RelayTaskName', 'ProxyTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
+        foreach ($name in @('RelayTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
             if ($saved.$name) { $settings[$name] = $saved.$name }
         }
     } catch { }
@@ -414,79 +413,6 @@ if ($codexVersion) {
 
 # --- optional npm modules -------------------------------------------------
 
-$openCodexVersion = $null
-foreach ($npm in $script:NpmExecutables) {
-    $found = Get-PackageVersion $npm '@bitkyc08/opencodex'
-    if ($found) { $openCodexVersion = $found; break }
-}
-$proxyPorts = @()
-foreach ($port in @(10100, 51863)) { if (Test-Port $port) { $proxyPorts += $port } }
-$proxyTaskKey = Get-TaskStateKey $settings.ProxyTaskName
-$openCodexModels = @()
-$openCodexProviders = @()
-$openCodexIntegration = ''
-$openCodexProviderName = ''
-$disabledOpenCodexModels = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
-try {
-    $openCodexConfigPath = Join-Path $env:USERPROFILE '.opencodex\config.json'
-    if (Test-Path -LiteralPath $openCodexConfigPath) {
-        $openCodexConfig = Get-Content -Raw -LiteralPath $openCodexConfigPath -Encoding UTF8 | ConvertFrom-Json
-        foreach ($selector in @($openCodexConfig.disabledModels)) {
-            if ($selector) { [void]$disabledOpenCodexModels.Add([string]$selector) }
-        }
-    }
-} catch { }
-if ($openCodexVersion) {
-    $openCodexCommand = Get-Command opencodex -ErrorAction SilentlyContinue
-    if ($openCodexCommand) {
-        try {
-            $liveRaw = & $openCodexCommand.Source models live --json 2>$null | Out-String
-            if ($liveRaw -and $liveRaw.Trim().StartsWith('[')) {
-                $liveList = $liveRaw | ConvertFrom-Json
-                foreach ($entry in @($liveList)) {
-                    $modelId = if ($entry.id) { [string]$entry.id } else { [string]$entry.model }
-                    if ($modelId) {
-                        $providerId = [string]$entry.provider
-                        $isDisabled = [bool]$entry.disabled
-                        $openCodexModels += [ordered]@{
-                            Id=$modelId
-                            Provider=$providerId
-                            IsVisible=(-not $isDisabled)
-                        }
-                    }
-                }
-            } else {
-                $modelJson = & $openCodexCommand.Source models list --json 2>$null | Out-String | ConvertFrom-Json
-                foreach ($entry in @($modelJson.models)) {
-                    if ($entry.model) {
-                        $providerId = [string]$entry.provider
-                        $modelId = [string]$entry.model
-                        $selector = if ($providerId -and $providerId -ne 'openai') { "$providerId/$modelId" } else { $modelId }
-                        $openCodexModels += [ordered]@{
-                            Id=$modelId
-                            Provider=$providerId
-                            IsVisible=(-not $disabledOpenCodexModels.Contains($selector))
-                        }
-                    }
-                }
-            }
-        } catch { }
-        try {
-            $providerJson = & $openCodexCommand.Source provider list --json 2>$null | Out-String | ConvertFrom-Json
-            foreach ($entry in @($providerJson.configured)) {
-                $isDefault = [bool]$entry.isDefault
-                $openCodexProviders += [ordered]@{ Id=[string]$entry.name; Name=[string]$entry.name; BaseUrl=[string]$entry.baseUrl; Enabled=$true; IsDefault=$isDefault }
-                if ($isDefault) { $openCodexProviderName = [string]$entry.name }
-            }
-        } catch { }
-        try {
-            $integrationJson = & $openCodexCommand.Source integration native --json 2>$null | Out-String | ConvertFrom-Json
-            $codexIntegration = @($integrationJson.clients | Where-Object { $_.clientId -eq 'codex' } | Select-Object -First 1)
-            if ($codexIntegration.Count -gt 0) { $openCodexIntegration = [string]$codexIntegration[0].state }
-        } catch { }
-    }
-}
-
 $relayVersion = $null
 $relayPackageJson = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\package.json'
 if (Test-Path -LiteralPath $relayPackageJson) {
@@ -603,20 +529,6 @@ $components += New-Component -Id 'codex' -NameKey 'CompCodexName' -KindKey 'Comp
     -Latest $(if ($codexNpmVersion) { $v = Get-RegistryVersion '@openai/codex'; if ($v) { $v } else { $script:Unknown } } else { $script:Unknown }) `
     -Manage $false -Running ([bool]$codexVersion) -Account $codexAccount -PrereqReady ($nodeOk -and $npmOk)
 
-$proxyState = if ($proxyPorts.Count -gt 0) { 'Healthy' }
-    elseif (-not $openCodexVersion) { 'Unavailable' }
-    elseif ($proxyTaskKey -eq 'TaskStateRunning') { 'Warning' }
-    else { 'Stopped' }
-$proxyDetailKey = if ($proxyPorts.Count -gt 0) { 'DetailProxyListening' }
-    elseif (-not $openCodexVersion) { 'DetailProxyMissing' }
-    elseif ($proxyTaskKey -eq 'TaskStateNotInstalled') { 'DetailProxyNoTask' }
-    else { 'DetailProxyStopped' }
-$proxyDetailArgs = if ($proxyPorts.Count -gt 0) { @(($proxyPorts -join ', '), ('@' + $proxyTaskKey)) } else { @(('@' + $proxyTaskKey)) }
-$components += New-Component -Id 'opencodex' -NameKey 'CompProxyName' -KindKey 'CompProxyKind' `
-    -State $proxyState -DetailKey $proxyDetailKey -DetailArgs $proxyDetailArgs `
-    -Installed $(if ($openCodexVersion) { $openCodexVersion } else { $script:Unknown }) `
-    -Latest $(if ($openCodexVersion) { $v = Get-RegistryVersion '@bitkyc08/opencodex'; if ($v) { $v } else { $script:Unknown } } else { $script:Unknown }) `
-    -Manage $true -Running ($proxyPorts.Count -gt 0) -PrereqReady ($nodeOk -and $npmOk)
 
 $relayState = if ($relayListening) { 'Healthy' }
     elseif (-not $relayVersion) { 'Unavailable' }
@@ -707,88 +619,6 @@ foreach ($p in @(Get-CimInstance Win32_Process -Filter "Name = 'ChatGPT.exe' or 
         ExecutablePath = $(if ($p.ExecutablePath) { [string]$p.ExecutablePath } else { $script:Unknown })
     }
 }
-
-# --- providers ------------------------------------------------------------
-
-$codexConfig = Join-Path $env:USERPROFILE '.codex\config.toml'
-$configLines = if (Test-Path -LiteralPath $codexConfig) { @(Get-Content -LiteralPath $codexConfig -Encoding UTF8) } else { @() }
-$selectedProvider = ''
-$openaiBaseUrl = ''
-foreach ($line in $configLines) {
-    $trimmed = $line.Trim()
-    if ($trimmed.StartsWith('model_provider') -and $trimmed.Contains('=')) { $selectedProvider = $trimmed.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
-    if ($trimmed.StartsWith('openai_base_url') -and $trimmed.Contains('=')) { $openaiBaseUrl = $trimmed.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
-}
-
-$providersList = @()
-$currentProviderId = ''
-$currentProviderName = ''
-$currentProviderUrl = ''
-$currentProviderWire = ''
-foreach ($line in ($configLines + @('[__end__]'))) {
-    $trimmed = $line.Trim()
-    if ($trimmed.StartsWith('[model_providers.')) {
-        if ($currentProviderId) {
-            $providersList += [ordered]@{
-                Id      = $currentProviderId
-                Name    = $(if ($currentProviderName) { $currentProviderName } else { $currentProviderId })
-                BaseUrl = $(if ($currentProviderUrl) { $currentProviderUrl } else { 'https://api.openai.com/v1' })
-                WireApi = $(if ($currentProviderWire) { $currentProviderWire } else { 'responses' })
-                IsActive = [bool]($selectedProvider -eq $currentProviderId)
-            }
-        }
-        $currentProviderId = $trimmed.Substring('[model_providers.'.Length).TrimEnd(']').Trim()
-        $currentProviderName = ''; $currentProviderUrl = ''; $currentProviderWire = ''
-        continue
-    }
-    if ($trimmed.StartsWith('[')) {
-        if ($currentProviderId) {
-            $providersList += [ordered]@{
-                Id      = $currentProviderId
-                Name    = $(if ($currentProviderName) { $currentProviderName } else { $currentProviderId })
-                BaseUrl = $(if ($currentProviderUrl) { $currentProviderUrl } else { 'https://api.openai.com/v1' })
-                WireApi = $(if ($currentProviderWire) { $currentProviderWire } else { 'responses' })
-                IsActive = [bool]($selectedProvider -eq $currentProviderId)
-            }
-        }
-        $currentProviderId = ''
-        continue
-    }
-    if ($currentProviderId) {
-        if ($trimmed -match '^name\s*=') { $currentProviderName = $trimmed.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
-        elseif ($trimmed -match '^base_url\s*=') { $currentProviderUrl = $trimmed.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
-        elseif ($trimmed -match '^wire_api\s*=') { $currentProviderWire = $trimmed.Split('=', 2)[1].Trim().Trim('"').Trim("'") }
-    }
-}
-
-# config.toml may omit model_provider. In that case Codex uses its built-in
-# OpenAI provider, unless openai_base_url was rewritten to a local proxy — which
-# is exactly what OpenCodex does on install. Resolve that before marking a row
-# active, otherwise the UI claims OpenAI is serving requests that never leave
-# the machine.
-$localProxyPattern = '(?i)^https?://(?:localhost|127\.0\.0\.1|\[::1\]):(?:10100|51863)'
-$effectiveProviderId = $selectedProvider
-if (-not $effectiveProviderId) {
-    if ($openaiBaseUrl -and $openaiBaseUrl -match $localProxyPattern) { $effectiveProviderId = 'opencodex' }
-    else { $effectiveProviderId = 'custom' }
-}
-
-if (-not ($providersList | Where-Object { $_.Id -eq 'custom' })) {
-    $providersList = @([ordered]@{
-        Id = 'custom'; Name = 'OpenAI'; BaseUrl = 'https://api.openai.com/v1'
-        WireApi = 'responses'; IsActive = $false
-    }) + $providersList
-}
-if (-not ($providersList | Where-Object { $_.Id -eq 'opencodex' })) {
-    $providersList += [ordered]@{
-        Id       = 'opencodex'
-        Name     = 'OpenCodex'
-        BaseUrl  = 'http://127.0.0.1:10100/v1'
-        WireApi  = 'responses'
-        IsActive = [bool]($effectiveProviderId -eq 'opencodex')
-    }
-}
-foreach ($provider in $providersList) { $provider.IsActive = ($provider.Id -eq $effectiveProviderId) }
 
 # --- public egress --------------------------------------------------------
 
@@ -923,12 +753,7 @@ $snapshot = [ordered]@{
         EnvironmentProxy = $environmentProxy
     }
     PublicEgress  = $publicEgress
-    Providers     = $providersList
     NetworkProbes = $networkProbes
-    OpenCodexModels = $openCodexModels
-    OpenCodexProviders = $openCodexProviders
-    OpenCodexIntegration = $openCodexIntegration
-    OpenCodexProviderName = $openCodexProviderName
     NodeMirror    = [string]$settings.NodeMirror
     NpmRegistry   = $npmRegistry
     NodeMinimumVersion = $NodeMinimumVersion

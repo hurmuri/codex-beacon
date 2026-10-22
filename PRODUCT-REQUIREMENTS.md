@@ -8,11 +8,10 @@ This document is the canonical description of the vNext information architecture
 
 ## Product boundary
 
-Codex Beacon is a Windows-only native manager for the ChatGPT desktop package, the user-managed Codex CLI, their prerequisites and network path, and optional OpenCodex, Tailscale, and Codex Relay integrations.
+Codex Beacon is a Windows-only native manager for the ChatGPT desktop package, the user-managed Codex CLI, their prerequisites and network path, and optional Tailscale and Codex Relay integrations.
 
 - ChatGPT desktop and the user-managed Codex CLI are the product core.
-- OpenCodex, Tailscale, and Codex Relay remain separate modules. Missing optional modules do not make the core unhealthy.
-- OpenCodex owns its supported client integrations. Codex Beacon invokes OpenCodex's declared CLI/API capabilities instead of duplicating or reverse-engineering its internal configuration.
+- Tailscale and Codex Relay remain separate modules. Missing optional modules do not make the core unhealthy.
 - Configured state is not proof of active state. Runtime health requires the relevant process, listener, route, or observed connection evidence.
 
 ## Navigation
@@ -23,11 +22,9 @@ The canonical navigation order is:
 2. **Dependencies**
 3. **Codex processes**
 4. **Network**
-5. **Providers**
-6. **OpenCodex**
-7. **Tailscale**
-8. **Codex Relay**
-9. **Settings / About & updates**
+5. **Tailscale**
+6. **Codex Relay**
+7. **Settings / About & updates**
 
 The desktop layout uses `NavigationView`. Pages preserve state while navigating. Network management is a dedicated page, not an overview subsection.
 
@@ -89,7 +86,7 @@ Preserve the existing process inventory and guarded recovery behavior. Continue 
 
 ## Network
 
-The Network page separates transport state from model-provider state.
+The Network page owns transport state: proxy mode, reachability, and public egress.
 
 ### System transport
 
@@ -98,7 +95,7 @@ The Network page separates transport state from model-provider state.
 - supported environment-variable proxies;
 - TUN adapter detection;
 - configured custom HTTP proxy endpoint;
-- machine public egress IP, provider, geography, and check time.
+- machine public egress IP, egress provider, geography, and check time.
 
 ### Client checks
 
@@ -114,46 +111,7 @@ ChatGPT desktop and Codex CLI have separate checks. Results distinguish:
 - selected route active with observed connections;
 - timeout or TLS failure.
 
-A proxy route is active only when the selected provider supports it, the endpoint matches, listener ownership is known, and observed TCP connections support the conclusion. Public egress is never presented as a remote service IP.
-
-## Providers
-
-The Providers page supports:
-
-- list, add, edit, duplicate, remove, and set active;
-- provider name, base URL, adapter/API type, authentication mode, default model, and source;
-- duplicate detection and endpoint validation;
-- selectable connectivity-test model, defaulting to `gpt-5.4`;
-- layered DNS/TCP/TLS, model-discovery, and minimal inference tests;
-- latency and specific error classification;
-- configuration backup and rollback around every mutation.
-
-### Provider key input
-
-- The operator may paste or type the raw provider key into a password-style field.
-- The value is hidden by default and can be revealed only through an explicit press-and-hold or toggle control with an accessible name.
-- When the operator saves the provider, Codex Beacon may store the raw key in `%USERPROFILE%\.CodexBeacon\providers.json` alongside that provider's non-secret configuration.
-- `.CodexBeacon` is explicitly assigned the Windows `Hidden` attribute; the leading dot alone is not treated as the hiding mechanism.
-- The credential file is plaintext by product decision and must be restricted to the current Windows user. It must never inherit access that makes it readable by other ordinary local users.
-- The key must not be uploaded, logged, included in diagnostics, placed on a process command line, echoed in errors or status text, written to crash reports, or included in a default settings/diagnostic export.
-- Loading an existing provider may populate the password control, but the value remains masked by default. Lists and summaries show only a neutral `Key saved` state, never a prefix, suffix, length, or fingerprint.
-- Saving uses an atomic replace and preserves the current-user-only access rule. Removing a provider or selecting `Clear key` removes the persisted value.
-- Connectivity tests pass the key through standard input, a protected local IPC body, or another non-command-line channel and redact downstream failures before they reach the UI.
-
-## OpenCodex
-
-OpenCodex has a dedicated page with:
-
-- dependency, installation, stable/preview version, and update state;
-- service install, start, stop, restart, and health;
-- the OpenCodex scheduled-task/service name, listener port, startup behavior, and other OpenCodex-specific settings;
-- configured providers and the current default;
-- static and live model catalogs, selected models, and last synchronization time;
-- selectable model connectivity tests;
-- native Codex integration state, including absent, current, drifted, blocked, and pending synchronization;
-- `doctor`, synchronization, and dashboard entry points.
-
-Feature availability is driven by `opencodex capabilities --json`. Current integrations should prefer structured commands such as `health --json`, `provider list --json`, `models list --json`, live-model discovery, provider testing, and `integration native` rather than parsing private files.
+A proxy route is active only when the configured mode matches the endpoint, listener ownership is known, and observed TCP connections support the conclusion. Public egress is never presented as a remote service IP.
 
 ## Tailscale
 
@@ -171,8 +129,6 @@ This page owns only application-wide preferences and Codex Beacon itself, such a
 
 - Node.js mirror and npm Registry -> Dependencies;
 - system, TUN, and custom HTTP proxy options -> Network;
-- provider definitions, test model, key input, and saved-key lifecycle -> Providers;
-- OpenCodex task/service name, port, startup, sync, and integration settings -> OpenCodex;
 - Tailscale service options -> Tailscale;
 - Codex Relay task/service name, listener, startup, login, and pairing settings -> Codex Relay.
 
@@ -180,7 +136,7 @@ The Settings page must not become a second inventory of component controls.
 
 ## Download experience
 
-Every operation that downloads bytes must expose a consistent, non-blocking progress surface. This includes application self-update, ChatGPT/App Installer acquisition, NVM, Node.js, npm packages, OpenCodex, Codex Relay, Tailscale, and any downloaded metadata large enough to create a visible wait.
+Every operation that downloads bytes must expose a consistent, non-blocking progress surface. This includes application self-update, ChatGPT/App Installer acquisition, NVM, Node.js, npm packages, Codex Relay, Tailscale, and any downloaded metadata large enough to create a visible wait.
 
 While the source reports total size, show:
 
@@ -203,7 +159,7 @@ When total size is unknown, use an indeterminate native progress bar but still s
 - Administrative actions remain visible and use standard UAC; there is no silent elevation.
 - Configuration changes are atomic, backed up, validated, and rolled back on failure.
 - User-facing errors state what failed and the next recovery action.
-- Diagnostics and logs remove credentials, authorization headers, cookies, tokens, and sensitive query parameters. Default exports exclude saved provider keys and the credential-bearing file.
+- Diagnostics and logs remove credentials, authorization headers, cookies, tokens, and sensitive query parameters. Default exports exclude any credential-bearing configuration.
 
 ## Documentation synchronization
 

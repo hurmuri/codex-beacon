@@ -37,9 +37,7 @@
                 <NavigationViewItem x:Uid="NavDashboard" Content="总览" Tag="dashboard" IsSelected="True">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE80F;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="OpenCodex" Tag="opencodex">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE950;" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
+
                 <NavigationViewItem x:Uid="NavDependencies" Content="依赖管理" Tag="installations">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE896;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
@@ -443,161 +441,6 @@
                                     <Button x:Name="OpenEgressWebsiteButton" x:Uid="OpenEgressCheck" Content="打开完整 IP 检测" Style="{StaticResource QuietButtonStyle}" Click="OpenEgressCheck_Click" />
                                     <TextBlock x:Uid="EgressWebsiteHint" Text="由 ip.net.coffee 提供 ChatGPT / Codex 出口与风险检测。" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
                                 </StackPanel>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- ========================== OpenCodex ========================== -->
-                <ScrollViewer x:Name="OpenCodexPage" Visibility="Collapsed" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Padding="28,20,28,36">
-                    <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch">
-                        <TextBlock Text="OpenCodex" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="OpenCodexDescription" Text="独立管理 OpenCodex 代理扩展的依赖、版本、后台服务、模型路由与 Codex 原生集成。" Style="{StaticResource CaptionTextStyle}" Margin="0,6,0,0" />
-
-                        <!-- 服务与版本管理 -->
-                        <TextBlock x:Uid="ServiceVersionHeading" Text="服务与版本控制" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}" Margin="0,12,0,0">
-                            <StackPanel Spacing="14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="4">
-                                        <TextBlock x:Uid="OpenCodexServiceTitle" Text="OpenCodex 本地代理服务" Style="{StaticResource CardTitleStyle}" />
-                                        <TextBlock x:Uid="OpenCodexServiceSubtitle" Text="统一管理 ChatGPT 客户端与 Codex CLI 的本地代理和模型显示" Style="{StaticResource CaptionTextStyle}" />
-                                    </StackPanel>
-                                    <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Top">
-                                        <TextBlock x:Name="OpenCodexStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
-                                    </Border>
-                                </Grid>
-
-                                <Grid ColumnSpacing="24" RowSpacing="6">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                    <TextBlock x:Uid="CurrentVersionLabel" Text="当前版本" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" x:Name="OpenCodexCurrentVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Row="1" x:Uid="LatestVersionLabel" Text="最新版本" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="OpenCodexLatestVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <TextBlock x:Name="OpenCodexDetailText" Text="—" Style="{StaticResource CaptionTextStyle}" />
-
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button x:Uid="CheckNewerButton" Content="检查新版本" Tag="opencodex" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
-                                    <Button x:Name="OpenCodexInstallButton" x:Uid="ActionInstall" Content="安装" Tag="install" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="OpenCodexUpgradeButton" x:Uid="ActionUpgrade" Content="升级" Tag="upgrade" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="OpenCodexStartButton" x:Uid="ActionStart" Content="启动" Tag="start" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="OpenCodexStopButton" x:Uid="ActionStop" Content="停止" Tag="stop" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Uid="ActionRestart" Content="重启" Tag="restart" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <TextBlock x:Uid="OpenCodexClientsHeading" Text="客户端代理状态" Style="{StaticResource SectionTitleStyle}" />
-                        <Grid ColumnSpacing="14">
-                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
-                            <Border Style="{StaticResource PanelStyle}">
-                                <StackPanel Spacing="10">
-                                    <TextBlock x:Uid="ChatGptClientName" Text="ChatGPT 客户端" Style="{StaticResource CardTitleStyle}" />
-                                    <TextBlock x:Name="ChatGptProxyStateText" Text="正在检测代理状态…" Style="{StaticResource BodyTextStyle}" />
-                                    <TextBlock x:Name="ChatGptProviderText" Text="—" Style="{StaticResource MonoCaptionStyle}" />
-                                    <Button x:Name="ChatGptIntegrateButton" x:Uid="SetChatGptProxyButton" Content="设为 ChatGPT 代理" Tag="integrate-chatgpt" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Left" />
-                                </StackPanel>
-                            </Border>
-                            <Border Grid.Column="1" Style="{StaticResource PanelStyle}">
-                                <StackPanel Spacing="10">
-                                    <TextBlock Text="Codex CLI" Style="{StaticResource CardTitleStyle}" />
-                                    <TextBlock x:Name="CodexProxyStateText" Text="正在检测代理状态…" Style="{StaticResource BodyTextStyle}" />
-                                    <TextBlock x:Name="CodexProviderText" Text="—" Style="{StaticResource MonoCaptionStyle}" />
-                                    <Button x:Name="CodexIntegrateButton" x:Uid="SetCodexProxyButton" Content="设为 Codex 代理" Tag="integrate-codex" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Left" />
-                                </StackPanel>
-                            </Border>
-                        </Grid>
-
-                        <!-- 按 Provider 管理模型与测试 -->
-                        <TextBlock x:Uid="AvailableModelsHeading" Text="Provider 模型管理" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}">
-                            <Grid ColumnSpacing="14">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Spacing="3">
-                                    <TextBlock x:Uid="OpenCodexModelTestTitle" Text="模型连通测试" Style="{StaticResource CardTitleStyle}" />
-                                    <TextBlock x:Uid="OpenCodexModelTestHint" Text="从当前已显示的模型中选择一个进行提供方连通测试。" Style="{StaticResource CaptionTextStyle}" />
-                                </StackPanel>
-                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <ComboBox x:Uid="OpenCodexModelPicker" x:Name="OpenCodexModelPicker" MinWidth="360" MaxWidth="520" ItemsSource="{x:Bind VisibleOpenCodexModels}" DisplayMemberPath="DisplayName" PlaceholderText="请选择模型进行测试" />
-                                    <Button x:Uid="TestModelButton" Content="测试所选模型" Tag="test-model" Click="OpenCodexAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                </StackPanel>
-                            </Grid>
-                        </Border>
-
-                        <TextBlock x:Uid="OpenCodexProviderModelsHint" Text="每个 Provider 独立读取目录并管理模型显示；OpenCodex 可能复用短期模型缓存。" Style="{StaticResource CaptionTextStyle}" Margin="0,12,0,0" />
-                        <TextBlock x:Uid="OpenCodexProviderModelsEmpty" x:Name="OpenCodexProviderModelsEmpty" Text="尚未发现已配置的 Provider。" Style="{StaticResource CaptionTextStyle}" Margin="0,12,0,0" Visibility="Collapsed" />
-                        <ItemsRepeater ItemsSource="{x:Bind OpenCodexProviderGroups}" Margin="0,12,0,0">
-                            <ItemsRepeater.Layout>
-                                <StackLayout Spacing="12" />
-                            </ItemsRepeater.Layout>
-                            <ItemsRepeater.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Style="{StaticResource PanelStyle}">
-                                        <StackPanel Spacing="12">
-                                            <Grid ColumnSpacing="12">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel Spacing="3">
-                                                    <TextBlock Text="{Binding DisplayName}" Style="{StaticResource CardTitleStyle}" />
-                                                    <TextBlock Text="{Binding Summary}" Style="{StaticResource CaptionTextStyle}" />
-                                                    <TextBlock Text="{Binding BaseUrl}" Style="{StaticResource MonoCaptionStyle}" TextTrimming="CharacterEllipsis" />
-                                                </StackPanel>
-                                                <Button Grid.Column="1" x:Uid="RefreshProviderModelsButton" Content="刷新此 Provider" Click="OpenCodexProviderModels_Refresh" Style="{StaticResource QuietButtonStyle}" VerticalAlignment="Center" />
-                                                <ToggleSwitch Grid.Column="2" x:Uid="ProviderModelsToggle" Header="全部在客户端显示" OnContent="" OffContent="" IsOn="{Binding AllModelsVisible, Mode=OneWay}" Toggled="OpenCodexProviderVisibility_Toggled" VerticalAlignment="Center" />
-                                            </Grid>
-                                            <Grid Padding="12,8" ColumnSpacing="16" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="148" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock x:Uid="ModelVisibilityHeader" Text="在客户端显示" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
-                                                <TextBlock x:Uid="ModelNameHeader" Grid.Column="1" Text="模型名" Style="{StaticResource CaptionTextStyle}" FontWeight="SemiBold" />
-                                            </Grid>
-                                            <ItemsRepeater ItemsSource="{Binding Models}">
-                                                <ItemsRepeater.Layout>
-                                                    <StackLayout Spacing="0" />
-                                                </ItemsRepeater.Layout>
-                                                <ItemsRepeater.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <Grid Padding="12,7" ColumnSpacing="16">
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="148" />
-                                                                <ColumnDefinition Width="*" />
-                                                            </Grid.ColumnDefinitions>
-                                                            <ToggleSwitch HorizontalAlignment="Left" VerticalAlignment="Center" OnContent="" OffContent="" IsOn="{Binding IsVisible, Mode=OneWay}" Toggled="OpenCodexModelVisibility_Toggled" />
-                                                            <TextBlock Grid.Column="1" Text="{Binding Id}" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                                                        </Grid>
-                                                    </DataTemplate>
-                                                </ItemsRepeater.ItemTemplate>
-                                            </ItemsRepeater>
-                                        </StackPanel>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsRepeater.ItemTemplate>
-                        </ItemsRepeater>
-
-                        <!-- 计划任务设置 -->
-                        <TextBlock x:Uid="ServiceSettingsHeading" Text="服务设置" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="10">
-                                <TextBox x:Name="ProxyTaskNameBox" x:Uid="ProxyTaskNameBox" Header="OpenCodex Proxy 计划任务名称" Width="460" HorizontalAlignment="Left" />
-                                <Button x:Uid="OpenCodexSaveButton" Content="保存任务名称" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -1051,7 +894,6 @@
                         <TextBlock x:Uid="ReferencesHeading" Text="上游与开源参考" Style="{StaticResource SectionTitleStyle}" />
                         <toolkit:SettingsExpander x:Uid="OpenSourceProjectsExpander" Header="参考项目" Description="组件源码与实现参考" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
-                                <toolkit:SettingsCard x:Uid="ReferenceOpencodex" Header="OpenCodex" Description="可选 Provider 代理扩展"><HyperlinkButton Content="lidge-jun/opencodex" NavigateUri="https://github.com/lidge-jun/opencodex" /></toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="ReferenceAppManager" Header="Codex App Manager" Description="Codex 桌面版本管理方案参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="ReferenceRelay" Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="ReferenceIpCoffee" Header="ip.net.coffee" Description="ChatGPT / Codex 出口 IP 与风险检测数据源"><HyperlinkButton Content="ip.net.coffee/gpt" NavigateUri="https://ip.net.coffee/gpt/" /></toolkit:SettingsCard>

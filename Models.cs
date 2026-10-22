@@ -1,4 +1,4 @@
-﻿﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
@@ -66,14 +66,9 @@ public sealed class SystemSnapshot
     public List<NodeRuntime> NodeVersions { get; set; } = [];
     public ProxyStatus Proxy { get; set; } = new();
     public List<PublicEgress> PublicEgress { get; set; } = [];
-    public List<ModelProviderItem> Providers { get; set; } = [];
     public List<NetworkProbe> NetworkProbes { get; set; } = [];
-    public List<OpenCodexModel> OpenCodexModels { get; set; } = [];
-    public List<OpenCodexProvider> OpenCodexProviders { get; set; } = [];
     public string NodeMirror { get; set; } = "";
     public string NpmRegistry { get; set; } = "";
-    public string OpenCodexIntegration { get; set; } = "";
-    public string OpenCodexProviderName { get; set; } = "";
     public string NodeMinimumVersion { get; set; } = "22.14.0";
     public string CodexStoreProductId { get; set; } = "";
     public string? Error { get; set; }
@@ -98,41 +93,6 @@ public sealed class NetworkProbe
     };
     [JsonIgnore] public SolidColorBrush StatusBackground => Palette.Background(State == "Connected" ? "Healthy" : State == "Unknown" ? "Stopped" : "Warning");
     [JsonIgnore] public SolidColorBrush StatusForeground => Palette.Foreground(State == "Connected" ? "Healthy" : State == "Unknown" ? "Stopped" : "Warning");
-}
-
-public sealed class OpenCodexModel
-{
-    public string Id { get; set; } = "";
-    public string Provider { get; set; } = "";
-    public bool IsVisible { get; set; } = true;
-    [JsonIgnore] public string Selector => string.IsNullOrWhiteSpace(Provider) || Provider.Equals("openai", StringComparison.OrdinalIgnoreCase) ? Id : $"{Provider}/{Id}";
-    [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Provider) ? Id : $"{Id} · {Provider}";
-    [JsonIgnore] public string VisibilityLabel => Localization.Get(IsVisible ? "ModelVisible" : "ModelHidden");
-}
-
-public sealed class OpenCodexProvider
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string BaseUrl { get; set; } = "";
-    public bool Enabled { get; set; }
-    public bool IsDefault { get; set; }
-}
-
-public sealed class OpenCodexProviderGroup
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string BaseUrl { get; set; } = "";
-    public bool IsDefault { get; set; }
-    public ObservableCollection<OpenCodexModel> Models { get; } = [];
-
-    [JsonIgnore] public string DisplayName => string.IsNullOrWhiteSpace(Name) ? Id : Name;
-    [JsonIgnore] public string Summary => Localization.Format(
-        IsDefault ? "OpenCodexProviderModelCountDefault" : "OpenCodexProviderModelCount",
-        Models.Count,
-        Models.Count(model => model.IsVisible));
-    [JsonIgnore] public bool AllModelsVisible => Models.Count > 0 && Models.All(model => model.IsVisible);
 }
 
 public sealed class ComponentStatus : INotifyPropertyChanged
@@ -247,7 +207,6 @@ public sealed class ComponentStatus : INotifyPropertyChanged
     {
         "desktop" => new Uri("https://github.com/Wangnov/Codex-App-Manager"),
         "codex" => new Uri("https://github.com/openai/codex"),
-        "opencodex" => new Uri("https://github.com/lidge-jun/opencodex"),
         "relay" => new Uri("https://github.com/gronxb/codex-relay"),
         "nvm" => new Uri("https://github.com/coreybutler/nvm-windows"),
         "appinstaller" or "winget" => new Uri("https://github.com/microsoft/winget-cli"),
@@ -287,40 +246,6 @@ public sealed class ProcessRecord
     [JsonIgnore] public string VersionLabel => string.IsNullOrEmpty(Version) ? Palette.Dash : Version;
     [JsonIgnore] public string StartedAtLabel => string.IsNullOrEmpty(StartedAt) ? Palette.Dash : StartedAt;
     [JsonIgnore] public string PathLabel => string.IsNullOrEmpty(ExecutablePath) ? Palette.Dash : ExecutablePath;
-}
-
-public sealed class ModelProviderItem
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string BaseUrl { get; set; } = "";
-    public string WireApi { get; set; } = "";
-    public bool IsActive { get; set; }
-    public string TestModel { get; set; } = "gpt-5.4";
-
-    [JsonIgnore] public bool CanSwitch => !IsActive;
-    [JsonIgnore] public string SwitchButtonText => Localization.Get(IsActive ? "ProviderActiveBtn" : "ProviderSwitchBtn");
-    [JsonIgnore] public string StatusLabel => Localization.Get(IsActive ? "ProviderActive" : "ProviderInactive");
-    [JsonIgnore] public SolidColorBrush StatusBackground => Palette.Background(IsActive ? "Healthy" : "Stopped");
-    [JsonIgnore] public SolidColorBrush StatusForeground => Palette.Foreground(IsActive ? "Healthy" : "Stopped");
-}
-
-/// <summary>
-/// User-managed provider configuration. ApiKey is serialized only by ProviderStore;
-/// it must never be copied into diagnostics, command-line arguments, or status output.
-/// </summary>
-public sealed class ProviderProfile
-{
-    public string Id { get; set; } = "";
-    public string Name { get; set; } = "";
-    public string BaseUrl { get; set; } = "https://api.openai.com/v1";
-    public string WireApi { get; set; } = "responses";
-    public string ApiKey { get; set; } = "";
-    public string TestModel { get; set; } = "gpt-5.4";
-    public bool IsDefault { get; set; }
-
-    [JsonIgnore] public bool HasApiKey => !string.IsNullOrWhiteSpace(ApiKey);
-    [JsonIgnore] public string KeyStatus => Localization.Get(HasApiKey ? "ProviderKeyConfigured" : "ProviderKeyMissing");
 }
 
 public sealed class OperationProgress
@@ -464,7 +389,6 @@ public sealed class AppSettings
 {
     public int RefreshSeconds { get; set; } = 15;
     public string RelayTaskName { get; set; } = "Codex Relay";
-    public string ProxyTaskName { get; set; } = "opencodex-proxy";
     public string Language { get; set; } = Localization.SystemLanguage;
     public string NodeMirror { get; set; } = "https://mirrors.aliyun.com/nodejs-release";
     public string NpmRegistry { get; set; } = "https://registry.npmjs.org";

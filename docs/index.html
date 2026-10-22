@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codex Beacon · All-in-One Control Center for Codex</title>
-  <meta name="description" content="All-in-One Control Center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, optional OpenCodex proxy multiplexing, Codex Relay, and Tailscale.">
+  <meta name="description" content="All-in-One Control Center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, Codex Relay, and Tailscale.">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
@@ -797,7 +797,7 @@
 
       <h1 class="hero-h1" data-i18n="h.title">All-in-One Control Center for Codex</h1>
       <p class="hero-desc" data-i18n="h.desc">
-        Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional OpenCodex proxying, Codex Relay, and Tailscale.
+        Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional Codex Relay and Tailscale.
       </p>
 
       <div class="hero-actions">
@@ -831,15 +831,13 @@
 
         <!-- Workspace -->
         <div class="win-workspace">
-          <!-- Left Navigation Rail with All 9 Real Modules -->
+          <!-- Left Navigation Rail with All Real Modules -->
           <div class="win-sidebar">
             <button class="side-icon-btn" title="Menu">☰</button>
             <button class="side-icon-btn active" id="sbtn-dashboard" onclick="setAppPage('dashboard')" title="Codex Dashboard / 总览">🏠</button>
             <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="Dependencies / 依赖管理">📥</button>
             <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes / 进程管控">📊</button>
             <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress / 网络与代理">🌐</button>
-            <button class="side-icon-btn" id="sbtn-providers" onclick="setAppPage('providers')" title="Providers / 凭证管理">{ }</button>
-            <button class="side-icon-btn" id="sbtn-opencodex" onclick="setAppPage('opencodex')" title="OpenCodex (Optional / 可选)">⚡</button>
             <button class="side-icon-btn" id="sbtn-relay" onclick="setAppPage('relay')" title="Codex Relay (Optional / 可选)">📡</button>
             <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale (Optional / 可选)">🔗</button>
             <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings / 设置">⚙️</button>
@@ -873,7 +871,7 @@
           <span>⚡</span> <span data-i18n="f2.t">Decoupled Dual Pipeline</span>
         </div>
         <p class="f-desc" data-i18n="f2.d">
-          Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, optional OpenCodex proxy, or Tailscale.
+          Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, the system proxy, or Tailscale.
         </p>
       </div>
 
@@ -1069,7 +1067,7 @@
 
           <div class="section-label">${isEn ? 'Real-time Dual-Layer Topology' : '双层链路实时拓扑'}</div>
           <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; padding:18px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.7;">
-            <div><span style="color:#0284c7; font-weight:700;">[Model Plane]</span> Codex CLI (:4096) ➔ OpenCodex Mux (:10100) ➔ DeepSeek-V3 / Claude</div>
+            <div><span style="color:#0284c7; font-weight:700;">[Model Plane]</span> Codex CLI (:4096) ➔ OpenAI Responses API</div>
             <div style="margin-top:8px;"><span style="color:#15803d; font-weight:700;">[Transport Plane]</span> Local Socket ➔ Direct System Proxy ➔ Tokyo Edge (38ms · Zero Leak)</div>
           </div>
         `;
@@ -1093,42 +1091,10 @@
               <span>14280</span><span>OpenAI.Codex.exe</span><span>:4096</span><span style="color:#15803d">${isEn ? 'Protected' : '核心受保护'}</span>
             </div>
             <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid var(--app-card-border);">
-              <span>21904</span><span>node.exe (opencodex)</span><span>:10100</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
+              <span>21904</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
             </div>
             <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px;">
-              <span>31088</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
-            </div>
-          </div>
-        `;
-      } else if (pageKey === 'providers') {
-        main.innerHTML = `
-          <div class="view-header">
-            <div>
-              <h2 class="view-h2">${isEn ? 'Providers & Secret Vault' : 'Providers 凭证管理'}</h2>
-              <div class="view-sub">${isEn ? 'Manage model providers securely. Keys are kept in hidden user-only storage.' : '编辑与切换模型供应商，密码框保护，禁止明文落入日志。'}</div>
-            </div>
-          </div>
-
-          <div class="summary-card">
-            <div class="summary-col">
-              <span class="summary-label">${isEn ? 'Active Provider' : '当前生效 Provider'}</span>
-              <span class="summary-val">OpenCodex Mux (${isEn ? 'Local Smart Dispatch' : '本地智能代理'})</span>
-            </div>
-            <div class="summary-col">
-              <span class="summary-label">${isEn ? 'Config Path' : '配置文件'}</span>
-              <span class="summary-val">%USERPROFILE%\\.codex\\config.toml</span>
-            </div>
-            <button class="btn-outline-sm" onclick="alert('${isEn ? 'Switched to Direct OpenAI' : '已切回官方直连'}')">${isEn ? 'Direct OpenAI' : '切回官方直连'}</button>
-          </div>
-
-          <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; padding:20px;">
-            <div style="margin-bottom:12px;">
-              <span style="font-size:0.75rem; color:var(--app-text-muted);">API Base URL:</span>
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:var(--app-text); margin-top:4px;">http://127.0.0.1:10100/v1</div>
-            </div>
-            <div>
-              <span style="font-size:0.75rem; color:var(--app-text-muted);">API Key (${isEn ? 'Protected Hidden Storage' : '受保护隐藏存储'}):</span>
-              <div style="font-family:'JetBrains Mono',monospace; font-size:0.85rem; color:#0284c7; margin-top:4px;">sk-••••••••••••••••••••••••39fe (%USERPROFILE%\\.CodexBeacon\\providers.json)</div>
+              <span>31088</span><span>node.exe (nvm-managed)</span><span>:4096</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
             </div>
           </div>
         `;
@@ -1157,20 +1123,6 @@
             <button class="card-btn enabled" style="padding:8px 16px; font-weight:700;">✓ v22.15.0 (${isEn ? 'Active' : '活跃中'})</button>
             <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v20.18.0' : '已切换到 v20.18.0'}')">v20.18.0</button>
             <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v18.20.4' : '已切换到 v18.20.4'}')">v18.20.4</button>
-          </div>
-        `;
-      } else if (pageKey === 'opencodex') {
-        main.innerHTML = `
-          <div class="view-header">
-            <div>
-              <h2 class="view-h2">${isEn ? 'OpenCodex (Optional Extension)' : 'OpenCodex (可选扩展模块)'}</h2>
-              <div class="view-sub">${isEn ? 'Optional modular service for multi-model dispatch and port 10100.' : '独立管理 opencodex-proxy 计划任务与 10100 端口服务（按需开启）。'}</div>
-            </div>
-          </div>
-          <div class="summary-card">
-            <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:10100</span></div>
-            <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 21904)</span></div>
-            <div class="summary-col"><span class="summary-label">Module Type</span><span class="summary-val" style="color:#0284c7">${isEn ? 'Optional Extension' : '可选扩展'}</span></div>
           </div>
         `;
       } else if (pageKey === 'relay') {
@@ -1240,13 +1192,13 @@
         'nav.download': 'Download',
         'h.pill': 'v1.1.0 · Native WinUI 3 Control Center',
         'h.title': 'All-in-One Control Center for Codex',
-        'h.desc': 'Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional OpenCodex proxying, Codex Relay, and Tailscale.',
+        'h.desc': 'Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional Codex Relay and Tailscale.',
         'h.btnDownload': 'Download Portable (.zip)',
         'app.hint': '💡 Click the sidebar icons to interactively explore each screen right here',
         'f1.t': 'Dual-Core Transparency',
         'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
         'f2.t': 'Decoupled Dual Pipeline',
-        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, optional OpenCodex proxy, or Tailscale.',
+        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, the system proxy, or Tailscale.',
         'f3.t': 'Egress Residential Radar',
         'f3.d': 'Probes the real origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
         'f4.t': 'Safe Process Whitelist',
@@ -1261,13 +1213,13 @@
         'nav.download': '下载',
         'h.pill': 'v1.1.0 · WinUI 3 原生 Windows 控制台',
         'h.title': 'Codex 一站式管理中心',
-        'h.desc': '统一调度 ChatGPT 桌面端与 Codex CLI。毫秒启动，双层管线，公网检测；支持 OpenCodex 代理分流、Codex Relay 与 Tailscale（可选功能，按需开启）。',
+        'h.desc': '统一调度 ChatGPT 桌面端与 Codex CLI。毫秒启动，双层管线，公网检测；支持 Codex Relay 与 Tailscale（可选功能，按需开启）。',
         'h.btnDownload': '下载便携版 (Portable)',
         'app.hint': '💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能',
         'f1.t': '双核心分离观测',
         'f1.d': '独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。',
         'f2.t': '双层链路解耦',
-        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走 OpenCodex 代理（可选），还是经过 Tailscale 转发（可选）。',
+        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走系统代理，还是经过 Tailscale 转发（可选）。',
         'f3.t': '公网出口防封雷达',
         'f3.d': '以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。',
         'f4.t': '安全进程白名单',

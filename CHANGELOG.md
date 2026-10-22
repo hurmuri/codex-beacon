@@ -4,25 +4,26 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Removed
+
+- Removed the OpenCodex integration completely. The navigation entry and the whole OpenCodex page are gone, together with the npm package version lookup, the CLI/JSON capability calls, the scheduled-task and service management, the model catalog and per-model visibility controls, the ChatGPT/Codex client integration actions, the local proxy port detection, and the ChatGPT/Codex process termination that only existed to restart that proxy. Codex Beacon no longer references the `@bitkyc08/opencodex` package, the `opencodex-proxy` scheduled task, or port 10100 in any code path, resource string, script, or document.
+- Removed the standalone Provider management feature that existed only to configure OpenCodex model routing. The unreachable provider editor, the stored-provider JSON file with its per-user ACL handling, the provider connectivity tester, the `provider use` action script branch, and the `model_provider`/`openai_base_url` rewriting of `%USERPROFILE%\.codex\config.toml` are all deleted. Codex Beacon now stores no credentials of any kind and no longer writes to the Codex configuration file.
+- The canonical information architecture is now seven pages: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Tailscale, Codex Relay, and Settings / About & updates. The Network page reports the effective transport route from evidence: Windows system proxy, TUN adapter, custom HTTP proxy, environment proxy variables, or a direct connection.
+
 ### Fixed
 
 - Closing the main window now hides Codex Beacon to the system tray. The background process and tray icon remain active until Exit is selected from the tray menu; internal language reloads and application updates still close cleanly.
 
-- Moved OpenCodex to the second navigation position, added a persistent system tray icon with open and exit actions, and added a Windows startup setting that launches Codex Beacon directly into the tray.
+- Added a persistent system tray icon with open and exit actions, and added a Windows startup setting that launches Codex Beacon directly into the tray.
 
-- Reorganized OpenCodex model management by provider. Each provider now has its own catalog read action, model list, all-model visibility switch, and per-model visibility controls, while the UI documents OpenCodex's short-lived runtime catalog cache.
+- Added a unified append-only application log window for action output, npm progress, launcher failures, and application errors.
 
-- Added a unified append-only application log window for action output, npm progress, launcher failures, and application errors. OpenCodex upgrades now stop the running proxy before npm replaces its bundled executable, stream each npm output line, and verify the installed package before reporting failure.
+- Corrected the Download Sources layout so labels and full-width selectors align consistently.
 
-- Corrected the Download Sources layout so labels and full-width selectors align consistently, and rebuilt OpenCodex model visibility as a compact table with one header row and left-aligned switches.
-  - Aligned OpenCodex model catalog with the live dashboard catalog by querying live runtime models directly instead of static configuration entries, and fixed selector resolution for native OpenAI models.
-
-- Completed dependency and OpenCodex operational state:
+- Completed dependency operational state:
   - Latest-version refresh now updates bound dependency rows immediately and uses selected Node/npm sources, GitHub, and WinGet fallbacks. NVM plus App Installer, WinGet, Microsoft Store source, Node.js, and npm all display current and latest values.
   - Download-source choices show both the provider name and full URL.
-  - Removed the standalone Providers page. OpenCodex now shows whether its proxy is active for ChatGPT and Codex CLI, reports the active provider, and offers client-specific integration actions when inactive.
-  - OpenCodex models now expose per-model visibility switches backed by `models enable/disable`; hidden models remain available for re-enabling.
-  - OpenCodex install, start, upgrade, integration, and restart actions close all allowlisted ChatGPT/Codex processes, restart the proxy, wait for its listener, and reopen the ChatGPT client. Codex Relay now presents current and latest versions as separate fields.
+  - Codex Relay now presents current and latest versions as separate fields.
 
 - Clarified core product state and dependency/network workflows:
   - Codex Beacon now enforces one active app instance. Starting it again closes the previous window and force-stops it only when a graceful close does not finish, then launches the new instance. The single-file launcher performs the replacement before updating its extraction cache.
@@ -47,12 +48,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- Canonical 9-page information architecture: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Providers, OpenCodex, Tailscale, Codex Relay, and Settings.
-- Pipeline asynchronous streaming refresh: local machine snapshot loads sub-second on startup, while network probes, public egress, latest remote version lookups, and OpenCodex model catalogs update concurrently in the background without UI freeze.
+- Canonical 7-page information architecture: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Tailscale, Codex Relay, and Settings.
+- Pipeline asynchronous streaming refresh: local machine snapshot loads sub-second on startup, while network probes, public egress, and latest remote version lookups update concurrently in the background without UI freeze.
 - Step-by-step Dependency management combining NVM, Node.js, and npm with in-card version switching, new version installation, and mirror configuration, alongside the Windows Store dependency chain (App Installer → WinGet → Store source).
 - Seamless Network & Proxy workflow: configure proxy mode (System / TUN / Custom HTTP), run immediate connectivity tests with latency feedback, apply system environment proxy variables, and verify OpenAI public egress.
-- Unified Providers management: highlights active Codex router, restores detection of system providers (OpenAI direct, local OpenCodex proxy on port 10100, and config.toml entries) with one-click activation and connectivity testing, alongside a secure custom provider vault supporting hidden-by-default password fields and local ACL-restricted storage.
-- Enhanced software version management for OpenCodex, Tailscale, and Codex Relay: includes install status, current vs latest version summary, update checks, service start/stop/restart, and model testing.
+- Enhanced software version management for Tailscale and Codex Relay: includes install status, current vs latest version summary, update checks, and service start/stop/restart.
 - Project open-source metadata on the Settings page: repository URL, version badge, and MIT license details.
 
 ### Added
@@ -71,7 +71,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Status collection now uses a semantic-key contract: the PowerShell scripts emit only resource keys and arguments joined by U+001F, and every user-visible sentence lives in `Strings/*/Resources.resw`.
 - Codex CLI and desktop versions are detected per install source (npm global, `PATH`, or the copy bundled with the desktop app) rather than assuming a single installation.
-- The Network page now shows only the OpenAI-view public egress and provider switching; the ambiguous proxy-chain, candidate-endpoint, and remote-connection views were removed, along with the Dashboard's "live data pipeline" block.
+- The Network page now shows only the OpenAI-view public egress and the effective proxy route; the ambiguous proxy-chain, candidate-endpoint, and remote-connection views were removed, along with the Dashboard's "live data pipeline" block.
 - Typography is centralised in `App.xaml` through a named type ramp; no control sets `FontSize` locally.
 - `Localization.GetXUid` resolves strings that are normally bound through `x:Uid`. A dotted resw name such as `Foo.Content` compiles into the hierarchy `Resources/Foo/Content`, so the flat `Get` path can never reach it; code that needs a label whose text also changes at runtime now shares the very same entry instead of duplicating the string.
 - Both READMEs described ZIP downloads that the release workflow has not produced since the move to single-file executables; the download tables now list the actual assets and explain the expand-on-first-run layout the updater relies on.
@@ -79,11 +79,8 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Fixed
 
 - Settings page right-side component clipping caused by unrestricted horizontal scroll measurement.
-- Provider list omission of local OpenCodex proxy and existing config.toml providers.
 - Slow blocking status collections by caching npm package resolution directly from local package manifests rather than invoking heavy node processes.
 - `nvm install` could hang indefinitely on networks where `nodejs.org` is unreachable.
-- Switching to the OpenCodex provider did not write `openai_base_url`, so traffic was never routed through the local proxy; the key is now injected when absent and removed when switching away.
-- Provider switching could place `openai_base_url` inside a TOML table when `model_provider` appeared after a section header.
 - Codex CLI install/upgrade was rejected with "Codex CLI is not a service" before it could reach the npm package step.
 - The six per-component action buttons used `.Label` resource keys while rendering as `Button`, which resolves `.Content`, leaving them untranslated in English.
 - `GeneralSettingsExpander` had no `x:Uid`, so the general settings header stayed Chinese in English.

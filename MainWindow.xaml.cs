@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -41,14 +40,7 @@ public sealed partial class MainWindow : Window
     public ObservableCollection<TailnetDevice> TailnetDevices { get; } = [];
     public ObservableCollection<NodeRuntime> NodeVersions { get; } = [];
     public ObservableCollection<PublicEgress> PublicEgressRoutes { get; } = [];
-    private ObservableCollection<ModelProviderItem> ModelProviders { get; } = [];
-    private ObservableCollection<ProviderProfile> ProviderProfiles { get; } = [];
     public ObservableCollection<NetworkProbe> NetworkProbes { get; } = [];
-    public ObservableCollection<OpenCodexModel> OpenCodexModels { get; } = [];
-    public ObservableCollection<OpenCodexModel> VisibleOpenCodexModels { get; } = [];
-    public ObservableCollection<OpenCodexProvider> OpenCodexProviders { get; } = [];
-    public ObservableCollection<OpenCodexProviderGroup> OpenCodexProviderGroups { get; } = [];
-    public ObservableCollection<ComponentStatus> OpenCodexComponents { get; } = [];
 
     /// <summary>Nav tag to restore after the language-switch window reload.</summary>
     internal static string? PendingNavTag;
@@ -59,7 +51,6 @@ public sealed partial class MainWindow : Window
         _settings = _systemService.LoadSettings();
         RefreshSecondsBox.Value = _settings.RefreshSeconds;
         RelayTaskNameBox.Text = _settings.RelayTaskName;
-        ProxyTaskNameBox.Text = _settings.ProxyTaskName;
         NodeMirrorPicker.SelectedValue = _settings.NodeMirror;
         if (NodeMirrorPicker.SelectedIndex < 0)
         {
@@ -271,27 +262,6 @@ public sealed partial class MainWindow : Window
                 catch { }
             });
 
-            // 任务 2.5：OpenCodex 模型拉取
-            if (snapshot.Components.Any(x => x.Id == "opencodex" && x.IsRunning))
-            {
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        var models = await SystemService.FetchOpenCodexModelsAsync().ConfigureAwait(false);
-                        if (models.Count > 0)
-                        {
-                            DispatcherQueue.TryEnqueue(() =>
-                            {
-                                ApplyOpenCodexCatalog(models, OpenCodexProviders);
-                                if (OpenCodexModelPicker.SelectedItem is null && VisibleOpenCodexModels.Count > 0)
-                                    OpenCodexModelPicker.SelectedIndex = 0;
-                            });
-                        }
-                    }
-                    catch { }
-                });
-            }
         }
         catch (Exception ex)
         {
@@ -337,7 +307,7 @@ public sealed partial class MainWindow : Window
             component.PrerequisitesReady = component.Id switch
             {
                 "desktop" => storeReady,
-                "codex" or "opencodex" or "relay" => nodeReady && npmReady,
+                "codex" or "relay" => nodeReady && npmReady,
                 "winget" => appInstallerReady,
                 "msstore" or "nvm" => wingetReady,
                 "node" => nvm?.State == "Healthy",
@@ -349,8 +319,7 @@ public sealed partial class MainWindow : Window
         Replace(InstallableComponents, snapshot.Components.Where(x => x.Id is "appinstaller" or "winget" or "msstore"));
         Replace(RuntimeComponents, snapshot.Components.Where(x => x.Id is "nvm" or "node" or "npm"));
 
-        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "opencodex" or "tailscale" or "relay"));
-        Replace(OpenCodexComponents, snapshot.Components.Where(x => x.Id == "opencodex"));
+        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "tailscale" or "relay"));
         Replace(Processes, snapshot.Processes.OrderBy(x => x.RoleKey).ThenBy(x => x.Pid));
         Replace(TailnetDevices, snapshot.TailscaleDevices.OrderByDescending(x => x.IsSelf).ThenByDescending(x => x.Online).ThenBy(x => x.Name));
         _installedNodeVersions.Clear();
@@ -362,8 +331,6 @@ public sealed partial class MainWindow : Window
         Replace(NodeVersions, snapshot.NodeVersions.OrderByDescending(x => x.IsCurrent)
             .ThenByDescending(x => Version.TryParse(x.Version, out var version) ? version : new Version()));
         if (snapshot.NetworkProbes.Count > 0) Replace(NetworkProbes, snapshot.NetworkProbes);
-        ApplyOpenCodexCatalog(snapshot.OpenCodexModels, snapshot.OpenCodexProviders);
-        ApplyOpenCodexClientRoute(snapshot.OpenCodexIntegration, snapshot.OpenCodexProviderName);
         if (snapshot.PublicEgress.Count > 0) Replace(PublicEgressRoutes, snapshot.PublicEgress);
 
         OverallMessageText.Text = Localization.Get(snapshot.OverallKey);
@@ -461,68 +428,6 @@ public sealed partial class MainWindow : Window
         foreach (var item in items) collection.Add(item);
     }
 
-    private void ApplyOpenCodexCatalog(
-        IEnumerable<OpenCodexModel> models,
-        IEnumerable<OpenCodexProvider> providers)
-    {
-        var ordered = models.OrderBy(x => x.Provider).ThenBy(x => x.Id).ToList();
-        var providerList = providers
-            .GroupBy(provider => provider.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
-            .OrderByDescending(provider => provider.IsDefault)
-            .ThenBy(provider => provider.Name)
-            .ToList();
-        Replace(OpenCodexProviders, providerList);
-        Replace(OpenCodexModels, ordered);
-        Replace(VisibleOpenCodexModels, ordered.Where(x => x.IsVisible));
-
-        var providerById = providerList.ToDictionary(provider => provider.Id, StringComparer.OrdinalIgnoreCase);
-        var providerIds = providerList.Select(provider => provider.Id)
-            .Concat(ordered.Select(model => model.Provider))
-            .Where(id => !string.IsNullOrWhiteSpace(id))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(id => providerById.TryGetValue(id, out var provider) && provider.IsDefault)
-            .ThenBy(id => providerById.TryGetValue(id, out var provider) ? provider.Name : id)
-            .ToList();
-        var groups = providerIds.Select(id =>
-        {
-            providerById.TryGetValue(id, out var provider);
-            var group = new OpenCodexProviderGroup
-            {
-                Id = id,
-                Name = provider?.Name ?? id,
-                BaseUrl = provider?.BaseUrl ?? "",
-                IsDefault = provider?.IsDefault == true
-            };
-            foreach (var model in ordered.Where(model => model.Provider.Equals(id, StringComparison.OrdinalIgnoreCase)))
-                group.Models.Add(model);
-            return group;
-        });
-        Replace(OpenCodexProviderGroups, groups);
-        OpenCodexProviderModelsEmpty.Visibility = OpenCodexProviderGroups.Count == 0
-            ? Visibility.Visible
-            : Visibility.Collapsed;
-    }
-
-    private void ApplyOpenCodexClientRoute(string integrationState, string providerName)
-    {
-        var active = integrationState.Equals("current", StringComparison.OrdinalIgnoreCase);
-        var stateText = Localization.Get(active ? "OpenCodexProxyCurrent" : "OpenCodexProxyInactive");
-        var providerText = string.IsNullOrWhiteSpace(providerName)
-            ? Localization.Get("OpenCodexProviderUnknown")
-            : Localization.Format("OpenCodexCurrentProvider", providerName);
-        ChatGptProxyStateText.Text = stateText;
-        CodexProxyStateText.Text = stateText;
-        ChatGptProviderText.Text = providerText;
-        CodexProviderText.Text = providerText;
-        ChatGptProviderText.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-        CodexProviderText.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-        ChatGptIntegrateButton.Visibility = active ? Visibility.Collapsed : Visibility.Visible;
-        CodexIntegrateButton.Visibility = active ? Visibility.Collapsed : Visibility.Visible;
-        ChatGptIntegrateButton.IsEnabled = !active;
-        CodexIntegrateButton.IsEnabled = !active;
-    }
-
     private static void UpdateVersionBadge(ComponentStatus component, Border badgeBorder, TextBlock badgeText)
     {
         if (string.IsNullOrWhiteSpace(component.LatestVersion) || component.LatestVersion == Palette.Dash)
@@ -610,23 +515,6 @@ public sealed partial class MainWindow : Window
             CodexUpgradeButton.IsEnabled = codex.CanUpgrade;
         }
 
-        var openCodex = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "opencodex");
-        if (openCodex is not null)
-        {
-            OpenCodexStatusBadgeText.Text = openCodex.StatusLabel;
-            OpenCodexCurrentVersionText.Text = openCodex.InstalledVersionLabel;
-            OpenCodexLatestVersionText.Text = openCodex.LatestVersionLabel;
-            OpenCodexDetailText.Text = openCodex.Detail;
-            OpenCodexInstallButton.IsEnabled = openCodex.CanInstall;
-            OpenCodexUpgradeButton.IsEnabled = openCodex.CanUpgrade;
-            OpenCodexStartButton.IsEnabled = openCodex.CanStart;
-            OpenCodexStopButton.IsEnabled = openCodex.CanStop;
-            if (!openCodex.IsInstalled)
-            {
-                ChatGptIntegrateButton.Visibility = Visibility.Collapsed;
-                CodexIntegrateButton.Visibility = Visibility.Collapsed;
-            }
-        }
 
         var tailscale = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "tailscale");
         if (tailscale is not null)
@@ -787,7 +675,6 @@ public sealed partial class MainWindow : Window
         DashboardPage.Visibility = tag == "dashboard" ? Visibility.Visible : Visibility.Collapsed;
         ProcessesPage.Visibility = tag == "processes" ? Visibility.Visible : Visibility.Collapsed;
         NetworkPage.Visibility = tag == "network" ? Visibility.Visible : Visibility.Collapsed;
-        OpenCodexPage.Visibility = tag == "opencodex" ? Visibility.Visible : Visibility.Collapsed;
         TailscalePage.Visibility = tag == "tailscale" ? Visibility.Visible : Visibility.Collapsed;
         InstallationsPage.Visibility = tag == "installations" ? Visibility.Visible : Visibility.Collapsed;
         RelayPage.Visibility = tag == "relay" ? Visibility.Visible : Visibility.Collapsed;
@@ -904,81 +791,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void AddProvider_Click(object sender, RoutedEventArgs e)
-    {
-        var provider = await ShowProviderDialogAsync(null);
-        if (provider is null) return;
-        ProviderProfiles.Add(provider);
-        _systemService.SaveProviders(ProviderProfiles);
-        UpdateProviderEmptyState();
-        SetStatus(Localization.Get("ProviderSaved"));
-    }
-
-    private async void EditProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string id }) return;
-        var existing = ProviderProfiles.FirstOrDefault(item => item.Id == id);
-        if (existing is null) return;
-        var updated = await ShowProviderDialogAsync(existing);
-        if (updated is null) return;
-        var index = ProviderProfiles.IndexOf(existing);
-        ProviderProfiles[index] = updated;
-        _systemService.SaveProviders(ProviderProfiles);
-        SetStatus(Localization.Get("ProviderSaved"));
-    }
-
-    private async void DeleteProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string id }) return;
-        var existing = ProviderProfiles.FirstOrDefault(item => item.Id == id);
-        if (existing is null) return;
-        if (!await ConfirmAsync(Localization.Get("DeleteProviderTitle"),
-                Localization.Format("DeleteProviderBody", existing.Name), Localization.Get("Delete"))) return;
-        ProviderProfiles.Remove(existing);
-        _systemService.SaveProviders(ProviderProfiles);
-        UpdateProviderEmptyState();
-        SetStatus(Localization.Get("ProviderDeleted"));
-    }
-
-    private void UpdateProviderEmptyState() { }
-
-    private async void TestProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string id }) return;
-        var provider = ProviderProfiles.FirstOrDefault(item => item.Id == id);
-        if (provider is null) return;
-        SetStatus(Localization.Format("ProviderTesting", provider.Name, provider.TestModel));
-        var result = await SystemService.TestProviderAsync(provider, provider.TestModel);
-        SetStatus(result.DisplayText);
-    }
-
-    private async void TestSystemProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string id }) return;
-        var provider = ModelProviders.FirstOrDefault(item => item.Id == id);
-        if (provider is null) return;
-        SetStatus($"正在测试 {provider.Name} (gpt-5.4)…");
-        try
-        {
-            var profile = new ProviderProfile
-            {
-                Id = provider.Id,
-                Name = provider.Name,
-                BaseUrl = provider.BaseUrl,
-                WireApi = provider.WireApi,
-                TestModel = "gpt-5.4"
-            };
-            var matched = ProviderProfiles.FirstOrDefault(x => x.Id == id || x.BaseUrl == provider.BaseUrl);
-            if (matched is not null) profile.ApiKey = matched.ApiKey;
-            var result = await SystemService.TestProviderAsync(profile, "gpt-5.4");
-            SetStatus(result.DisplayText);
-        }
-        catch (Exception ex)
-        {
-            SetStatus(Localization.Format("ProviderTestFailed", ex.Message));
-        }
-    }
-
     private async void CheckComponentUpdate_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string compId }) return;
@@ -1005,132 +817,6 @@ public sealed partial class MainWindow : Window
         {
             SetStatus(Localization.Format("ComponentUpdateFailed", ex.Message));
         }
-    }
-
-    private async void UseStoredProvider_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string id }) return;
-        if (!await ExecuteActionAsync("provider", "use-stored", id, Localization.Format("SwitchingProvider", id))) return;
-        foreach (var item in ProviderProfiles) item.IsDefault = item.Id == id;
-        _systemService.SaveProviders(ProviderProfiles);
-        Replace(ProviderProfiles, _systemService.LoadProviders());
-    }
-
-    private async Task<ProviderProfile?> ShowProviderDialogAsync(ProviderProfile? existing)
-    {
-        var idBox = new TextBox { Header = "ID", Text = existing?.Id ?? "", PlaceholderText = "my-provider" };
-        var nameBox = new TextBox { Header = Localization.Get("Name"), Text = existing?.Name ?? "" };
-        var baseUrlBox = new TextBox { Header = "Base URL", Text = existing?.BaseUrl ?? "https://api.openai.com/v1" };
-        var keyBox = new PasswordBox
-        {
-            Header = "API key",
-            PasswordRevealMode = PasswordRevealMode.Peek,
-            PlaceholderText = existing?.HasApiKey == true ? Localization.Get("ProviderKeepExistingKey") : "sk-…"
-        };
-        var wirePicker = new ComboBox { Header = "Wire API", Width = 260, SelectedValuePath = "Tag" };
-        wirePicker.Items.Add(new ComboBoxItem { Content = "Responses API", Tag = "responses" });
-        wirePicker.Items.Add(new ComboBoxItem { Content = "Chat Completions", Tag = "chat" });
-        wirePicker.SelectedValue = existing?.WireApi == "chat" ? "chat" : "responses";
-        var modelPicker = new ComboBox { Header = Localization.Get("TestModel"), Width = 260 };
-        modelPicker.Items.Add("gpt-5.4");
-        modelPicker.Items.Add("gpt-5.5");
-        modelPicker.SelectedItem = existing?.TestModel == "gpt-5.5" ? "gpt-5.5" : "gpt-5.4";
-        var fields = new StackPanel { Spacing = 10, Width = 520 };
-        fields.Children.Add(idBox);
-        fields.Children.Add(nameBox);
-        fields.Children.Add(baseUrlBox);
-        fields.Children.Add(keyBox);
-        fields.Children.Add(wirePicker);
-        fields.Children.Add(modelPicker);
-
-        var dialog = new ContentDialog
-        {
-            XamlRoot = Content.XamlRoot,
-            Title = existing is null ? Localization.Get("AddProvider") : Localization.Get("EditProvider"),
-            Content = fields,
-            PrimaryButtonText = Localization.Get("Save"),
-            CloseButtonText = Localization.Get("Cancel"),
-            DefaultButton = ContentDialogButton.Primary
-        };
-        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return null;
-
-        var id = idBox.Text.Trim();
-        var baseUrl = baseUrlBox.Text.Trim();
-        if (!Regex.IsMatch(id, "^[A-Za-z0-9][A-Za-z0-9_-]*$")
-            || !Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri)
-            || uri.Scheme is not ("http" or "https")
-            || (existing is null && ProviderProfiles.Any(item => item.Id.Equals(id, StringComparison.OrdinalIgnoreCase))))
-        {
-            SetStatus(Localization.Get("ProviderInvalid"));
-            return null;
-        }
-
-        return new ProviderProfile
-        {
-            Id = id,
-            Name = string.IsNullOrWhiteSpace(nameBox.Text) ? id : nameBox.Text.Trim(),
-            BaseUrl = baseUrl.TrimEnd('/'),
-            ApiKey = string.IsNullOrWhiteSpace(keyBox.Password) ? existing?.ApiKey ?? "" : keyBox.Password,
-            WireApi = wirePicker.SelectedValue as string ?? "responses",
-            TestModel = modelPicker.SelectedItem as string ?? "gpt-5.4",
-            IsDefault = existing?.IsDefault == true
-        };
-    }
-
-    private async void OpenCodexAction_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string action }) return;
-        var model = action == "test-model" && OpenCodexModelPicker.SelectedItem is OpenCodexModel selected
-            ? $"{selected.Provider}\u001F{selected.Id}" : null;
-        await ExecuteActionAsync("opencodex", action, model, Localization.Format("RunningAction", ActionName(action), "OpenCodex"));
-    }
-
-    private async void OpenCodexModelVisibility_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (sender is not ToggleSwitch { IsLoaded: true, DataContext: OpenCodexModel model } toggle || _refreshBusy || _actionBusy) return;
-        if (toggle.IsOn == model.IsVisible) return;
-        var action = toggle.IsOn ? "show-model" : "hide-model";
-        if (!await ExecuteActionAsync("opencodex", action, model.Selector,
-                Localization.Format("RunningAction", ActionName(action), model.DisplayName)))
-            toggle.IsOn = model.IsVisible;
-    }
-
-    private async void OpenCodexProviderModels_Refresh(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { DataContext: OpenCodexProviderGroup group } || _refreshBusy || _actionBusy) return;
-        _actionBusy = true;
-        UpdateBusyUi();
-        SetStatus(Localization.Format("RefreshingOpenCodexProviderModels", group.DisplayName));
-        try
-        {
-            var refreshed = await SystemService.FetchOpenCodexModelsAsync(group.Id);
-            var merged = OpenCodexModels
-                .Where(model => !model.Provider.Equals(group.Id, StringComparison.OrdinalIgnoreCase))
-                .Concat(refreshed)
-                .ToList();
-            ApplyOpenCodexCatalog(merged, OpenCodexProviders);
-            SetStatus(Localization.Format("ActionOpenCodexProviderModelsRefreshed", group.DisplayName, refreshed.Count));
-        }
-        catch (Exception ex)
-        {
-            SetStatus(Localization.Format("RefreshFailed", ex.Message));
-            AppLog.Error("OpenCodex", ex.ToString());
-        }
-        finally
-        {
-            _actionBusy = false;
-            UpdateBusyUi();
-        }
-    }
-
-    private async void OpenCodexProviderVisibility_Toggled(object sender, RoutedEventArgs e)
-    {
-        if (sender is not ToggleSwitch { IsLoaded: true, DataContext: OpenCodexProviderGroup group } toggle || _refreshBusy || _actionBusy) return;
-        if (group.Models.Count == 0 || toggle.IsOn == group.AllModelsVisible) return;
-        var action = toggle.IsOn ? "show-provider-models" : "hide-provider-models";
-        if (!await ExecuteActionAsync("opencodex", action, group.Id,
-                Localization.Format("RunningAction", ActionName(action), group.DisplayName)))
-            toggle.IsOn = group.AllModelsVisible;
     }
 
     private async void RelayAction_Click(object sender, RoutedEventArgs e)
@@ -1206,7 +892,6 @@ public sealed partial class MainWindow : Window
         {
             RefreshSeconds = Math.Clamp(seconds, 5, 300),
             RelayTaskName = string.IsNullOrWhiteSpace(RelayTaskNameBox.Text) ? "Codex Relay" : RelayTaskNameBox.Text.Trim(),
-            ProxyTaskName = string.IsNullOrWhiteSpace(ProxyTaskNameBox.Text) ? "opencodex-proxy" : ProxyTaskNameBox.Text.Trim(),
             NodeMirror = NormalizeHttpEndpoint(NodeMirrorPicker.SelectedValue as string ?? "", defaults.NodeMirror),
             NpmRegistry = NormalizeHttpEndpoint(NpmRegistryPicker.SelectedValue as string ?? "", defaults.NpmRegistry),
             NetworkMode = NetworkModePicker.SelectedValue as string ?? "system",
@@ -1593,8 +1278,6 @@ public sealed partial class MainWindow : Window
         "restart" => Localization.Get("ActionRestartName"),
         "install" => Localization.Get("ActionInstallName"),
         "upgrade" => Localization.Get("ActionUpgradeName"),
-        "show-model" or "show-provider-models" => Localization.Get("ActionShowModelsName"),
-        "hide-model" or "hide-provider-models" => Localization.Get("ActionHideModelsName"),
         "login" => Localization.Get("ActionLoginName"),
         "store" => Localization.Get("ActionStoreName"),
         _ => Localization.Get("ActionProcessName")

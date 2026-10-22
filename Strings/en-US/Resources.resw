@@ -77,8 +77,6 @@
   <data name="EgressUnavailable.Text" xml:space="preserve"><value>No public egress information yet. Select “Refresh now”.</value></data>
   <data name="OpenEgressCheck.Content" xml:space="preserve"><value>Open full IP check</value></data>
   <data name="EgressWebsiteHint.Text" xml:space="preserve"><value>ip.net.coffee provides the ChatGPT / Codex egress and risk check.</value></data>
-  <data name="ProvidersHeading.Text" xml:space="preserve"><value>Model provider switching</value></data>
-  <data name="ProvidersDescription.Text" xml:space="preserve"><value>Select a target to make it the primary Codex provider. The change is written to config.toml immediately.</value></data>
 
   <!-- Tailscale -->
   <data name="TailscaleTitle.Text" xml:space="preserve"><value>Tailscale network</value></data>
@@ -153,7 +151,6 @@
   <data name="SettingsDescription.Text" xml:space="preserve"><value>Configure general preferences and manage Codex Beacon's About and Updates.</value></data>
   <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>General</value></data>
   <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>Refresh frequency and display language</value></data>
-  <data name="ProviderEmptyText.Text" xml:space="preserve"><value>No providers have been added yet</value></data>
   <data name="LanguageCard.Header" xml:space="preserve"><value>Display language</value></data>
   <data name="LanguageCard.Description" xml:space="preserve"><value>Follow Windows, or switch instantly between English and Simplified Chinese</value></data>
   <data name="LanguageSystem.Content" xml:space="preserve"><value>Follow Windows</value></data>
@@ -162,7 +159,6 @@
   <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="MirrorCard.Description" xml:space="preserve"><value>Distribution mirror used by nvm install</value></data>
   <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
-  <data name="ProxyTaskCard.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>Save changes</value></data>
   <data name="SaveChangesCard.Description" xml:space="preserve"><value>Applies immediately and stores locally</value></data>
   <data name="SaveButton.Content" xml:space="preserve"><value>Save settings</value></data>
@@ -186,8 +182,6 @@
   <data name="CompDesktopKind" xml:space="preserve"><value>Official OpenAI Windows app</value></data>
   <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="CompCodexKind" xml:space="preserve"><value>Command-line client</value></data>
-  <data name="CompProxyName" xml:space="preserve"><value>OpenCodex Proxy</value></data>
-  <data name="CompProxyKind" xml:space="preserve"><value>Optional extension · npm package</value></data>
   <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
   <data name="CompRelayKind" xml:space="preserve"><value>Optional extension · npm package</value></data>
   <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
@@ -209,10 +203,6 @@
   <data name="DetailCodexNpm" xml:space="preserve"><value>Global npm install · {0}</value></data>
   <data name="DetailCodexOnPath" xml:space="preserve"><value>codex command on PATH · {0}</value></data>
   <data name="DetailCodexBundled" xml:space="preserve"><value>Bundled with the desktop app · {0}</value></data>
-  <data name="DetailProxyListening" xml:space="preserve"><value>Listening on port {0} · scheduled task: {1}</value></data>
-  <data name="DetailProxyMissing" xml:space="preserve"><value>No global npm package was detected</value></data>
-  <data name="DetailProxyNoTask" xml:space="preserve"><value>Package installed; scheduled task not configured ({0})</value></data>
-  <data name="DetailProxyStopped" xml:space="preserve"><value>No listening port detected · scheduled task: {0}</value></data>
   <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 is listening · scheduled task: {0}</value></data>
   <data name="DetailRelayMissing" xml:space="preserve"><value>No Relay installation was detected</value></data>
   <data name="DetailRelayNoTask" xml:space="preserve"><value>Package installed; select Start to use the official background mode ({0})</value></data>
@@ -306,7 +296,6 @@
   <data name="InstallingNode" xml:space="preserve"><value>Installing Node.js {0} with NVM…</value></data>
   <data name="SelectNodeVersion" xml:space="preserve"><value>Select an installed Node.js version first.</value></data>
   <data name="SwitchingNode" xml:space="preserve"><value>Switching to Node.js {0}…</value></data>
-  <data name="SwitchingProvider" xml:space="preserve"><value>Switching provider: {0}…</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>Settings saved. They take effect on the next refresh.</value></data>
   <data name="Cancel" xml:space="preserve"><value>Cancel</value></data>
   <data name="Cancelling" xml:space="preserve"><value>Cancelling the current action…</value></data>
@@ -336,7 +325,6 @@
   <data name="ActionUnsupported" xml:space="preserve"><value>This component does not support that action.</value></data>
   <data name="ActionNeedRuntime" xml:space="preserve"><value>Node.js or npm is missing. Complete the runtime setup first.</value></data>
   <data name="ActionRuntimeTooOld" xml:space="preserve"><value>Node.js {0} is too old; version 22.14.0 or newer is required.</value></data>
-  <data name="ActionProviderSwitched" xml:space="preserve"><value>Switched to provider: {0}</value></data>
   <data name="ActionNvmInstalled" xml:space="preserve"><value>NVM for Windows installation state updated</value></data>
   <data name="ActionNvmNodeInstalled" xml:space="preserve"><value>Node.js {0} installed</value></data>
   <data name="ActionNvmNodeSwitched" xml:space="preserve"><value>Switched to Node.js {0}</value></data>
@@ -359,7 +347,6 @@
   <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI is not installed. Complete installation first.</value></data>
   <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI is not a persistent service. Manage running processes from the Processes page.</value></data>
   <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} installed at the latest version</value></data>
-  <data name="ActionHintProxyStart" xml:space="preserve"><value>Select Start when you want to configure and use this extension.</value></data>
   <data name="ActionHintRelayStart" xml:space="preserve"><value>Select Start to run Relay in its official background mode.</value></data>
   <data name="ActionServicesRestarted" xml:space="preserve"><value>Optional services restarted (cleared {0} process(es); started: {1})</value></data>
   <data name="ActionServicesTerminated" xml:space="preserve"><value>Terminated {0} optional service process(es); the desktop app and Codex Beacon were not affected</value></data>
@@ -367,10 +354,6 @@
   <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay stopped</value></data>
   <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay restarted</value></data>
   <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay is not installed. Complete installation first.</value></data>
-  <data name="ActionProxyStarted" xml:space="preserve"><value>OpenCodex service started</value></data>
-  <data name="ActionProxyStopped" xml:space="preserve"><value>OpenCodex service stopped</value></data>
-  <data name="ActionProxyRestarted" xml:space="preserve"><value>OpenCodex service restarted</value></data>
-  <data name="ActionProxyMissing" xml:space="preserve"><value>OpenCodex is not installed. Complete installation first.</value></data>
   <data name="ActionTaskStarted" xml:space="preserve"><value>Scheduled task [{0}] started</value></data>
   <data name="ActionTaskStopped" xml:space="preserve"><value>Scheduled task [{0}] stopped</value></data>
   <data name="ActionTaskRestarted" xml:space="preserve"><value>Scheduled task [{0}] restarted</value></data>
@@ -384,10 +367,6 @@
   <data name="ActionConfigMissing" xml:space="preserve"><value>The provider could not be switched because %USERPROFILE%\.codex\config.toml was not found.</value></data>
 
   <!-- Provider -->
-  <data name="ProviderActiveBtn" xml:space="preserve"><value>Active now</value></data>
-  <data name="ProviderSwitchBtn" xml:space="preserve"><value>Set as active provider</value></data>
-  <data name="ProviderActive" xml:space="preserve"><value>Active</value></data>
-  <data name="ProviderInactive" xml:space="preserve"><value>Inactive</value></data>
 
   <!-- Infrastructure -->
   <data name="UnableToStart" xml:space="preserve"><value>Unable to start {0}</value></data>
@@ -443,23 +422,10 @@
   <data name="NetworkConnected" xml:space="preserve"><value>Connected</value></data>
   <data name="NetworkDisconnected" xml:space="preserve"><value>Not connected</value></data>
   <data name="NetworkUnreachable" xml:space="preserve"><value>Unreachable</value></data>
-  <data name="ProviderKeyConfigured" xml:space="preserve"><value>Key configured · hidden by default</value></data>
-  <data name="ProviderKeyMissing" xml:space="preserve"><value>No key configured</value></data>
-  <data name="ProviderSaved" xml:space="preserve"><value>Provider saved in the current user's hidden configuration directory.</value></data>
-  <data name="ProviderDeleted" xml:space="preserve"><value>Provider deleted.</value></data>
-  <data name="ProviderTesting" xml:space="preserve"><value>Testing {0} with {1}…</value></data>
-  <data name="ProviderTestSucceeded" xml:space="preserve"><value>Provider connectivity test succeeded ({0}).</value></data>
-  <data name="ProviderTestFailed" xml:space="preserve"><value>Provider connectivity test failed: {0}</value></data>
-  <data name="DeleteProviderTitle" xml:space="preserve"><value>Delete provider?</value></data>
-  <data name="DeleteProviderBody" xml:space="preserve"><value>This removes “{0}” and its key from local configuration.</value></data>
   <data name="Delete" xml:space="preserve"><value>Delete</value></data>
   <data name="Name" xml:space="preserve"><value>Name</value></data>
   <data name="TestModel" xml:space="preserve"><value>Test model</value></data>
-  <data name="ProviderKeepExistingKey" xml:space="preserve"><value>Leave blank to keep the existing key</value></data>
-  <data name="AddProvider" xml:space="preserve"><value>Add provider</value></data>
-  <data name="EditProvider" xml:space="preserve"><value>Edit provider</value></data>
   <data name="Save" xml:space="preserve"><value>Save</value></data>
-  <data name="ProviderInvalid" xml:space="preserve"><value>The provider ID or Base URL is invalid, or the ID already exists.</value></data>
   <data name="CompAppInstallerName" xml:space="preserve"><value>App Installer</value></data>
   <data name="CompAppInstallerKind" xml:space="preserve"><value>WinGet system dependency</value></data>
   <data name="DetailAppInstallerReady" xml:space="preserve"><value>App Installer is installed</value></data>
@@ -474,8 +440,6 @@
   <data name="DetailStoreMissing" xml:space="preserve"><value>The msstore source is unavailable and needs repair</value></data>
   <data name="ActionAppInstallerStoreOpened" xml:space="preserve"><value>Opened the App Installer page in Microsoft Store.</value></data>
   <data name="ActionStoreSourceReady" xml:space="preserve"><value>The Microsoft Store source was updated.</value></data>
-  <data name="ActionOpenCodexIntegrated" xml:space="preserve"><value>Codex now routes through OpenCodex.</value></data>
-  <data name="ActionOpenCodexModelsRefreshed" xml:space="preserve"><value>The OpenCodex model catalog was refreshed.</value></data>
   <data name="NavDependencies.Content" xml:space="preserve"><value>Dependencies</value></data>
   <data name="DetectingStatus.Text" xml:space="preserve"><value>Detecting…</value></data>
   <data name="DependencySettingsButton.Content" xml:space="preserve"><value>Dependency settings</value></data>
@@ -488,26 +452,13 @@
   <data name="ProxyModeCustom.Content" xml:space="preserve"><value>Custom HTTP proxy</value></data>
   <data name="CustomHttpProxyBox.Header" xml:space="preserve"><value>HTTP proxy address</value></data>
   <data name="SaveNetworkButton.Content" xml:space="preserve"><value>Save network settings</value></data>
-  <data name="ProvidersPageTitle.Text" xml:space="preserve"><value>Provider management</value></data>
-  <data name="ProvidersPageDescription.Text" xml:space="preserve"><value>Add, edit, and test providers. Keys stay in the current user's hidden folder and are never echoed or logged.</value></data>
-  <data name="AddProviderButton.Content" xml:space="preserve"><value>Add provider</value></data>
-  <data name="ConfiguredProvidersHeading.Text" xml:space="preserve"><value>Configured providers</value></data>
-  <data name="UseProviderButton.Content" xml:space="preserve"><value>Set current</value></data>
-  <data name="TestProviderButton.Content" xml:space="preserve"><value>Test</value></data>
-  <data name="EditProviderButton.Content" xml:space="preserve"><value>Edit</value></data>
-  <data name="DeleteProviderButton.Content" xml:space="preserve"><value>Delete</value></data>
-  <data name="ProviderTestHint.Text" xml:space="preserve"><value>The default connectivity-test model is gpt-5.4; gpt-5.5 is also available.</value></data>
-  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>Manage the OpenCodex version, service, client proxy state, and model visibility.</value></data>
   <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>Service and version</value></data>
   <data name="AwaitingDetection.Text" xml:space="preserve"><value>Awaiting detection</value></data>
-  <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>Integration: —</value></data>
   <data name="IntegrateCodexButton.Content" xml:space="preserve"><value>Use for Codex</value></data>
   <data name="AvailableModelsHeading.Text" xml:space="preserve"><value>Available models</value></data>
   <data name="RefreshModelsButton.Content" xml:space="preserve"><value>Refresh models</value></data>
   <data name="TestModelButton.Content" xml:space="preserve"><value>Test model</value></data>
   <data name="ServiceSettingsHeading.Text" xml:space="preserve"><value>Service settings</value></data>
-  <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy scheduled task</value></data>
-  <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>Save</value></data>
   <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>Download sources</value></data>
   <data name="NodeMirrorFieldLabel.Text" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry (nrm presets)</value></data>
@@ -527,47 +478,17 @@
   <data name="DesktopStoreInstallButton.Content" xml:space="preserve"><value>Store install/upgrade</value></data>
   <data name="CodexCardSubtitle.Text" xml:space="preserve"><value>Official OpenAI command-line tool</value></data>
   <data name="ProxyModeHint.Text" xml:space="preserve"><value>Choose the proxy mode; after switching or entering an address you can test connectivity right away, then save to apply.</value></data>
-  <data name="ActiveProviderLabel.Text" xml:space="preserve"><value>Current Codex router provider</value></data>
-  <data name="ActiveProviderDetecting.Text" xml:space="preserve"><value>Detecting the active provider…</value></data>
-  <data name="ProviderBannerActive.Text" xml:space="preserve"><value>Active</value></data>
-  <data name="ProviderSetActiveBtn.Content" xml:space="preserve"><value>Set as current</value></data>
-  <data name="ProviderTestConnBtn.Content" xml:space="preserve"><value>Test connection</value></data>
-  <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex local proxy service</value></data>
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>Version status</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>Check for newer version</value></data>
-  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>Control whether each model appears in client model lists. Changes apply to the running proxy immediately.</value></data>
   <data name="ModelVisibilityHeader.Text" xml:space="preserve"><value>Show in clients</value></data>
   <data name="ModelNameHeader.Text" xml:space="preserve"><value>Model</value></data>
-  <data name="ModelProviderHeader.Text" xml:space="preserve"><value>Provider</value></data>
-  <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>Manage local proxy routing and model visibility for ChatGPT and Codex CLI</value></data>
-  <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>Client proxy status</value></data>
   <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT client</value></data>
   <data name="SetChatGptProxyButton.Content" xml:space="preserve"><value>Use for ChatGPT</value></data>
   <data name="SetCodexProxyButton.Content" xml:space="preserve"><value>Use for Codex</value></data>
   <data name="ModelVisible" xml:space="preserve"><value>Shown in clients</value></data>
   <data name="ModelHidden" xml:space="preserve"><value>Hidden from clients</value></data>
-  <data name="OpenCodexProxyCurrent" xml:space="preserve"><value>OpenCodex proxy is active</value></data>
-  <data name="OpenCodexProxyInactive" xml:space="preserve"><value>OpenCodex proxy is not active</value></data>
-  <data name="OpenCodexCurrentProvider" xml:space="preserve"><value>Active provider: {0}</value></data>
-  <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>Active provider: unavailable</value></data>
-  <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>Model {0} is now shown.</value></data>
-  <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>Model {0} is now hidden.</value></data>
-  <data name="OpenCodexModelTestTitle.Text" xml:space="preserve"><value>Model connectivity test</value></data>
-  <data name="OpenCodexModelTestHint.Text" xml:space="preserve"><value>Choose one currently visible model for a provider connectivity test.</value></data>
-  <data name="OpenCodexProviderModelsHint.Text" xml:space="preserve"><value>Read and manage each provider independently. OpenCodex may reuse its model cache for about five minutes.</value></data>
-  <data name="OpenCodexProviderModelsEmpty.Text" xml:space="preserve"><value>No configured providers were found.</value></data>
-  <data name="RefreshProviderModelsButton.Content" xml:space="preserve"><value>Refresh provider</value></data>
-  <data name="ProviderModelsToggle.Header" xml:space="preserve"><value>Show all in clients</value></data>
-  <data name="OpenCodexProviderModelCount" xml:space="preserve"><value>{0} models · {1} shown</value></data>
-  <data name="OpenCodexProviderModelCountDefault" xml:space="preserve"><value>Default provider · {0} models · {1} shown</value></data>
-  <data name="RefreshingOpenCodexProviderModels" xml:space="preserve"><value>Reading the {0} model catalog…</value></data>
-  <data name="ActionOpenCodexProviderModelsRefreshed" xml:space="preserve"><value>Read {0}: {1} models.</value></data>
-  <data name="ActionOpenCodexProviderModelsShown" xml:space="preserve"><value>All models under provider {0} are now shown.</value></data>
-  <data name="ActionOpenCodexProviderModelsHidden" xml:space="preserve"><value>All models under provider {0} are now hidden.</value></data>
   <data name="ActionShowModelsName" xml:space="preserve"><value>show models</value></data>
   <data name="ActionHideModelsName" xml:space="preserve"><value>hide models</value></data>
-  <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex is running and the ChatGPT client has been reopened.</value></data>
-  <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>Pick a model to test</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>Version and background service control</value></data>
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale local network service</value></data>
   <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>A Windows background service drives the VPN (start, stop and restart require administrator)</value></data>
@@ -584,12 +505,9 @@
   <data name="ProjectRepoCard.Header" xml:space="preserve"><value>GitHub repository</value></data>
   <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>Open-source license</value></data>
   <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>Permissive free-software license</value></data>
-  <data name="ReferenceOpencodex.Description" xml:space="preserve"><value>Optional provider proxy extension</value></data>
   <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Reference for Codex desktop version management</value></data>
   <data name="ReferenceRelay.Description" xml:space="preserve"><value>Optional mobile bridge extension</value></data>
   <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex egress IP and risk-check data source</value></data>
-  <data name="ProviderBannerOpencodex" xml:space="preserve"><value>OpenCodex local proxy (http://127.0.0.1:10100/v1)</value></data>
-  <data name="ProviderBannerOpenAI" xml:space="preserve"><value>OpenAI direct (https://api.openai.com/v1)</value></data>
   <data name="DesktopStorePathFallback" xml:space="preserve"><value>Official OpenAI Store package</value></data>
   <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm global install</value></data>
   <data name="NetworkTesting" xml:space="preserve"><value>Testing network and proxy connectivity…</value></data>
@@ -600,11 +518,7 @@
   <data name="ComponentUpdateUnknown" xml:space="preserve"><value>No remote version found for {0}.</value></data>
   <data name="ComponentUpdateFailed" xml:space="preserve"><value>Query failed: {0}</value></data>
   <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT desktop app</value></data>
-  <data name="OpenCodexIntegrationNone" xml:space="preserve"><value>Integration: —</value></data>
-  <data name="OpenCodexIntegrationCurrent" xml:space="preserve"><value>Integration: active</value></data>
-  <data name="OpenCodexIntegrationState" xml:space="preserve"><value>Integration: {0}</value></data>
   <!-- QA fix round addendum -->
-  <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>Built-in and detected providers (incl. OpenCodex local proxy)</value></data>
   <data name="NpmRegistryHint.Text" xml:space="preserve"><value>Applied via --registry when installing or upgrading Codex CLI and Relay; separate from the system-wide npm config.</value></data>
   <data name="OpenLogsLabel.Text" xml:space="preserve"><value>Logs</value></data>
   <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon logs</value></data>

@@ -10,17 +10,16 @@
 | Process and network inventories | WinUI `ListView` | PowerShell collector JSON | Empty, populated, collection failure | Verify row data and explicit empty/failure message |
 | Persistent feedback | Window status bar | Current refresh or action result | Busy, success, failure | Trigger refresh and a safe state action |
 | Toast | Authored window status bar | Current refresh or action result | Busy, success, failure; no transient popup in v0.1 | Trigger refresh and verify status announcement |
-| Context notice | WinUI `InfoBar` | Active route and source policy | Information or warning | Compare text with provider and version-source evidence |
+| Context notice | WinUI `InfoBar` | Active route and source policy | Information or warning | Compare text with proxy-mode and version-source evidence |
 | Destructive confirmation | WinUI `ContentDialog` | Requested bulk action | Stop or restart | Cancel once, then verify named exclusions |
 | Service commands | WinUI `CommandBar` | State-derived action properties | Install, login, start, stop, restart, upgrade | Confirm invalid transitions remain disabled |
 | Version selection | WinUI `ComboBox` | NVM installed-version list | Current or another installed version | Switch versions and recollect Node/npm state |
-| Provider key entry | WinUI password-style input | Current-user provider configuration | Hidden, explicitly revealed, saved, replaced, or cleared | Verify current-user-only file access and absence from uploads, command lines, logs, errors, diagnostics, status text, and default exports |
 | Download progress | WinUI `ProgressBar` plus text | Native downloader/tool output | Determinate or indeterminate | Verify stage, bytes, percentage when known, speed, elapsed time, cancellation, and timeout behavior |
 | Repository links | WinUI `HyperlinkButton` | Hard-coded verified upstream URLs | Upstream or implementation reference | Open each link and compare repository owner/name |
 
 ## Navigation
 
-`NavigationView` is the canonical application shell. The order is Codex overview, Dependencies, Codex processes, Network, Providers, OpenCodex, Tailscale, Codex Relay, and Settings / About & updates. Views keep their state during navigation; Network never collapses into the overview.
+`NavigationView` is the canonical application shell. The order is Codex overview, Dependencies, Codex processes, Network, Tailscale, Codex Relay, and Settings / About & updates. Views keep their state during navigation; Network never collapses into the overview.
 
 ## Status and feedback
 
@@ -42,10 +41,10 @@ Every operation that downloads bytes exposes progress. Determinate downloads sho
 
 ## Settings
 
-Native `NumberBox` and `TextBox` controls own ordinary settings entry. Provider keys use a password-style control that is hidden by default and may be stored in plaintext under `%USERPROFILE%\.CodexBeacon\providers.json`. The `.CodexBeacon` directory is explicitly marked with the Windows `Hidden` attribute and the file is restricted to the current Windows user. Existing keys remain masked when loaded; lists expose only `Key saved`. Save is atomic, and `Clear key` removes the persisted value.
+Native `NumberBox` and `TextBox` controls own ordinary settings entry. Settings that contain credentials are out of scope: Codex Beacon stores no provider keys and no other secret, so no password-style input, hidden secret file, or per-user credential store is required.
 
-The existing About and Codex Beacon update controls remain under Settings / About & updates. Component-specific controls live on their owning pages: mirror and Registry settings under Dependencies, proxy settings under Network, Provider settings under Providers, OpenCodex task/service settings under OpenCodex, Tailscale options under Tailscale, and Relay task/service settings under Codex Relay.
+The existing About and Codex Beacon update controls remain under Settings / About & updates. Component-specific controls live on their owning pages: mirror and Registry settings under Dependencies, proxy settings under Network, Tailscale options under Tailscale, and Relay task/service settings under Codex Relay.
 
 ## Destructive scope
 
-Bulk stop targets only command lines or scheduled tasks explicitly associated with OpenCodex proxy, Codex Relay, or CLI service processes. It excludes Codex Beacon, the Windows Codex desktop application, unrelated Node processes, and user documents.
+Bulk stop targets only command lines or scheduled tasks explicitly associated with Codex Relay or CLI service processes. It excludes Codex Beacon, the Windows Codex desktop application, unrelated Node processes, and user documents.

@@ -5,7 +5,7 @@
 <h1 align="center">Codex Beacon</h1>
 
 <p align="center">
-  <strong>All-in-One Control Center for Codex: Unified orchestration for ChatGPT Desktop and Codex CLI on Windows, with optional OpenCodex, Relay, and Tailscale extensions.</strong>
+  <strong>All-in-One Control Center for Codex: Unified orchestration for ChatGPT Desktop and Codex CLI on Windows, with optional Relay and Tailscale extensions.</strong>
 </p>
 
 <p align="center">
@@ -21,34 +21,32 @@
   <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="MIT License"></a>
   <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/OpenAI-Codex%20Ecosystem-17202A?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex"></a>
-  <a href="https://github.com/lidge-jun/opencodex"><img src="https://img.shields.io/badge/Extension-OpenCodex%20Proxy-4F46E5?style=flat" alt="OpenCodex"></a>
   <a href="https://github.com/gronxb/codex-relay"><img src="https://img.shields.io/badge/Extension-Codex%20Relay-059669?style=flat" alt="Codex Relay"></a>
   <a href="https://tailscale.com"><img src="https://img.shields.io/badge/Mesh-Tailscale-2B3137?style=flat&logo=tailscale&logoColor=white" alt="Tailscale"></a>
 </p>
 
-Codex Beacon is a native, light-theme WinUI 3 control center for inspecting and managing the Codex desktop app, Codex CLI, OpenCodex Proxy, Codex Relay, Node.js/NVM/npm, and Tailscale on Windows.
+Codex Beacon is a native, light-theme WinUI 3 control center for inspecting and managing the Codex desktop app, Codex CLI, Codex Relay, Node.js/NVM/npm, and Tailscale on Windows.
 
-Codex Beacon supports English and Simplified Chinese. It follows the Windows display language by default, and the language can be changed under Settings. `build/version.txt` is the single version source and increments on every build; the running version is always shown under Settings → About & update. The Codex desktop app and CLI are core features; OpenCodex Proxy and Codex Relay are independent optional modules. Installing an extension never changes the active Codex provider automatically.
+Codex Beacon supports English and Simplified Chinese. It follows the Windows display language by default, and the language can be changed under Settings. `build/version.txt` is the single version source and increments on every build; the running version is always shown under Settings → About & update. The Codex desktop app and CLI are core features; Codex Relay and Tailscale are independent optional modules. Installing an extension never changes the active Codex routing automatically.
 
 ## About
 
-Codex Beacon is an open-source system manager designed specifically for developers using OpenAI Codex on Windows. As the local AI development toolchain expands, developers frequently coordinate multiple distinct services: the official Codex desktop client (`OpenAI.Codex`), CLI utilities, community proxy bridges like OpenCodex, mobile relay tunnels, specific Node.js versions, and Tailscale virtual private networks.
+Codex Beacon is an open-source system manager designed specifically for developers using OpenAI Codex on Windows. As the local AI development toolchain expands, developers frequently coordinate multiple distinct services: the official Codex desktop client (`OpenAI.Codex`), CLI utilities, mobile relay tunnels, specific Node.js versions, and Tailscale virtual private networks.
 
 Before Codex Beacon, monitoring and managing these components required juggling Task Manager, multiple PowerShell windows, npm CLI commands, and configuration files. Codex Beacon solves this by bringing everything together into a cohesive, Windows-native desktop application.
 
 ### Key Highlights
 
 - **Windows Native & Modern**: Crafted exclusively with WinUI 3, Windows App SDK 1.8, and Fluent Design System guidelines. Lightweight, clean, high-contrast light theme without web-wrapper overhead.
-- **Protected Credentials**: The vNext Provider editor uses a password field hidden by default. An explicitly saved key is stored locally in a current-user-only configuration file and is excluded from uploads, command lines, logs, errors, diagnostics, crash reports, status text, and default exports.
+- **No Stored Credentials**: Codex Beacon stores no API keys, tokens, or passwords. Diagnostics, logs, exports, and status text never contain credential material.
 - **State-Driven Workflow**: Every action (install, sign in, start, stop, restart, upgrade) is strictly bounded by component status—preventing accidental duplicate instances or broken configurations.
-- **Modular & Non-Intrusive**: Codex desktop and CLI are core; OpenCodex and Codex Relay are purely optional extensions. Missing extensions never degrade core system status.
+- **Modular & Non-Intrusive**: Codex desktop and CLI are core; Codex Relay and Tailscale are purely optional extensions. Missing extensions never degrade core system status.
 - **Bilingual & Instant Switching**: Seamlessly supports English and Simplified Chinese with instant, in-app UI switching without requiring process restarts.
 - **Self-Updating**: Checks the official GitHub release feed, shows a banner when a newer build exists, streams the download with progress and a SHA-256 check, then replaces the install package in place and restarts into the new version.
 
 ## Upstream projects
 
 - [Codex CLI · openai/codex](https://github.com/openai/codex)
-- [OpenCodex · lidge-jun/opencodex](https://github.com/lidge-jun/opencodex)
 - [Codex Relay · gronxb/codex-relay](https://github.com/gronxb/codex-relay)
 - [NVM for Windows](https://github.com/coreybutler/nvm-windows)
 - [Node.js](https://github.com/nodejs/node) and [npm CLI](https://github.com/npm/cli)
@@ -62,12 +60,12 @@ Before Codex Beacon, monitoring and managing these components required juggling 
 ## Implemented
 
 - Separate version, process, sign-in, and update detection for the Codex desktop app and Codex CLI. Each executable's version is read from its own install source (npm global, `PATH`, or the copy bundled with the desktop app), so several different versions can coexist on one machine.
-- Local/latest version comparison for `@openai/codex`, `@bitkyc08/opencodex`, and `codex-relay` using the official npm registry.
+- Local/latest version comparison for `@openai/codex` and `codex-relay` using the official npm registry.
 - State-driven actions per component (install, sign in, start, stop, restart, upgrade), plus a separate optional-module list on the Installation page.
 - NVM for Windows detection, installed Node.js inventory, version installation, and active-version switching.
 - Node.js downloads use a configurable mirror and fall back to the official host automatically, so an unreachable `nodejs.org` can no longer stall an install.
 - Node.js ≥ 22.14.0 and npm prerequisite checks before npm-based modules can be installed.
-- Provider switching that rewrites `model_provider` — and adds or removes the local-proxy `openai_base_url` — in `%USERPROFILE%\.codex\config.toml`.
+- Effective network route detection that reports whether Codex currently uses the Windows system proxy, a TUN adapter, a custom HTTP proxy, environment proxy variables, or a direct connection.
 - Public egress reported from OpenAI's point of view, enriched with country, region, city, ISP, AS number, hosting/proxy classification, and a trust score.
 - Tailscale service, local node, Tailnet device, address, online, and last-seen status.
 - Allowlisted bulk recovery that excludes the Codex desktop app, Codex Beacon, and unrelated Node.js processes.
@@ -78,17 +76,15 @@ Before Codex Beacon, monitoring and managing these components required juggling 
 
 ## Core Functional Modules
 
-Codex Beacon is built around nine modular, state-driven destinations:
+Codex Beacon is built around seven modular, state-driven destinations:
 
 1. **Codex Dashboard**: Dual-core visibility for official Microsoft Store ChatGPT (`OpenAI.Codex`) and global npm `@openai/codex` CLI. Compares local builds against upstream npm registry metadata.
 2. **Dependencies & NVM**: Automatic NVM for Windows detection, Node.js version switching (satisfying Relay Node.js >= 22.14.0 prerequisite), and mirror acceleration with automatic fallback.
 3. **Process Arbiter**: Real-time inventory of all related processes (PID, paths, ports, memory) with a strict termination whitelist that prevents killing host apps or unrelated Node.js workflows.
-4. **Network & Egress**: Decoupled dual-plane pipeline observation (Model Plane vs Transport Plane) and true public egress IP probing with automatic Residential vs Datacenter tagging to avoid OpenAI 403 blocks.
-5. **Providers & Safe Vault**: Visual provider switching synced to `config.toml`. Password fields are masked by default, and keys are saved in hidden user directories (`%USERPROFILE%\.CodexBeacon\providers.json`) with zero serialization into logs.
-6. **OpenCodex Proxy (Optional Extension)**: Independent management of the `opencodex-proxy` scheduled task and port 10100, enabling multi-model dispatch and failover.
-7. **Codex Relay (Optional Extension)**: Dedicated management of the Codex Relay daemon on port 8787, optimized for low-latency streaming Server-Sent Events (SSE).
-8. **Tailscale Mesh (Optional Extension)**: Local Tailscale daemon inspection, virtual IP discovery, and remote node inventory for private GPU computing.
-9. **Settings & Self-Updating**: Version telemetry, instant English/Chinese bilingual switching, and in-place GitHub Releases self-updates with SHA-256 verification.
+4. **Network & Egress**: Effective proxy route detection (system proxy, TUN, custom HTTP proxy, environment proxy, direct) and true public egress IP probing with automatic Residential vs Datacenter tagging to avoid OpenAI 403 blocks.
+5. **Codex Relay (Optional Extension)**: Dedicated management of the Codex Relay daemon on port 8787, optimized for low-latency streaming Server-Sent Events (SSE).
+6. **Tailscale Mesh (Optional Extension)**: Local Tailscale daemon inspection, virtual IP discovery, and remote node inventory for private GPU computing.
+7. **Settings & Self-Updating**: Version telemetry, instant English/Chinese bilingual switching, and in-place GitHub Releases self-updates with SHA-256 verification.
 
 ## Download and run
 
@@ -114,7 +110,7 @@ Windows does not include .NET 10 or the required Windows App Runtime by default;
 
 Both builds require x64 Windows 10 1809 (build 17763) or later. Status collection uses Windows PowerShell 5.1, which is included with supported Windows versions. Unsigned community builds may trigger Windows SmartScreen. Network access is used for version checks, official installers, sign-in, and public-egress discovery.
 
-Node.js, npm, NVM, Tailscale, OpenCodex, and Codex Relay are not prerequisites for launching Codex Beacon. They are required only for their corresponding management features. The UI detects missing dependencies and guides users through install → sign in → start. OpenCodex and Codex Relay require Node.js and npm; Relay requires Node.js 22.14.0 or newer.
+Node.js, npm, NVM, Tailscale, and Codex Relay are not prerequisites for launching Codex Beacon. They are required only for their corresponding management features. The UI detects missing dependencies and guides users through install → sign in → start. Codex Relay requires Node.js and npm, and Node.js 22.14.0 or newer.
 
 The self-contained directory is currently about 214 MB and compresses to about 87 MB. Most of that size comes from the bundled .NET 10 runtime, WinUI 3 / Windows App SDK, DirectML, and ONNX Runtime components.
 
@@ -140,7 +136,7 @@ dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true 
 ### Standard Non-Admin Mode (Recommended)
 
 Codex Beacon is designed to run **without administrator privileges** by default:
-- Live detection of Codex desktop, CLI, OpenCodex, and Relay status and dual-layer data flow pipelines;
+- Live detection of Codex desktop, CLI, and Relay status plus the effective network route;
 - Querying public egress IP, geographical location, ISP, and outbound proxy type;
 - Inspecting all running Codex and ChatGPT processes, with one-click termination and app restart;
 - Detecting NVM and Node.js runtime environments.
@@ -154,7 +150,7 @@ The following specific actions may require UAC elevation on Windows:
 
 Codex Beacon never elevates silently. When an operation fails due to insufficient privileges, it provides an actionable error message prompting the user to restart as administrator if needed.
 
-- Diagnostics never read or display tokens, authorization headers, passwords, cookies, or API keys. Saved provider keys remain masked and are excluded from diagnostic collection and export.
+- Diagnostics never read or display tokens, authorization headers, passwords, cookies, or API keys. Codex Beacon stores no credentials at all, so no key material can leak into diagnostic collection or export.
 - A remote service IP is a process destination, not the machine's public egress IP. The UI displays them separately.
 - The installed Codex desktop version comes from the local `OpenAI.Codex` MSIX/AppX package. The latest Windows package version comes from the Codex App Mirror manifest, which mirrors Microsoft Store product `9PLM9XGG6VKS`. The UI identifies that source, while installation and upgrades always open the official Microsoft Store page.
 
@@ -162,8 +158,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md), [DESIGN.md](DESIGN.md), [SECURITY.md](SE
 
 ## Local adaptation
 
-In vNext, the OpenCodex page owns the `opencodex-proxy` scheduled-task/service name and the Codex Relay page owns the `Codex Relay` name. These listener ports are detected by default, but the active path only includes an endpoint supported by the selected provider and observed runtime evidence:
+The Codex Relay page owns the `Codex Relay` scheduled-task/service name. Its listener port is detected by default, but the active path only includes an endpoint backed by observed runtime evidence:
 
-- OpenCodex Proxy: `127.0.0.1:10100`
 - Codex Relay: `127.0.0.1:8787`
-- Other providers: parsed dynamically from `%USERPROFILE%\.codex\config.toml`
+
+The Network page reports the effective transport route independently of any extension: Windows system proxy, TUN adapter, custom HTTP proxy, environment proxy variables, or a direct connection.

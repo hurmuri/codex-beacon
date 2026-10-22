@@ -77,8 +77,6 @@
   <data name="EgressUnavailable.Text" xml:space="preserve"><value>尚未取得公网出口信息，请点击“立即刷新”。</value></data>
   <data name="OpenEgressCheck.Content" xml:space="preserve"><value>打开完整 IP 检测</value></data>
   <data name="EgressWebsiteHint.Text" xml:space="preserve"><value>由 ip.net.coffee 提供 ChatGPT / Codex 出口 IP 与风险检测。</value></data>
-  <data name="ProvidersHeading.Text" xml:space="preserve"><value>模型 Provider 切换</value></data>
-  <data name="ProvidersDescription.Text" xml:space="preserve"><value>点击即可把 Codex 的主 Provider 切换为指定目标，结果会即时写入 config.toml。</value></data>
 
   <!-- Tailscale -->
   <data name="TailscaleTitle.Text" xml:space="preserve"><value>Tailscale 网络</value></data>
@@ -152,7 +150,6 @@
   <data name="SettingsDescription.Text" xml:space="preserve"><value>配置通用偏好，并管理 Codex Beacon 自身的关于与更新。</value></data>
   <data name="GeneralSettingsExpander.Header" xml:space="preserve"><value>常规设置</value></data>
   <data name="GeneralSettingsExpander.Description" xml:space="preserve"><value>刷新频率与显示语言</value></data>
-  <data name="ProviderEmptyText.Text" xml:space="preserve"><value>尚未添加 Provider</value></data>
   <data name="LanguageCard.Header" xml:space="preserve"><value>显示语言</value></data>
   <data name="LanguageCard.Description" xml:space="preserve"><value>跟随 Windows，或在 English / 简体中文之间即时切换</value></data>
   <data name="LanguageSystem.Content" xml:space="preserve"><value>跟随 Windows</value></data>
@@ -161,7 +158,6 @@
   <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="MirrorCard.Description" xml:space="preserve"><value>nvm install 使用的发行版镜像地址</value></data>
   <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
-  <data name="ProxyTaskCard.Header" xml:space="preserve"><value>OpenCodex Proxy 计划任务</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>保存更改</value></data>
   <data name="SaveChangesCard.Description" xml:space="preserve"><value>立即生效并存储在本机</value></data>
   <data name="SaveButton.Content" xml:space="preserve"><value>保存设置</value></data>
@@ -185,8 +181,6 @@
   <data name="CompDesktopKind" xml:space="preserve"><value>OpenAI 官方 Windows 应用</value></data>
   <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="CompCodexKind" xml:space="preserve"><value>命令行客户端</value></data>
-  <data name="CompProxyName" xml:space="preserve"><value>OpenCodex Proxy</value></data>
-  <data name="CompProxyKind" xml:space="preserve"><value>可选扩展 · npm 包</value></data>
   <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
   <data name="CompRelayKind" xml:space="preserve"><value>可选扩展 · npm 包</value></data>
   <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
@@ -208,10 +202,6 @@
   <data name="DetailCodexNpm" xml:space="preserve"><value>npm 全局安装 · {0}</value></data>
   <data name="DetailCodexOnPath" xml:space="preserve"><value>PATH 上的 codex 命令 · {0}</value></data>
   <data name="DetailCodexBundled" xml:space="preserve"><value>随桌面客户端内置 · {0}</value></data>
-  <data name="DetailProxyListening" xml:space="preserve"><value>监听端口 {0} · 计划任务：{1}</value></data>
-  <data name="DetailProxyMissing" xml:space="preserve"><value>未检测到 npm 全局包</value></data>
-  <data name="DetailProxyNoTask" xml:space="preserve"><value>包已安装，但计划任务尚未配置（{0}）</value></data>
-  <data name="DetailProxyStopped" xml:space="preserve"><value>未检测到监听端口 · 计划任务：{0}</value></data>
   <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 正在监听 · 计划任务：{0}</value></data>
   <data name="DetailRelayMissing" xml:space="preserve"><value>未检测到 Relay 安装</value></data>
   <data name="DetailRelayNoTask" xml:space="preserve"><value>包已安装；点击“启动”可用官方后台模式运行（{0}）</value></data>
@@ -305,7 +295,6 @@
   <data name="InstallingNode" xml:space="preserve"><value>正在通过 NVM 安装 Node.js {0}…</value></data>
   <data name="SelectNodeVersion" xml:space="preserve"><value>请先选择一个已安装的 Node.js 版本。</value></data>
   <data name="SwitchingNode" xml:space="preserve"><value>正在切换到 Node.js {0}…</value></data>
-  <data name="SwitchingProvider" xml:space="preserve"><value>正在切换 Provider：{0}…</value></data>
   <data name="SettingsSaved" xml:space="preserve"><value>设置已保存，将在下次刷新时生效。</value></data>
   <data name="Cancel" xml:space="preserve"><value>取消</value></data>
   <data name="Cancelling" xml:space="preserve"><value>正在取消当前操作…</value></data>
@@ -335,7 +324,6 @@
   <data name="ActionUnsupported" xml:space="preserve"><value>该组件不支持此操作。</value></data>
   <data name="ActionNeedRuntime" xml:space="preserve"><value>缺少 Node.js 或 npm，请先完成运行环境配置。</value></data>
   <data name="ActionRuntimeTooOld" xml:space="preserve"><value>Node.js {0} 版本过低，需要 22.14.0 或更高版本。</value></data>
-  <data name="ActionProviderSwitched" xml:space="preserve"><value>已切换到 Provider：{0}</value></data>
   <data name="ActionNvmInstalled" xml:space="preserve"><value>NVM for Windows 安装状态已更新</value></data>
   <data name="ActionNvmNodeInstalled" xml:space="preserve"><value>Node.js {0} 已安装</value></data>
   <data name="ActionNvmNodeSwitched" xml:space="preserve"><value>已切换到 Node.js {0}</value></data>
@@ -358,7 +346,6 @@
   <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI 尚未安装，请先完成安装。</value></data>
   <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI 不是常驻服务，请在进程页管理正在运行的进程。</value></data>
   <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} 已安装为最新版</value></data>
-  <data name="ActionHintProxyStart" xml:space="preserve"><value>需要使用时请点击“启动”完成服务配置。</value></data>
   <data name="ActionHintRelayStart" xml:space="preserve"><value>点击“启动”会使用 Relay 官方后台模式运行。</value></data>
   <data name="ActionServicesRestarted" xml:space="preserve"><value>已重新启动可选服务（清理 {0} 个进程，已启动：{1}）</value></data>
   <data name="ActionServicesTerminated" xml:space="preserve"><value>已终止 {0} 个可选服务进程；桌面客户端与本管理器未受影响</value></data>
@@ -366,10 +353,6 @@
   <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay 已停止</value></data>
   <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay 已重新启动</value></data>
   <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay 尚未安装，请先完成安装。</value></data>
-  <data name="ActionProxyStarted" xml:space="preserve"><value>OpenCodex 服务已启动</value></data>
-  <data name="ActionProxyStopped" xml:space="preserve"><value>OpenCodex 服务已停止</value></data>
-  <data name="ActionProxyRestarted" xml:space="preserve"><value>OpenCodex 服务已重新启动</value></data>
-  <data name="ActionProxyMissing" xml:space="preserve"><value>OpenCodex 尚未安装，请先完成安装。</value></data>
   <data name="ActionTaskStarted" xml:space="preserve"><value>计划任务 [{0}] 已启动</value></data>
   <data name="ActionTaskStopped" xml:space="preserve"><value>计划任务 [{0}] 已停止</value></data>
   <data name="ActionTaskRestarted" xml:space="preserve"><value>计划任务 [{0}] 已重新启动</value></data>
@@ -383,10 +366,6 @@
   <data name="ActionConfigMissing" xml:space="preserve"><value>未找到 %USERPROFILE%\.codex\config.toml，无法切换 Provider。</value></data>
 
   <!-- Provider -->
-  <data name="ProviderActiveBtn" xml:space="preserve"><value>当前使用中</value></data>
-  <data name="ProviderSwitchBtn" xml:space="preserve"><value>设为当前 Provider</value></data>
-  <data name="ProviderActive" xml:space="preserve"><value>当前激活</value></data>
-  <data name="ProviderInactive" xml:space="preserve"><value>未激活</value></data>
 
   <!-- 基础设施 -->
   <data name="UnableToStart" xml:space="preserve"><value>无法启动 {0}</value></data>
@@ -442,23 +421,10 @@
   <data name="NetworkConnected" xml:space="preserve"><value>网络连接成功</value></data>
   <data name="NetworkDisconnected" xml:space="preserve"><value>网络未连接</value></data>
   <data name="NetworkUnreachable" xml:space="preserve"><value>目标不可达</value></data>
-  <data name="ProviderKeyConfigured" xml:space="preserve"><value>密钥已配置 · 默认隐藏</value></data>
-  <data name="ProviderKeyMissing" xml:space="preserve"><value>尚未配置密钥</value></data>
-  <data name="ProviderSaved" xml:space="preserve"><value>Provider 已保存到当前用户隐藏配置目录。</value></data>
-  <data name="ProviderDeleted" xml:space="preserve"><value>Provider 已删除。</value></data>
-  <data name="ProviderTesting" xml:space="preserve"><value>正在使用 {1} 测试 {0}…</value></data>
-  <data name="ProviderTestSucceeded" xml:space="preserve"><value>Provider 联通测试成功（{0}）。</value></data>
-  <data name="ProviderTestFailed" xml:space="preserve"><value>Provider 联通测试失败：{0}</value></data>
-  <data name="DeleteProviderTitle" xml:space="preserve"><value>删除 Provider？</value></data>
-  <data name="DeleteProviderBody" xml:space="preserve"><value>将从本机配置中删除“{0}”及其密钥。</value></data>
   <data name="Delete" xml:space="preserve"><value>删除</value></data>
   <data name="Name" xml:space="preserve"><value>名称</value></data>
   <data name="TestModel" xml:space="preserve"><value>测试模型</value></data>
-  <data name="ProviderKeepExistingKey" xml:space="preserve"><value>留空以保留现有密钥</value></data>
-  <data name="AddProvider" xml:space="preserve"><value>添加 Provider</value></data>
-  <data name="EditProvider" xml:space="preserve"><value>编辑 Provider</value></data>
   <data name="Save" xml:space="preserve"><value>保存</value></data>
-  <data name="ProviderInvalid" xml:space="preserve"><value>Provider ID、Base URL 无效，或 ID 已存在。</value></data>
   <data name="CompAppInstallerName" xml:space="preserve"><value>应用安装程序</value></data>
   <data name="CompAppInstallerKind" xml:space="preserve"><value>WinGet 系统依赖</value></data>
   <data name="DetailAppInstallerReady" xml:space="preserve"><value>应用安装程序已安装</value></data>
@@ -473,8 +439,6 @@
   <data name="DetailStoreMissing" xml:space="preserve"><value>msstore 源不可用，需要修复</value></data>
   <data name="ActionAppInstallerStoreOpened" xml:space="preserve"><value>已打开 Microsoft Store 的应用安装程序页面。</value></data>
   <data name="ActionStoreSourceReady" xml:space="preserve"><value>Microsoft Store 软件源已更新。</value></data>
-  <data name="ActionOpenCodexIntegrated" xml:space="preserve"><value>Codex 已设置为通过 OpenCodex 路由。</value></data>
-  <data name="ActionOpenCodexModelsRefreshed" xml:space="preserve"><value>OpenCodex 模型目录已刷新。</value></data>
   <data name="NavDependencies.Content" xml:space="preserve"><value>依赖管理</value></data>
   <data name="DetectingStatus.Text" xml:space="preserve"><value>正在检测…</value></data>
   <data name="DependencySettingsButton.Content" xml:space="preserve"><value>依赖设置</value></data>
@@ -487,26 +451,13 @@
   <data name="ProxyModeCustom.Content" xml:space="preserve"><value>自定义 HTTP 代理</value></data>
   <data name="CustomHttpProxyBox.Header" xml:space="preserve"><value>HTTP 代理地址</value></data>
   <data name="SaveNetworkButton.Content" xml:space="preserve"><value>保存网络设置</value></data>
-  <data name="ProvidersPageTitle.Text" xml:space="preserve"><value>Provider 管理</value></data>
-  <data name="ProvidersPageDescription.Text" xml:space="preserve"><value>手动添加、编辑并测试 Provider。密钥保存在当前用户隐藏目录，不会回显或写入日志。</value></data>
-  <data name="AddProviderButton.Content" xml:space="preserve"><value>添加 Provider</value></data>
-  <data name="ConfiguredProvidersHeading.Text" xml:space="preserve"><value>已配置 Provider</value></data>
-  <data name="UseProviderButton.Content" xml:space="preserve"><value>设为当前</value></data>
-  <data name="TestProviderButton.Content" xml:space="preserve"><value>测试</value></data>
-  <data name="EditProviderButton.Content" xml:space="preserve"><value>编辑</value></data>
-  <data name="DeleteProviderButton.Content" xml:space="preserve"><value>删除</value></data>
-  <data name="ProviderTestHint.Text" xml:space="preserve"><value>默认联通测试模型为 gpt-5.4，也可选择 gpt-5.5。</value></data>
-  <data name="OpenCodexDescription.Text" xml:space="preserve"><value>管理 OpenCodex 版本、服务、客户端代理状态和模型显示。</value></data>
   <data name="ServiceVersionHeading.Text" xml:space="preserve"><value>服务与版本</value></data>
   <data name="AwaitingDetection.Text" xml:space="preserve"><value>等待检测</value></data>
-  <data name="OpenCodexIntegrationPending.Text" xml:space="preserve"><value>集成状态：—</value></data>
   <data name="IntegrateCodexButton.Content" xml:space="preserve"><value>设为 Codex Provider</value></data>
   <data name="AvailableModelsHeading.Text" xml:space="preserve"><value>可用模型</value></data>
   <data name="RefreshModelsButton.Content" xml:space="preserve"><value>刷新模型</value></data>
   <data name="TestModelButton.Content" xml:space="preserve"><value>测试模型</value></data>
   <data name="ServiceSettingsHeading.Text" xml:space="preserve"><value>服务设置</value></data>
-  <data name="ProxyTaskNameBox.Header" xml:space="preserve"><value>OpenCodex Proxy 计划任务</value></data>
-  <data name="OpenCodexSaveButton.Content" xml:space="preserve"><value>保存</value></data>
   <data name="DownloadSourcesHeading.Text" xml:space="preserve"><value>下载源</value></data>
   <data name="NodeMirrorFieldLabel.Text" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry（nrm 预设）</value></data>
@@ -526,47 +477,17 @@
   <data name="DesktopStoreInstallButton.Content" xml:space="preserve"><value>商店安装/升级</value></data>
   <data name="CodexCardSubtitle.Text" xml:space="preserve"><value>OpenAI 官方命令行工具</value></data>
   <data name="ProxyModeHint.Text" xml:space="preserve"><value>选择代理工作模式；切换或填入代理地址后可直接测试连通性，确认无误后点击保存生效。</value></data>
-  <data name="ActiveProviderLabel.Text" xml:space="preserve"><value>当前 Codex 主路由服务商</value></data>
-  <data name="ActiveProviderDetecting.Text" xml:space="preserve"><value>正在检测当前 Provider…</value></data>
-  <data name="ProviderBannerActive.Text" xml:space="preserve"><value>生效中</value></data>
-  <data name="ProviderSetActiveBtn.Content" xml:space="preserve"><value>设为当前</value></data>
-  <data name="ProviderTestConnBtn.Content" xml:space="preserve"><value>联通测试</value></data>
-  <data name="OpenCodexServiceTitle.Text" xml:space="preserve"><value>OpenCodex 本地代理服务</value></data>
   <data name="VersionStatusLabel.Text" xml:space="preserve"><value>版本状态</value></data>
   <data name="CheckNewerButton.Content" xml:space="preserve"><value>检查新版本</value></data>
-  <data name="OpenCodexModelsHint.Text" xml:space="preserve"><value>控制每个模型是否出现在客户端模型列表中；修改后立即同步到运行中的代理。</value></data>
   <data name="ModelVisibilityHeader.Text" xml:space="preserve"><value>在客户端显示</value></data>
   <data name="ModelNameHeader.Text" xml:space="preserve"><value>模型名</value></data>
-  <data name="ModelProviderHeader.Text" xml:space="preserve"><value>Provider</value></data>
-  <data name="OpenCodexServiceSubtitle.Text" xml:space="preserve"><value>统一管理 ChatGPT 客户端与 Codex CLI 的本地代理和模型显示</value></data>
-  <data name="OpenCodexClientsHeading.Text" xml:space="preserve"><value>客户端代理状态</value></data>
   <data name="ChatGptClientName.Text" xml:space="preserve"><value>ChatGPT 客户端</value></data>
   <data name="SetChatGptProxyButton.Content" xml:space="preserve"><value>设为 ChatGPT 代理</value></data>
   <data name="SetCodexProxyButton.Content" xml:space="preserve"><value>设为 Codex 代理</value></data>
   <data name="ModelVisible" xml:space="preserve"><value>在客户端中显示</value></data>
   <data name="ModelHidden" xml:space="preserve"><value>已从客户端隐藏</value></data>
-  <data name="OpenCodexProxyCurrent" xml:space="preserve"><value>OpenCodex 代理已生效</value></data>
-  <data name="OpenCodexProxyInactive" xml:space="preserve"><value>当前未使用 OpenCodex 代理</value></data>
-  <data name="OpenCodexCurrentProvider" xml:space="preserve"><value>当前生效 Provider：{0}</value></data>
-  <data name="OpenCodexProviderUnknown" xml:space="preserve"><value>当前生效 Provider：无法获取</value></data>
-  <data name="ActionOpenCodexModelShown" xml:space="preserve"><value>模型 {0} 已显示。</value></data>
-  <data name="ActionOpenCodexModelHidden" xml:space="preserve"><value>模型 {0} 已隐藏。</value></data>
-  <data name="OpenCodexModelTestTitle.Text" xml:space="preserve"><value>模型连通测试</value></data>
-  <data name="OpenCodexModelTestHint.Text" xml:space="preserve"><value>从当前已显示的模型中选择一个进行提供方连通测试。</value></data>
-  <data name="OpenCodexProviderModelsHint.Text" xml:space="preserve"><value>每个 Provider 独立读取目录并管理模型显示；OpenCodex 可能复用约 5 分钟的短期模型缓存。</value></data>
-  <data name="OpenCodexProviderModelsEmpty.Text" xml:space="preserve"><value>尚未发现已配置的 Provider。</value></data>
-  <data name="RefreshProviderModelsButton.Content" xml:space="preserve"><value>刷新此 Provider</value></data>
-  <data name="ProviderModelsToggle.Header" xml:space="preserve"><value>全部在客户端显示</value></data>
-  <data name="OpenCodexProviderModelCount" xml:space="preserve"><value>{0} 个模型 · {1} 个已显示</value></data>
-  <data name="OpenCodexProviderModelCountDefault" xml:space="preserve"><value>默认 Provider · {0} 个模型 · {1} 个已显示</value></data>
-  <data name="RefreshingOpenCodexProviderModels" xml:space="preserve"><value>正在读取 {0} 的模型目录…</value></data>
-  <data name="ActionOpenCodexProviderModelsRefreshed" xml:space="preserve"><value>已读取 {0}：{1} 个模型。</value></data>
-  <data name="ActionOpenCodexProviderModelsShown" xml:space="preserve"><value>Provider {0} 下的模型已全部显示。</value></data>
-  <data name="ActionOpenCodexProviderModelsHidden" xml:space="preserve"><value>Provider {0} 下的模型已全部隐藏。</value></data>
   <data name="ActionShowModelsName" xml:space="preserve"><value>显示模型</value></data>
   <data name="ActionHideModelsName" xml:space="preserve"><value>隐藏模型</value></data>
-  <data name="ActionOpenCodexClientsRestarted" xml:space="preserve"><value>OpenCodex 已启动，并已重新打开 ChatGPT 客户端。</value></data>
-  <data name="OpenCodexModelPicker.PlaceholderText" xml:space="preserve"><value>请选择模型进行测试</value></data>
   <data name="TailscaleControlHeading.Text" xml:space="preserve"><value>版本与后台服务控制</value></data>
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale 本机网络服务</value></data>
   <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>Windows 后台服务驱动虚拟专用网络（启动、停止与重启需管理员权限）</value></data>
@@ -583,12 +504,9 @@
   <data name="ProjectRepoCard.Header" xml:space="preserve"><value>GitHub 源码仓库</value></data>
   <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>开源许可协议</value></data>
   <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>宽松的自由软件授权</value></data>
-  <data name="ReferenceOpencodex.Description" xml:space="preserve"><value>可选 Provider 代理扩展</value></data>
   <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Codex 桌面版本管理方案参考</value></data>
   <data name="ReferenceRelay.Description" xml:space="preserve"><value>可选移动端桥接扩展</value></data>
   <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex 出口 IP 与风险检测数据源</value></data>
-  <data name="ProviderBannerOpencodex" xml:space="preserve"><value>OpenCodex 本地代理 (http://127.0.0.1:10100/v1)</value></data>
-  <data name="ProviderBannerOpenAI" xml:space="preserve"><value>OpenAI 官方直连 (https://api.openai.com/v1)</value></data>
   <data name="DesktopStorePathFallback" xml:space="preserve"><value>OpenAI 官方 Store 应用包</value></data>
   <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm 全局安装</value></data>
   <data name="NetworkTesting" xml:space="preserve"><value>正在测试网络与代理连通性…</value></data>
@@ -599,11 +517,7 @@
   <data name="ComponentUpdateUnknown" xml:space="preserve"><value>未查询到 {0} 的远端版本。</value></data>
   <data name="ComponentUpdateFailed" xml:space="preserve"><value>查询失败: {0}</value></data>
   <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT 桌面应用</value></data>
-  <data name="OpenCodexIntegrationNone" xml:space="preserve"><value>集成状态：—</value></data>
-  <data name="OpenCodexIntegrationCurrent" xml:space="preserve"><value>集成状态：已集成</value></data>
-  <data name="OpenCodexIntegrationState" xml:space="preserve"><value>集成状态：{0}</value></data>
   <!-- QA fix round addendum -->
-  <data name="ProvidersDetectedHeading.Text" xml:space="preserve"><value>系统预置与已检测 Provider (含 OpenCodex 本地代理)</value></data>
   <data name="NpmRegistryHint.Text" xml:space="preserve"><value>安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。</value></data>
   <data name="OpenLogsLabel.Text" xml:space="preserve"><value>日志</value></data>
   <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon 日志</value></data>

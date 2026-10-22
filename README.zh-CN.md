@@ -5,7 +5,7 @@
 <h1 align="center">Codex Beacon</h1>
 
 <p align="center">
-  <strong>Codex 一站式管理中心：统一调度 ChatGPT 桌面端与 Codex CLI，支持可选 OpenCodex、Relay 与 Tailscale 扩展。</strong>
+  <strong>Codex 一站式管理中心：统一调度 ChatGPT 桌面端与 Codex CLI，支持可选 Relay 与 Tailscale 扩展。</strong>
 </p>
 
 <p align="center">
@@ -21,34 +21,32 @@
   <a href="https://learn.microsoft.com/windows/apps/winui/winui3/"><img src="https://img.shields.io/badge/UI-WinUI%203%20%7C%20Fluent-2563EB?style=flat" alt="WinUI 3"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg?style=flat" alt="MIT License"></a>
   <a href="https://github.com/openai/codex"><img src="https://img.shields.io/badge/OpenAI-Codex%20Ecosystem-17202A?style=flat&logo=openai&logoColor=white" alt="OpenAI Codex"></a>
-  <a href="https://github.com/lidge-jun/opencodex"><img src="https://img.shields.io/badge/Extension-OpenCodex%20Proxy-4F46E5?style=flat" alt="OpenCodex"></a>
   <a href="https://github.com/gronxb/codex-relay"><img src="https://img.shields.io/badge/Extension-Codex%20Relay-059669?style=flat" alt="Codex Relay"></a>
   <a href="https://tailscale.com"><img src="https://img.shields.io/badge/Mesh-Tailscale-2B3137?style=flat&logo=tailscale&logoColor=white" alt="Tailscale"></a>
 </p>
 
-Codex Beacon 是一个明亮主题的 WinUI 3 本机控制台，用于检查和管理 Windows 上的 Codex 桌面客户端、Codex CLI、OpenCodex Proxy、Codex Relay、Node.js/NVM/npm 与 Tailscale。
+Codex Beacon 是一个明亮主题的 WinUI 3 本机控制台，用于检查和管理 Windows 上的 Codex 桌面客户端、Codex CLI、Codex Relay、Node.js/NVM/npm 与 Tailscale。
 
-支持英文和简体中文，默认跟随 Windows 显示语言，也可在设置页切换。`build/version.txt` 是唯一版本源，每次构建都会自增；当前运行版本始终显示在「设置 → 关于与更新」中。Codex 桌面客户端与 CLI 是产品核心；OpenCodex Proxy 和 Codex Relay 为独立可选模块。安装扩展不会自动修改 Codex 的当前 provider。
+支持英文和简体中文，默认跟随 Windows 显示语言，也可在设置页切换。`build/version.txt` 是唯一版本源，每次构建都会自增；当前运行版本始终显示在「设置 → 关于与更新」中。Codex 桌面客户端与 CLI 是产品核心；Codex Relay 和 Tailscale 为独立可选模块。安装扩展不会自动修改 Codex 的当前路由。
 
 ## 关于项目 (About)
 
-Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌面管理看板。随着本地 AI 辅助研发工具链的扩展，开发者通常需要协同管理多个独立服务：OpenAI 官方 Codex 桌面客户端（`OpenAI.Codex`）、Codex CLI、社区模型代理扩展 OpenCodex、移动端远程中继 Codex Relay、特定版本的 Node.js/NVM 运行时环境，以及 Tailscale 组网连接。
+Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌面管理看板。随着本地 AI 辅助研发工具链的扩展，开发者通常需要协同管理多个独立服务：OpenAI 官方 Codex 桌面客户端（`OpenAI.Codex`）、Codex CLI、移动端远程中继 Codex Relay、特定版本的 Node.js/NVM 运行时环境，以及 Tailscale 组网连接。
 
 在此之前，排查服务状态需要频繁穿梭于任务管理器、多开的 PowerShell 窗口、npm 全局包命令与各 TOML 配置文件之间。Codex Beacon 将这一整套分散的生命周期管理统一收敛至原生桌面面板中。
 
 ### 核心特性
 
 - **微软原生体验**：基于 WinUI 3 与 Windows App SDK 1.8 打造，遵循 Windows 11 Fluent 视觉与动效规范。轻量明亮主题，杜绝 Web/Electron 包装带来的冗余资源消耗。
-- **受保护的凭据输入**：vNext Provider 编辑器使用默认隐藏的密码框。用户明确保存后，Key 以明文写入仅当前 Windows 用户可访问的本地配置文件，并排除在上传、命令行、日志、错误、诊断、崩溃报告、状态文字和默认导出之外。
+- **不落地任何凭据**：Codex Beacon 不保存 API Key、Token 或密码，诊断、日志、导出与状态文字中都不会出现凭据内容。
 - **状态驱动操作**：所有控制按钮（安装、登录、启动、停止、重启、升级）均由真实运行状态驱动，杜绝盲目点击导致的冲突或脏配置。
-- **独立解耦架构**：Codex 官方客户端与 CLI 为产品核心，OpenCodex 与 Codex Relay 为独立可选扩展；缺少可选组件绝不会判定系统异常。
+- **独立解耦架构**：Codex 官方客户端与 CLI 为产品核心，Codex Relay 与 Tailscale 为独立可选扩展；缺少可选组件绝不会判定系统异常。
 - **原生双语支持**：完整支持英文与简体中文，跟随系统或在设置中一键即时热切换，无需重启应用程序。
 - **应用内自更新**：查询官方 GitHub 发行通道，发现新版本时在窗口顶部提示；下载过程实时显示进度与速度并做 SHA-256 校验，校验通过后原地替换安装包并自动重启到新版本。
 
 ## 上游项目与参考
 
 - [Codex CLI · openai/codex](https://github.com/openai/codex)
-- [OpenCodex · lidge-jun/opencodex](https://github.com/lidge-jun/opencodex)
 - [Codex Relay · gronxb/codex-relay](https://github.com/gronxb/codex-relay)
 - [NVM for Windows](https://github.com/coreybutler/nvm-windows)
 - [Node.js](https://github.com/nodejs/node)、[npm CLI](https://github.com/npm/cli)
@@ -59,12 +57,12 @@ Codex Beacon 是专为 Windows 平台打造的 OpenAI Codex 工具链开源桌�
 ## 已实现
 
 - Codex 桌面客户端与 CLI 分开检测版本、进程、账号和更新方式；每个可执行文件的版本按各自安装来源（npm 全局、`PATH` 或桌面端内置副本）单独读取，同一台机器可同时存在多个版本。
-- 从 npm 官方注册表比较 `@openai/codex`、`@bitkyc08/opencodex` 与 `codex-relay` 的本机/最新版本。
+- 从 npm 官方注册表比较 `@openai/codex` 与 `codex-relay` 的本机/最新版本。
 - 按状态启用每个组件的安装、登录、启动、停止、重启与升级，并在安装页单独提供可选模块列表。
 - NVM for Windows 检测、Node.js 版本列表、指定版本安装与当前版本切换。
 - Node.js 下载使用可配置镜像，镜像不可用时自动回退官方源，`nodejs.org` 不可达也不会再卡住安装。
 - 安装 npm 模块前验证 Node.js ≥ 22.14.0 与 npm 前置条件。
-- 切换 Provider 时改写 `%USERPROFILE%\.codex\config.toml` 中的 `model_provider`，并按需写入或清除本地代理的 `openai_base_url`。
+- 生效网络路径检测：显示当前使用系统代理、TUN 虚拟网卡、自定义 HTTP 代理、环境变量代理还是直连。
 - 以 OpenAI 视角展示本机公网出口，并补充国家/地区、城市、运营商、AS 号、机房/住宅分类与信任分。
 - Tailscale 服务、本机节点、Tailnet 设备、地址、在线状态和最后活动时间。
 - 安全的批量停止/重启，排除 Codex 桌面应用、Codex Beacon 和无关 Node 进程。
@@ -80,12 +78,10 @@ Codex Beacon 采用模块化独立页面设计，遵循状态驱动控制原则�
 1. **Codex 总览 (Dashboard)**：聚合展示 ChatGPT 官方客户端（MSIX 安装包 `OpenAI.Codex`）与全局 npm `codex` CLI 的健康状态，对比本地版本与官方注册表最新版本，提供一键启停与更新。
 2. **依赖管理 (Dependencies)**：自动探测系统 NVM for Windows 与已安装 Node.js 版本，支持一键切换活跃版本以满足 Relay（Node.js ≥ 22.14.0）等运行条件；支持国内镜像加速与故障自动回退。
 3. **进程管控 (Processes)**：实时盘点全部关联进程（PID、路径、端口、内存），内置严格的安全白名单，支持一键安全清理卡死代理，绝不误杀宿主应用与非相关 Node 任务。
-4. **网络与代理 (Network & Egress)**：双层数据管线解耦观测，一眼看清模型调度与物理网络流向；以 OpenAI 视角探测真实公网出口 IP，智能标记原生家庭宽带（Residential）与数据中心机房（IDC），规避风控封号。
-5. **Providers 凭证管理 (Providers & Vault)**：可视化管理模型供应商，安全写入 `config.toml`；密码框默认遮罩，Key 保存在当前用户专属隐藏目录 `%USERPROFILE%\.CodexBeacon\providers.json`，严禁明文进入任何日志与诊断包。
-6. **OpenCodex 代理 (可选模块)**：独立管理 `opencodex-proxy` 计划任务与 10100 端口服务，支持多供应商请求智能重写、配额均衡与模型热备。
-7. **Codex Relay 隧道 (可选模块)**：管理 Codex Relay 专属后台服务（默认端口 8787），针对流式 Server-Sent Events (SSE) 协议进行低抖动传输优化，便于移动端远程访问。
-8. **Tailscale 网格 (可选模块)**：探测 Tailscale 本地服务、虚拟 IP、Tailnet 设备清单与在线状态，免暴露公网端口安全连接远程 GPU 算力节点。
-9. **设置与自更新 (Settings & About)**：软件版本展示、中英双语即时热切换、日志路径查看，以及对接官方 GitHub Releases 的原地 SHA-256 校验流式热自更新。
+4. **网络与代理 (Network & Egress)**：生效代理路径检测（系统代理、TUN、自定义 HTTP 代理、环境变量代理或直连）；以 OpenAI 视角探测真实公网出口 IP，智能标记原生家庭宽带（Residential）与数据中心机房（IDC），规避风控封号。
+5. **Codex Relay 隧道 (可选模块)**：管理 Codex Relay 专属后台服务（默认端口 8787），针对流式 Server-Sent Events (SSE) 协议进行低抖动传输优化，便于移动端远程访问。
+6. **Tailscale 网格 (可选模块)**：探测 Tailscale 本地服务、虚拟 IP、Tailnet 设备清单与在线状态，免暴露公网端口安全连接远程 GPU 算力节点。
+7. **设置与自更新 (Settings & About)**：软件版本展示、中英双语即时热切换、日志路径查看，以及对接官方 GitHub Releases 的原地 SHA-256 校验流式热自更新。
 
 ## 下载与直接运行
 
@@ -109,7 +105,7 @@ Windows 不会默认附带 .NET 10 和指定版本的 Windows App Runtime；不�
 
 便携版本体只要求 Windows 10 1809（build 17763）或更高版本的 x64 Windows；状态采集使用系统自带的 Windows PowerShell 5.1。首次运行未签名的开源构建时，Windows SmartScreen 可能要求确认。联网仅用于获取最新版、打开官方安装程序、登录和查询公网出口。
 
-Node.js、npm、NVM、Tailscale、OpenCodex 与 Codex Relay 都不是启动 Codex Beacon 的前置依赖。只有使用对应管理功能时才需要安装；界面会按“安装 → 登录 → 启动”的顺序引导。OpenCodex 和 Codex Relay 需要 Node.js 与 npm，其中 Relay 要求 Node.js ≥ 22.14.0。
+Node.js、npm、NVM、Tailscale 与 Codex Relay 都不是启动 Codex Beacon 的前置依赖。只有使用对应管理功能时才需要安装；界面会按“安装 → 登录 → 启动”的顺序引导。Codex Relay 需要 Node.js 与 npm，且要求 Node.js ≥ 22.14.0。
 
 自包含目录当前约 214 MB，压缩后约 87 MB。主要体积来自随包携带的 .NET 10、WinUI 3 / Windows App SDK、DirectML 与 ONNX Runtime。
 
@@ -135,7 +131,7 @@ dotnet publish .\CodexBeacon.csproj -c Release -r win-x64 --self-contained true 
 ### 默认非管理员模式（推荐）
 
 Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心功能在标准普通用户权限下均可完整运行：
-- 实时探测 Codex 客户端、CLI、OpenCodex、Relay 运行状态与双层数据流动路径；
+- 实时探测 Codex 客户端、CLI、Relay 运行状态与生效网络路径；
 - 查询公网出口 IP、归属地、运营商及网络代理类型；
 - 查看所有 Codex / ChatGPT 运行进程，一键终止进程与重新拉起 ChatGPT 客户端；
 - 检测 NVM 与 Node.js 运行时环境。
@@ -151,7 +147,7 @@ Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心
 
 应用内部严禁任何静默提权行为。当非管理员身份执行上述受限操作时，系统会明确捕获权限不足提示，并在界面状态栏指引用户“以管理员身份运行 Codex Beacon”重试。
 
-- 诊断不读取或显示 Token、授权头、密码、Cookie 和 API Key；已保存的 Provider Key 始终保持遮罩，并排除在诊断采集和导出之外。
+- 诊断不读取或显示 Token、授权头、密码、Cookie 和 API Key；应用本身不落地任何凭据，因此不会发生密钥泄漏到诊断采集和导出。
 - “远端服务 IP”是进程建立连接的目标，不等于本机公网出口 IP；界面会分开显示。
 - Codex 桌面客户端当前版本来自本机 `OpenAI.Codex` MSIX/AppX 包。最新 Windows 包版本来自 Codex App Mirror 清单；该项目同步 Microsoft Store 产品 `9PLM9XGG6VKS`。界面明确标注来源，安装和升级始终打开官方 Microsoft Store 页面。
 
@@ -159,8 +155,8 @@ Codex Beacon 设计为**默认无需管理员权限**即可开箱使用。核心
 
 ## 本机适配
 
-vNext 中，OpenCodex 页面负责配置 `opencodex-proxy` 计划任务/服务名称，Codex Relay 页面负责配置 `Codex Relay` 名称。默认检测以下端口，但当前数据流只采用与激活 provider 及运行证据相符的端点：
+Codex Relay 页面负责配置 `Codex Relay` 计划任务/服务名称。默认检测以下端口，但当前数据流只采用有运行证据支撑的端点：
 
-- OpenCodex Proxy：`127.0.0.1:10100`
 - Codex Relay：`127.0.0.1:8787`
-- 其他 provider：从 `%USERPROFILE%\.codex\config.toml` 动态解析
+
+网络页独立于任何扩展模块，直接显示当前生效的传输路径：Windows 系统代理、TUN 虚拟网卡、自定义 HTTP 代理、环境变量代理或直连。

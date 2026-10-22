@@ -2,7 +2,7 @@
 
 ## North star
 
-Codex Beacon should feel like a focused Windows 11 Settings page for local Codex management: native, bright, compact, predictable, and evidence-led. Codex desktop and Codex CLI are the independent product core. OpenCodex Proxy and Codex Relay are optional extensions; their absence is not a system failure.
+Codex Beacon should feel like a focused Windows 11 Settings page for local Codex management: native, bright, compact, predictable, and evidence-led. Codex desktop and Codex CLI are the independent product core. Codex Relay is an optional extension; its absence is not a system failure.
 
 ## Information architecture
 
@@ -10,14 +10,13 @@ Codex Beacon should feel like a focused Windows 11 Settings page for local Codex
 - **Dependencies** — App Installer/WinGet/Store and NVM/Node.js/npm/Registry prerequisite chains.
 - **Codex processes** — Codex-related processes, executable versions, paths, ownership, and guarded recovery controls.
 - **Network** — ChatGPT and CLI reachability, system/TUN/HTTP proxy state, evidence-backed active routes, and machine public egress.
-- **OpenCodex** — independent installation, service health, active provider, per-model visibility, tests, synchronization, and ChatGPT/Codex integration state.
 - **Tailscale** — independent service, sign-in, local-node, and Tailnet inventory.
 - **Codex Relay** — independent optional install, service, listener, login, and pairing state.
 - **Settings / About & updates** — application-wide preferences plus the preserved Codex Beacon version, release notes, update check, download, verification, and restart surface.
 
 This order is canonical in `NavigationView`. Network is a dedicated page. The overview is not a generic dashboard and contains only the two core products. Dense inventories remain native list rows rather than nested cards. See [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) for the functional contract.
 
-Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, OpenCodex provider/model state under OpenCodex, and scheduled-task/service names under OpenCodex or Codex Relay. The global Settings page does not duplicate those controls.
+Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, and scheduled-task/service names under Codex Relay. The global Settings page does not duplicate those controls.
 
 ## Native component policy
 
@@ -44,18 +43,18 @@ Actions stay disabled until prerequisites are proven. Detection distinguishes pa
 - Tailscale requires the Windows package, service, and a signed-in Tailnet state.
 - Codex CLI login is verified by its status command; login opens a visible official CLI flow.
 - ChatGPT desktop health is independent of Codex CLI authentication state.
-- OpenCodex Proxy and Codex Relay may be installed without a configured scheduled task.
+- Codex Relay may be installed without a configured scheduled task.
 - Codex desktop installation and update always open the official Microsoft Store product page.
 
-## Optional-module routing
+## Network route evidence
 
-The compact route strip only renders the active route supported by evidence:
+The Network page only renders the active route supported by evidence:
 
 ```text
-Codex client → selected model_provider → active base_url owner → observed upstream
+Codex client → configured proxy mode → observed upstream
 ```
 
-OpenCodex Proxy or Codex Relay enters this route only when the selected provider and listener evidence prove that it is active. Installing an extension alone never changes the route. Configured-but-inactive endpoints are listed separately. The machine public egress address is never conflated with remote service IPs.
+The effective route is derived from the configured proxy mode, the Windows system proxy state, TUN adapter presence, and environment proxy variables. A configured-but-inactive endpoint is reported as inactive rather than as the active path. The machine public egress address is never conflated with remote service IPs.
 
 ## Self-update
 
