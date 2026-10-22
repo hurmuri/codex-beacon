@@ -27,7 +27,6 @@ All notable changes to this project are documented here. The format follows [Kee
 - Completed dependency operational state:
   - Latest-version refresh now updates bound dependency rows immediately and uses selected Node/npm sources, GitHub, and WinGet fallbacks. NVM plus App Installer, WinGet, Microsoft Store source, Node.js, and npm all display current and latest values.
   - Download-source choices show both the provider name and full URL.
-  - Codex Relay now presents current and latest versions as separate fields.
 
 - Clarified core product state and dependency/network workflows:
   - Codex Beacon now enforces one active app instance. Starting it again closes the previous window and force-stops it only when a graceful close does not finish, then launches the new instance. The single-file launcher performs the replacement before updating its extraction cache.
@@ -52,15 +51,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- Canonical 7-page information architecture: Codex Overview, Dependencies, Codex Processes, Network & Proxy, Tailscale, Codex Relay, and Settings.
 - Pipeline asynchronous streaming refresh: local machine snapshot loads sub-second on startup, while network probes, public egress, and latest remote version lookups update concurrently in the background without UI freeze.
 - Step-by-step Dependency management combining NVM, Node.js, and npm with in-card version switching, new version installation, and mirror configuration, alongside the Windows Store dependency chain (App Installer → WinGet → Store source).
 - Seamless Network & Proxy workflow: configure proxy mode (System / TUN / Custom HTTP), run immediate connectivity tests with latency feedback, apply system environment proxy variables, and verify OpenAI public egress.
-- Enhanced software version management for Tailscale and Codex Relay: includes install status, current vs latest version summary, update checks, and service start/stop/restart.
+- Enhanced software version management for Tailscale: includes install status, current vs latest version summary, update checks, and service start/stop/restart.
 - Project open-source metadata on the Settings page: repository URL, version badge, and MIT license details.
-
-### Added
-
 - Build version stamping: every real build increments `build/version.txt` and applies the result to the assembly metadata, so each artifact carries a distinct version. The launcher reads the same value instead of bumping it, keeping its payload stamp tied to the app it embeds.
 - A configurable Node.js download mirror for `nvm install` (`NvmMirror` setting), with an automatic fallback to the official distribution host when the mirror fails.
 - Per-component version evidence in the UI, such as the Codex App Mirror manifest that tracks Microsoft Store product `9PLM9XGG6VKS`.

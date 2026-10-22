@@ -4,7 +4,7 @@
 
 | Capability | Canonical owner | Source of truth | Allowed variants | Verification |
 |---|---|---|---|---|
-| Application navigation | WinUI `NavigationView` | Selected navigation tag | Compact or expanded pane | Navigate to all seven pages with mouse and keyboard |
+| Application navigation | WinUI `NavigationView` | Selected navigation tag | Compact or expanded pane | Navigate to all six pages with mouse and keyboard |
 | Service summary | Toolkit `SettingsCard` | `ComponentStatus` snapshot | Installed, signed out, stopped, running, degraded, update available | Compare enabled commands with the collected state |
 | Grouped settings | Toolkit `SettingsExpander` | `AppSettings` and runtime snapshot | Expanded or collapsed | Reload saved values and inspect focus order |
 | Process and network inventories | WinUI `ListView` | PowerShell collector JSON | Empty, populated, collection failure | Verify row data and explicit empty/failure message |
