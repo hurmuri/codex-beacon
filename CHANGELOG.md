@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and releases use [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.3.68] - 2026-10-22
 
 ### Removed
 
@@ -13,6 +13,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Fixed
 
+- The in-app updater looked for release assets named `CodexBeacon-portable.exe` and `CodexBeacon-slim.exe`, but the release workflow publishes versioned names, so every update check reported "that release has no package for this build type" even when a matching package existed. The updater now resolves the asset for the release it is checking: the exact `CodexBeacon-<version>.exe` for a portable build and `CodexBeacon-<version>-slim.exe` for a slim build, with a same-pattern fallback so a differently versioned asset still matches while a release that ships only the other build type still reports as missing.
+- The one-line installer `irm https://hurmuri.github.io/codex-beacon/install.ps1 | iex` requested the non-existent `CodexBeacon-portable.exe` asset and could not install anything. It now resolves the current release's portable asset by version and falls back to the release redirect when the API lookup fails, instead of downloading an HTML page.
 - Reconciled every product, design, requirements, UX, README, security, contribution, and website statement with what the application actually does. The corrections cover the page count and navigation order, the control types each surface really uses, the Tailscale and Desktop action sets, the process inventory fields, the network route evidence and the client-check result states, the dependency and mirror behavior, the credential and settings-storage model, the application log and window-lifetime rules, the package sizes, and the release asset names. Stale references to the removed provider credential store, the shield marker, the remote-service-IP view, and ZIP downloads are gone.
 - Closing the main window now hides Codex Beacon to the system tray. The background process and tray icon remain active until Exit is selected from the tray menu; internal language reloads and application updates still close cleanly.
 
@@ -65,7 +67,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Streamed native tool progress plus a cancel button for long-running actions, and hard timeouts on both collection and actions so the window never appears frozen.
 - Richer public egress details: country, region, city, ISP, AS number, hosting/proxy classification, and a trust score, sourced from `ip.net.coffee`.
 - A "open full IP check" entry point on the Network page.
-- In-app self-update against the official GitHub Releases channel: startup check with a window-top banner, manual check, streamed download with progress and transfer speed, SHA-256 verification against the release's `SHA256SUMS.txt`, skip-this-version, and an in-place replace-and-restart. The package type is detected at runtime (a self-contained build ships `coreclr.dll` next to the app), so portable installs fetch `CodexBeacon-portable.exe` and slim installs fetch `CodexBeacon-slim.exe`.
+- In-app self-update against the official GitHub Releases channel: startup check with a window-top banner, manual check, streamed download with progress and transfer speed, SHA-256 verification against the release's `SHA256SUMS.txt`, skip-this-version, and an in-place replace-and-restart. The package type is detected at runtime (a self-contained build ships `coreclr.dll` next to the app), so portable installs fetch `CodexBeacon-<version>.exe` and slim installs fetch `CodexBeacon-<version>-slim.exe`.
 - A new "About & update" section on the Settings page showing the current version, detected package type, an auto-check toggle, and the full update status surface with release notes.
 - The single-file launcher now hands its own path to the application (`--launcher`). The application runs from the extracted `app-portable` copy and cannot infer that path, but the updater needs it to replace the install package in place. Because the launcher exits before the app starts, that file is never locked, so the swap needs neither elevation nor a reboot.
 
@@ -145,7 +147,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Evidence-based provider route, public egress, remote connection, and inactive endpoint views.
 - iOS AppIcon asset catalog and Windows application icon derived from one master artwork.
 
-[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/hurmuri/codex-beacon/compare/v0.3.68...HEAD
+[0.3.68]: https://github.com/hurmuri/codex-beacon/compare/v0.3.25...v0.3.68
 [0.3.0]: https://github.com/hurmuri/codex-beacon/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/hurmuri/codex-beacon/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/hurmuri/codex-beacon/compare/v0.1.1...v0.2.0

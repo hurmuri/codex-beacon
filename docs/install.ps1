@@ -19,7 +19,7 @@ if ($osVersion.Major -lt 10 -or ($osVersion.Major -eq 10 -and $osVersion.Build -
 
 # 2. Determine target install directory in %LOCALAPPDATA%
 $installDir = Join-Path $env:LOCALAPPDATA "CodexBeacon"
-$targetExe = Join-Path $installDir "CodexBeacon-portable.exe"
+$targetExe = Join-Path $installDir "CodexBeacon.exe"
 
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
@@ -33,19 +33,33 @@ try {
     $release = Invoke-RestMethod -Uri $apiUrl -UseBasicParsing
     $tag = $release.tag_name
     Write-Host "==> Latest version identified: $tag" -ForegroundColor Green
-    
-    $asset = $release.assets | Where-Object { $_.name -eq 'CodexBeacon-portable.exe' } | Select-Object -First 1
+
+    # Releases publish versioned assets: CodexBeacon-<version>.exe (portable)
+    # and CodexBeacon-<version>-slim.exe (slim). Pick the portable one.
+    $version = $tag.TrimStart('v')
+    $asset = $release.assets | Where-Object {
+        $_.name -eq "CodexBeacon-$version.exe"
+    } | Select-Object -First 1
     if ($asset) {
         $downloadUrl = $asset.browser_download_url
     } else {
-        $downloadUrl = "https://github.com/$repo/releases/latest/download/CodexBeacon-portable.exe"
+        throw "Release $tag does not publish CodexBeacon-$version.exe"
     }
 } catch {
-    Write-Host "==> Direct release lookup fallback..." -ForegroundColor Yellow
-    $downloadUrl = "https://github.com/$repo/releases/latest/download/CodexBeacon-portable.exe"
+    Write-Host "==> Resolving the latest tag through the release redirect..." -ForegroundColor Yellow
+    try {
+        $response = Invoke-WebRequest -Uri "https://github.com/$repo/releases/latest" -UseBasicParsing -MaximumRedirection 0 -ErrorAction SilentlyContinue
+        $location = $response.Headers['Location']
+    } catch {
+        $location = $_.Exception.Response.Headers['Location']
+    }
+    if (-not $location) { throw "Could not resolve the latest Codex Beacon release. Visit https://github.com/$repo/releases/latest and download the portable package manually." }
+    $version = ($location -replace '^.*/tag/v', '')
+    $downloadUrl = "https://github.com/$repo/releases/download/v$version/CodexBeacon-$version.exe"
+    Write-Host "==> Latest version identified: v$version" -ForegroundColor Green
 }
 
-Write-Host "==> Downloading CodexBeacon-portable.exe..." -ForegroundColor Yellow
+Write-Host "==> Downloading Codex Beacon portable package..." -ForegroundColor Yellow
 Invoke-WebRequest -Uri $downloadUrl -OutFile $targetExe -UseBasicParsing
 
 if (Test-Path $targetExe) {

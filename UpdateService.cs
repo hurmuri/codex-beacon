@@ -75,8 +75,9 @@ public sealed class UpdateService
 {
     private const string RepositoryOwner = "hurmuri";
     private const string RepositoryName = "codex-beacon";
-    private const string PortableAssetName = "CodexBeacon-portable.exe";
-    private const string SlimAssetName = "CodexBeacon-slim.exe";
+    private const string PortableAssetPrefix = "CodexBeacon-";
+    private const string PortableAssetSuffix = ".exe";
+    private const string SlimAssetSuffix = "-slim.exe";
     private const string ChecksumAssetName = "SHA256SUMS.txt";
     private const string LauncherArgument = "--launcher";
 
@@ -116,7 +117,15 @@ public sealed class UpdateService
     /// </summary>
     public bool IsSelfContained { get; }
 
-    public string PackageAssetName => IsSelfContained ? PortableAssetName : SlimAssetName;
+    /// <summary>
+    /// Expected asset name for this build type. Releases publish versioned
+    /// names, so the exact name carries the release version: the portable
+    /// package is <c>CodexBeacon-&lt;version&gt;.exe</c> and the slim package is
+    /// <c>CodexBeacon-&lt;version&gt;-slim.exe</c>.
+    /// </summary>
+    public string PackageAssetName => IsSelfContained
+        ? $"{PortableAssetPrefix}{CurrentVersion}{PortableAssetSuffix}"
+        : $"{PortableAssetPrefix}{CurrentVersion}{SlimAssetSuffix}";
 
     /// <summary>Path of the single-file launcher that started this build, when known.</summary>
     public string? LauncherPath { get; }
@@ -277,10 +286,14 @@ public sealed class UpdateService
     private UpdateCheckResult Describe(UpdateRelease release)
     {
         var latest = NormalizeVersion(release.TagName);
-        var asset = release.Assets.FirstOrDefault(
-            candidate => string.Equals(candidate.Name, PackageAssetName, StringComparison.OrdinalIgnoreCase));
+        var asset = FindPackageAsset(release, latest);
         var checksum = release.Assets.FirstOrDefault(
             candidate => string.Equals(candidate.Name, ChecksumAssetName, StringComparison.OrdinalIgnoreCase));
+
+        AppLog.Info("Update",
+            $"Release {release.TagName} checked. Package type: {(IsSelfContained ? "portable" : "slim")}. " +
+            $"Resolved asset: {(asset?.Name ?? "<none>")}. Available: " +
+            string.Join(", ", release.Assets.Select(candidate => candidate.Name)));
 
         return new UpdateCheckResult
         {
@@ -292,11 +305,36 @@ public sealed class UpdateService
             ReleaseNotes = release.Body,
             ReleaseUrl = release.HtmlUrl,
             PublishedAt = release.PublishedAt,
-            AssetName = asset?.Name ?? PackageAssetName,
+            AssetName = asset?.Name ?? ExpectedAssetName(latest),
             AssetUrl = asset?.DownloadUrl ?? "",
             AssetSize = asset?.Size ?? 0,
             ChecksumAssetUrl = checksum?.DownloadUrl ?? ""
         };
+    }
+
+    /// <summary>Asset name this build type uses inside a given release.</summary>
+    private string ExpectedAssetName(string releaseVersion) => IsSelfContained
+        ? $"{PortableAssetPrefix}{releaseVersion}{PortableAssetSuffix}"
+        : $"{PortableAssetPrefix}{releaseVersion}{SlimAssetSuffix}";
+
+    /// <summary>
+    /// Finds the package for this build type in a release. The exact expected
+    /// name wins. Otherwise a same-pattern asset is accepted, so a release
+    /// that publishes a differently versioned name still resolves, while a
+    /// release that only ships the other build type does not.
+    /// </summary>
+    private UpdateAsset? FindPackageAsset(UpdateRelease release, string releaseVersion)
+    {
+        var expected = ExpectedAssetName(releaseVersion);
+        var exact = release.Assets.FirstOrDefault(
+            candidate => string.Equals(candidate.Name, expected, StringComparison.OrdinalIgnoreCase));
+        if (exact is not null) return exact;
+
+        var suffix = IsSelfContained ? PortableAssetSuffix : SlimAssetSuffix;
+        return release.Assets.FirstOrDefault(candidate =>
+            candidate.Name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase) &&
+            candidate.Name.StartsWith(PortableAssetPrefix, StringComparison.OrdinalIgnoreCase) &&
+            !candidate.Name.EndsWith(SlimAssetSuffix, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task<string?> TryGetExpectedHashAsync(
