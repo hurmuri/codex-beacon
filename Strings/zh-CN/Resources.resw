@@ -157,7 +157,6 @@
   <data name="RefreshIntervalCard.Description" xml:space="preserve"><value>5–300 秒</value></data>
   <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="MirrorCard.Description" xml:space="preserve"><value>nvm install 使用的发行版镜像地址</value></data>
-  <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>保存更改</value></data>
   <data name="SaveChangesCard.Description" xml:space="preserve"><value>立即生效并存储在本机</value></data>
   <data name="SaveButton.Content" xml:space="preserve"><value>保存设置</value></data>
@@ -181,15 +180,13 @@
   <data name="CompDesktopKind" xml:space="preserve"><value>OpenAI 官方 Windows 应用</value></data>
   <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="CompCodexKind" xml:space="preserve"><value>命令行客户端</value></data>
-  <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
-  <data name="CompRelayKind" xml:space="preserve"><value>可选扩展 · npm 包</value></data>
   <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
   <data name="CompTailscaleKind" xml:space="preserve"><value>Windows 网络服务</value></data>
 
   <!-- 组件说明 -->
   <data name="DetailNvmReady" xml:space="preserve"><value>{0} 个已安装的 Node.js 版本</value></data>
   <data name="DetailNvmMissing" xml:space="preserve"><value>未在 PATH 中检测到 nvm.exe</value></data>
-  <data name="DetailNodeReady" xml:space="preserve"><value>满足 Codex Relay 的最低要求 ≥ {0}</value></data>
+  <data name="DetailNodeReady" xml:space="preserve"><value>满足 Codex CLI 的最低要求 ≥ {0}</value></data>
   <data name="DetailNodeOld" xml:space="preserve"><value>版本过低，请升级到 {0} 或更高版本</value></data>
   <data name="DetailNodeMissing" xml:space="preserve"><value>未在 PATH 中检测到 node.exe</value></data>
   <data name="DetailNpmReady" xml:space="preserve"><value>包管理器可用</value></data>
@@ -202,10 +199,6 @@
   <data name="DetailCodexNpm" xml:space="preserve"><value>npm 全局安装 · {0}</value></data>
   <data name="DetailCodexOnPath" xml:space="preserve"><value>PATH 上的 codex 命令 · {0}</value></data>
   <data name="DetailCodexBundled" xml:space="preserve"><value>随桌面客户端内置 · {0}</value></data>
-  <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 正在监听 · 计划任务：{0}</value></data>
-  <data name="DetailRelayMissing" xml:space="preserve"><value>未检测到 Relay 安装</value></data>
-  <data name="DetailRelayNoTask" xml:space="preserve"><value>包已安装；点击“启动”可用官方后台模式运行（{0}）</value></data>
-  <data name="DetailRelayStopped" xml:space="preserve"><value>端口 8787 未监听 · 计划任务：{0}</value></data>
   <data name="DetailTailscaleMissing" xml:space="preserve"><value>未检测到 Tailscale</value></data>
   <data name="DetailTailscaleSignedOut" xml:space="preserve"><value>已安装，但尚未登录 Tailnet</value></data>
   <data name="DetailTailscaleReady" xml:space="preserve"><value>{0} · {1}</value></data>
@@ -235,7 +228,6 @@
   <data name="RoleDesktopApp" xml:space="preserve"><value>Codex 桌面客户端</value></data>
   <data name="RoleCliAppBundled" xml:space="preserve"><value>Codex CLI · 桌面客户端内置</value></data>
   <data name="RoleCliVsCode" xml:space="preserve"><value>Codex CLI · VS Code 扩展</value></data>
-  <data name="RoleCliRelay" xml:space="preserve"><value>Codex CLI · Relay 内置</value></data>
   <data name="RoleCliOther" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="RoleSupportHost" xml:space="preserve"><value>Codex 代码执行宿主</value></data>
   <data name="RoleUnknown" xml:space="preserve"><value>Codex 相关进程</value></data>
@@ -346,17 +338,6 @@
   <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI 尚未安装，请先完成安装。</value></data>
   <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI 不是常驻服务，请在进程页管理正在运行的进程。</value></data>
   <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} 已安装为最新版</value></data>
-  <data name="ActionHintRelayStart" xml:space="preserve"><value>点击“启动”会使用 Relay 官方后台模式运行。</value></data>
-  <data name="ActionServicesRestarted" xml:space="preserve"><value>已重新启动可选服务（清理 {0} 个进程，已启动：{1}）</value></data>
-  <data name="ActionServicesTerminated" xml:space="preserve"><value>已终止 {0} 个可选服务进程；桌面客户端与本管理器未受影响</value></data>
-  <data name="ActionRelayStarted" xml:space="preserve"><value>Codex Relay 已启动</value></data>
-  <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay 已停止</value></data>
-  <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay 已重新启动</value></data>
-  <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay 尚未安装，请先完成安装。</value></data>
-  <data name="ActionTaskStarted" xml:space="preserve"><value>计划任务 [{0}] 已启动</value></data>
-  <data name="ActionTaskStopped" xml:space="preserve"><value>计划任务 [{0}] 已停止</value></data>
-  <data name="ActionTaskRestarted" xml:space="preserve"><value>计划任务 [{0}] 已重新启动</value></data>
-  <data name="ActionTaskMissing" xml:space="preserve"><value>未找到计划任务 [{0}]，请先完成对应服务安装。</value></data>
   <data name="ActionNvmMissing" xml:space="preserve"><value>未检测到 NVM for Windows，请先安装 NVM 并重新打开 Codex Beacon。</value></data>
   <data name="ActionNvmVersionInvalid" xml:space="preserve"><value>请输入完整 Node.js 版本号，例如 24.15.0。</value></data>
   <data name="ActionNvmUnsupported" xml:space="preserve"><value>NVM 不支持此操作。</value></data>
@@ -463,10 +444,7 @@
   <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry（nrm 预设）</value></data>
   <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js 下载镜像</value></data>
   <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>保存依赖设置</value></data>
-  <data name="RelayDescription.Text" xml:space="preserve"><value>可选的移动端桥接扩展；安装、版本、服务和计划任务均在此页管理。</value></data>
   <data name="ServiceControlHeading.Text" xml:space="preserve"><value>服务控制</value></data>
-  <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay 计划任务</value></data>
-  <data name="SaveRelayButton.Content" xml:space="preserve"><value>保存 Relay 设置</value></data>
 
   <!-- QA fix round: wired previously hardcoded UI strings -->
   <data name="OverviewStoreChannelLabel.Text" xml:space="preserve"><value>Microsoft Store 渠道状态</value></data>
@@ -492,8 +470,6 @@
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale 本机网络服务</value></data>
   <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>Windows 后台服务驱动虚拟专用网络（启动、停止与重启需管理员权限）</value></data>
   <data name="TailscaleWingetUpgrade.Content" xml:space="preserve"><value>通过 WinGet 升级</value></data>
-  <data name="RelayCardTitle.Text" xml:space="preserve"><value>Codex Relay 桥接服务</value></data>
-  <data name="RelayCardSubtitle.Text" xml:space="preserve"><value>移动设备与桌面端 Codex 的双向通信扩展 (默认端口 8787)</value></data>
   <data name="TaskScheduleHeading.Text" xml:space="preserve"><value>计划任务配置</value></data>
   <data name="LanguageZh.Content" xml:space="preserve"><value>简体中文</value></data>
   <data name="AboutOpenSourceHeading.Text" xml:space="preserve"><value>关于 Codex Beacon 与项目开源信息</value></data>
@@ -505,7 +481,6 @@
   <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>开源许可协议</value></data>
   <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>宽松的自由软件授权</value></data>
   <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Codex 桌面版本管理方案参考</value></data>
-  <data name="ReferenceRelay.Description" xml:space="preserve"><value>可选移动端桥接扩展</value></data>
   <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex 出口 IP 与风险检测数据源</value></data>
   <data name="DesktopStorePathFallback" xml:space="preserve"><value>OpenAI 官方 Store 应用包</value></data>
   <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm 全局安装</value></data>
@@ -518,7 +493,7 @@
   <data name="ComponentUpdateFailed" xml:space="preserve"><value>查询失败: {0}</value></data>
   <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT 桌面应用</value></data>
   <!-- QA fix round addendum -->
-  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。</value></data>
+  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>安装或升级 Codex CLI 时通过 --registry 使用；保存设置时也会同步写入系统 npm config。</value></data>
   <data name="OpenLogsLabel.Text" xml:space="preserve"><value>日志</value></data>
   <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon 日志</value></data>
   <data name="LogWindowHeading.Text" xml:space="preserve"><value>应用日志</value></data>

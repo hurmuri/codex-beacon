@@ -8,10 +8,10 @@ This document is the canonical description of the vNext information architecture
 
 ## Product boundary
 
-Codex Beacon is a Windows-only native manager for the ChatGPT desktop package, the user-managed Codex CLI, their prerequisites and network path, and optional Tailscale and Codex Relay integrations.
+Codex Beacon is a Windows-only native manager for the ChatGPT desktop package, the user-managed Codex CLI, their prerequisites and network path, and optional Tailscale integration.
 
 - ChatGPT desktop and the user-managed Codex CLI are the product core.
-- Tailscale and Codex Relay remain separate modules. Missing optional modules do not make the core unhealthy.
+- Tailscale remains a separate module. A missing optional module does not make the core unhealthy.
 - Configured state is not proof of active state. Runtime health requires the relevant process, listener, route, or observed connection evidence.
 
 ## Navigation
@@ -23,8 +23,7 @@ The canonical navigation order is:
 3. **Codex processes**
 4. **Network**
 5. **Tailscale**
-6. **Codex Relay**
-7. **Settings / About & updates**
+6. **Settings / About & updates**
 
 The desktop layout uses `NavigationView`. Pages preserve state while navigating. Network management is a dedicated page, not an overview subsection.
 
@@ -39,8 +38,8 @@ Show:
 - Microsoft Store/AppX package installation state;
 - running and sign-in state when evidence is available;
 - installed version, latest known version, source, and last check time;
-- `Check for updates`, `Install`, `Upgrade`, and `Launch` actions enabled by state;
-- a `Set up` link to Dependencies when App Installer, WinGet, or the Store source is unavailable.
+- `Check for updates`, `Start`, `Stop`, `Restart`, and `Store install/upgrade` actions enabled by state;
+- a `Manage dependencies` shortcut to Dependencies, plus a store-channel status line that reports whether App Installer, WinGet, and the Store source are available.
 
 The primary Store product is `9PLM9XGG6VKS`, whose installed package identity is currently `OpenAI.Codex`. Store IDs must be passed to WinGet as unique positional IDs rather than combined with exact-match filtering.
 
@@ -52,9 +51,9 @@ Show:
 - its version, absolute path, and installation owner;
 - the npm-managed `@openai/codex` version and latest registry version;
 - installation, sign-in, update, and upgrade actions;
-- a warning when the active executable and npm-managed package are different.
+- a signed-in, signed-out, or unverifiable account state, with the login action disabled after a verified sign-in.
 
-Other Codex executables bundled by ChatGPT, VS Code, Relay, or other tools belong under `Other installations`; they must not silently replace the user-managed CLI in the headline version.
+The install source is reported explicitly, because several copies can coexist on one machine: a global npm install, a `codex` command on `PATH`, or the copy bundled with the desktop app. The headline version belongs to the executable resolved for the user; the other sources are not allowed to silently replace it.
 
 ## Dependencies
 
@@ -74,9 +73,11 @@ Required capabilities:
 - use visible `winget install 9PLM9XGG6VKS --source msstore` as the non-Store-UI installation route;
 - repair or install WinGet from Microsoft's official App Installer release channel when WinGet is absent;
 - detect NVM for Windows, list installed Node.js versions, install a selected version, and switch the active version;
-- configure and test a Node.js distribution mirror, with a visible official-source fallback;
-- configure, test, and restore the npm Registry independently from the Node.js mirror;
-- refresh process environment and explain when a terminal or the app must be reopened after PATH changes.
+- configure a Node.js distribution mirror, with a visible fallback to the official host when the mirror fails;
+- configure the npm Registry independently from the Node.js mirror, and apply it through `--registry` when installing or upgrading npm packages;
+- show the current Node.js mirror and npm Registry in use, and the source of every version lookup.
+
+The Node.js version selector merges the versions NVM already has installed with the versions the selected mirror offers. Choosing an installed version switches the active runtime; choosing a missing one installs it through the mirror and then switches to it. The npm Registry is passed to npm as `--registry` for Codex CLI installs and upgrades. Saving the dependency settings also writes the same value to the system-wide `npm config`, so both paths resolve to the same registry.
 
 There is no general consumer offline-package fallback for ChatGPT. Store package download can require Microsoft Entra administrator authorization. The UI must not offer an unofficial mirror as an official installer.
 
@@ -91,7 +92,7 @@ The Network page owns transport state: proxy mode, reachability, and public egre
 ### System transport
 
 - DNS, TCP, and TLS reachability;
-- WinINET and WinHTTP proxy state;
+- WinINET proxy state, including the manual proxy address, automatic detection, and PAC URL;
 - supported environment-variable proxies;
 - TUN adapter detection;
 - configured custom HTTP proxy endpoint;
@@ -99,44 +100,46 @@ The Network page owns transport state: proxy mode, reachability, and public egre
 
 ### Client checks
 
-ChatGPT desktop and Codex CLI have separate checks. Results distinguish:
+ChatGPT desktop and Codex CLI have separate checks. Each result carries the HTTP status code when the endpoint answered, or the transport-level failure reason when it did not, so the following situations stay distinguishable:
 
 - internet unavailable;
 - endpoint unreachable;
 - endpoint reachable but authentication rejected;
 - model or route not found;
 - rate limited;
-- proxy configured but not listening;
-- listener present but not selected by the client;
-- selected route active with observed connections;
+- name resolution failure, including a proxy name that cannot be resolved;
+- connection failure, including a refused or unreachable proxy;
 - timeout or TLS failure.
 
-A proxy route is active only when the configured mode matches the endpoint, listener ownership is known, and observed TCP connections support the conclusion. Public egress is never presented as a remote service IP.
+The effective route is reported from evidence: the configured proxy mode is compared against the Windows system proxy state, the automatic/PAC configuration, the detected TUN adapter, and the user environment proxy. Public egress is never presented as a remote service IP.
 
 ## Tailscale
 
 Keep Tailscale independent. Preserve package, Windows service, sign-in, local node, Tailnet device, address, online, and last-seen state. Tailscale absence does not degrade ChatGPT or Codex CLI health.
 
-## Codex Relay
-
-Keep Codex Relay independent and optional. Preserve installation, version, task/service, listener, start, stop, restart, update, login, and pairing state where supported. The Relay scheduled-task/service name, listener, startup behavior, and other Relay-specific settings live on this page. Relay-bundled Codex executables are inventory entries, not the managed default CLI.
-
 ## Settings / About & updates
 
 Preserve the existing About and application-update experience, including the running Codex Beacon version, package type, release notes, manual update check, update availability, skipped version, download, verification, replacement eligibility, and restart flow.
 
-This page owns only application-wide preferences and Codex Beacon itself, such as language, refresh interval, update channel/state, and About information. Component-specific configuration must live with the component it controls:
+This page owns only application-wide preferences and Codex Beacon itself: display language, refresh interval, Windows startup, update channel/state, and About information. Component-specific configuration must live with the component it controls:
 
 - Node.js mirror and npm Registry -> Dependencies;
 - system, TUN, and custom HTTP proxy options -> Network;
 - Tailscale service options -> Tailscale;
-- Codex Relay task/service name, listener, startup, login, and pairing settings -> Codex Relay.
 
 The Settings page must not become a second inventory of component controls.
 
+## Application log
+
+All action output, npm and installer progress, launcher messages, and application errors are written to one append-only log file in the current user's local application data directory. The application exposes that file through a dedicated log window with a read-only text view, a copy-all action, and an open-folder action. Secrets are redacted before a line is written, and the log never contains API keys, authorization headers, cookies, or tokens.
+
+## Window lifetime and startup
+
+Closing the main window hides it to the system tray; the process keeps running and the tray icon remains until Exit is chosen. The Windows startup setting registers Codex Beacon with the `--background` flag, so it starts into the tray after sign-in without showing a window. Only one Codex Beacon instance runs at a time: starting it again replaces the previous instance.
+
 ## Download experience
 
-Every operation that downloads bytes must expose a consistent, non-blocking progress surface. This includes application self-update, ChatGPT/App Installer acquisition, NVM, Node.js, npm packages, Codex Relay, Tailscale, and any downloaded metadata large enough to create a visible wait.
+Every operation that downloads bytes must expose a consistent, non-blocking progress surface. This includes application self-update, ChatGPT/App Installer acquisition, NVM, Node.js, npm packages, Tailscale, and any downloaded metadata large enough to create a visible wait.
 
 While the source reports total size, show:
 
@@ -157,7 +160,7 @@ When total size is unknown, use an indeterminate native progress bar but still s
 - Unknown, unchecked, blocked, unavailable, unhealthy, and healthy are distinct states.
 - Long operations support cancellation when safe and always have a hard timeout.
 - Administrative actions remain visible and use standard UAC; there is no silent elevation.
-- Configuration changes are atomic, backed up, validated, and rolled back on failure.
+- Configuration changes are written to the current user's local settings file and validated before use. A failed write leaves the previous file untouched.
 - User-facing errors state what failed and the next recovery action.
 - Diagnostics and logs remove credentials, authorization headers, cookies, tokens, and sensitive query parameters. Default exports exclude any credential-bearing configuration.
 

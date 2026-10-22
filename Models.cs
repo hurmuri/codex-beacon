@@ -207,7 +207,6 @@ public sealed class ComponentStatus : INotifyPropertyChanged
     {
         "desktop" => new Uri("https://github.com/Wangnov/Codex-App-Manager"),
         "codex" => new Uri("https://github.com/openai/codex"),
-        "relay" => new Uri("https://github.com/gronxb/codex-relay"),
         "nvm" => new Uri("https://github.com/coreybutler/nvm-windows"),
         "appinstaller" or "winget" => new Uri("https://github.com/microsoft/winget-cli"),
         "msstore" => new Uri("https://apps.microsoft.com/detail/9NBLGGH4NNS1"),
@@ -388,7 +387,6 @@ public sealed class ActionResult
 public sealed class AppSettings
 {
     public int RefreshSeconds { get; set; } = 15;
-    public string RelayTaskName { get; set; } = "Codex Relay";
     public string Language { get; set; } = Localization.SystemLanguage;
     public string NodeMirror { get; set; } = "https://mirrors.aliyun.com/nodejs-release";
     public string NpmRegistry { get; set; } = "https://registry.npmjs.org";

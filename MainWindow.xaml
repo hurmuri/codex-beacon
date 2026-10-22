@@ -50,9 +50,6 @@
                 <NavigationViewItem x:Uid="NavTailscale" Content="Tailscale" Tag="tailscale">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xEC27;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Codex Relay" Tag="relay">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE8A1;" /></NavigationViewItem.Icon>
-                </NavigationViewItem>
                 <NavigationViewItem x:Uid="NavSettings" Content="设置" Tag="settings">
                     <NavigationViewItem.Icon><FontIcon Glyph="&#xE713;" /></NavigationViewItem.Icon>
                 </NavigationViewItem>
@@ -723,68 +720,10 @@
                                     <ComboBoxItem x:Uid="NpmSourceHuawei" Content="华为云 · https://repo.huaweicloud.com/repository/npm" Tag="https://repo.huaweicloud.com/repository/npm" />
                                 </ComboBox>
                                 <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="10">
-                                    <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI、Relay 时通过 --registry 使用；与系统 npm config 是两套配置。" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
+                                    <TextBlock x:Uid="NpmRegistryHint" Text="安装或升级 Codex CLI 时通过 --registry 使用；保存设置时也会同步写入系统 npm config。" Style="{StaticResource CaptionTextStyle}" TextWrapping="Wrap" />
                                     <Button x:Uid="SaveDependenciesButton" Content="保存依赖设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
                                 </StackPanel>
                             </Grid>
-                        </Border>
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- ========================== Codex Relay ========================== -->
-                <ScrollViewer x:Name="RelayPage" Visibility="Collapsed" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" Padding="28,20,28,36">
-                    <StackPanel MaxWidth="1280" HorizontalAlignment="Stretch">
-                        <TextBlock Text="Codex Relay" Style="{StaticResource PageTitleStyle}" />
-                        <TextBlock x:Uid="RelayDescription" Text="可选的移动端桥接扩展；安装、版本、服务和计划任务均在此页管理。" Style="{StaticResource CaptionTextStyle}" Margin="0,6,0,0" />
-
-                        <!-- 服务与版本控制 -->
-                        <TextBlock x:Uid="ServiceControlHeading" Text="服务控制" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="14">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel Spacing="4">
-                                        <TextBlock x:Uid="RelayCardTitle" Text="Codex Relay 桥接服务" Style="{StaticResource CardTitleStyle}" />
-                                        <TextBlock x:Uid="RelayCardSubtitle" Text="移动设备与桌面端 Codex 的双向通信扩展 (默认端口 8787)" Style="{StaticResource CaptionTextStyle}" />
-                                    </StackPanel>
-                                    <Border Grid.Column="1" Background="#E5F6EF" CornerRadius="10" Padding="10,3" VerticalAlignment="Top">
-                                        <TextBlock x:Name="RelayStatusBadgeText" x:Uid="StatusDetectingShort" Text="检测中" Foreground="{StaticResource SignalBrush}" Style="{StaticResource PillTextStyle}" />
-                                    </Border>
-                                </Grid>
-
-                                <Grid ColumnSpacing="24" RowSpacing="6">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
-                                    <TextBlock x:Uid="CurrentVersionLabel" Text="当前版本" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" x:Name="RelayCurrentVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Row="1" x:Uid="LatestVersionLabel" Text="最新版本" Style="{StaticResource CaptionTextStyle}" VerticalAlignment="Center" />
-                                    <TextBlock Grid.Row="1" Grid.Column="1" x:Name="RelayLatestVersionText" Text="—" Style="{StaticResource MonoTextStyle}" VerticalAlignment="Center" />
-                                </Grid>
-
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <Button x:Uid="CheckNewerButton" Content="检查新版本" Tag="relay" Click="CheckComponentUpdate_Click" Style="{StaticResource QuietButtonStyle}" />
-                                    <Button x:Name="RelayUpgradeButton" x:Uid="ActionUpgrade" Content="升级" Tag="upgrade" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayInstallButton" x:Uid="ActionInstall" Content="安装" Tag="install" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayStartButton" x:Uid="ActionStart" Content="启动" Tag="start" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Name="RelayStopButton" x:Uid="ActionStop" Content="停止" Tag="stop" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                    <Button x:Uid="ActionRestart" Content="重启" Tag="restart" Click="RelayAction_Click" Style="{StaticResource ActionButtonStyle}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- 服务设置 -->
-                        <TextBlock x:Uid="TaskScheduleHeading" Text="计划任务配置" Style="{StaticResource SectionTitleStyle}" />
-                        <Border Style="{StaticResource PanelStyle}">
-                            <StackPanel Spacing="10">
-                                <TextBox x:Name="RelayTaskNameBox" x:Uid="RelayTaskNameBox" Header="Codex Relay 计划任务" Width="460" HorizontalAlignment="Left" />
-                                <Button x:Uid="SaveRelayButton" Content="保存 Relay 设置" Click="SaveSettings_Click" Style="{StaticResource QuietButtonStyle}" HorizontalAlignment="Left" />
-                            </StackPanel>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
@@ -895,7 +834,6 @@
                         <toolkit:SettingsExpander x:Uid="OpenSourceProjectsExpander" Header="参考项目" Description="组件源码与实现参考" IsExpanded="True">
                             <toolkit:SettingsExpander.Items>
                                 <toolkit:SettingsCard x:Uid="ReferenceAppManager" Header="Codex App Manager" Description="Codex 桌面版本管理方案参考"><HyperlinkButton Content="Wangnov/Codex-App-Manager" NavigateUri="https://github.com/Wangnov/Codex-App-Manager" /></toolkit:SettingsCard>
-                                <toolkit:SettingsCard x:Uid="ReferenceRelay" Header="Codex Relay" Description="可选移动端桥接扩展"><HyperlinkButton Content="gronxb/codex-relay" NavigateUri="https://github.com/gronxb/codex-relay" /></toolkit:SettingsCard>
                                 <toolkit:SettingsCard x:Uid="ReferenceIpCoffee" Header="ip.net.coffee" Description="ChatGPT / Codex 出口 IP 与风险检测数据源"><HyperlinkButton Content="ip.net.coffee/gpt" NavigateUri="https://ip.net.coffee/gpt/" /></toolkit:SettingsCard>
                             </toolkit:SettingsExpander.Items>
                         </toolkit:SettingsExpander>

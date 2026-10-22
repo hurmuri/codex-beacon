@@ -22,10 +22,10 @@ dotnet build .\CodexBeacon.csproj -c Release
 - Include screenshots for XAML changes.
 - Preserve Windows PowerShell 5.1 compatibility and UTF-8 BOM for scripts.
 - Add or update state detection before exposing a new action in the UI.
-- Do not add telemetry. Provider credentials may be collected only through the approved password input and current-user configuration flow.
+- Do not add telemetry. Codex Beacon stores no credentials, so do not introduce an API-key, token, or password input or a secret file without an explicit product decision.
 - Document every new external version source and label whether it is official or third-party.
 - Route every byte-download operation through the shared progress contract: stage, bytes, total and percentage when known, speed, elapsed time, safe cancellation, and timeout.
-- Keep Provider raw-key input hidden by default. Persist it only in `%USERPROFILE%\.CodexBeacon\providers.json`, explicitly mark `.CodexBeacon` with the Windows `Hidden` attribute, restrict the file to the current user, and keep it out of uploads, command lines, logs, errors, diagnostics, status text, crash reports, and default exports.
+- Keep secrets out of uploads, command lines, logs, errors, diagnostics, status text, crash reports, and default exports. The application log must redact key-shaped values before writing a line.
 - Keep component-specific task names and settings on the corresponding component page, and preserve the existing About and Codex Beacon update surface.
 - Update the canonical requirements and every affected product, design, README, website, UX, and security document in the same change.
 

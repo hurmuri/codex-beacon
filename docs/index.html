@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Codex Beacon · All-in-One Control Center for Codex</title>
-  <meta name="description" content="All-in-One Control Center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, Codex Relay, and Tailscale.">
+  <meta name="description" content="All-in-One Control Center for OpenAI Codex on Windows. Orchestrate ChatGPT Desktop, Codex CLI, and Tailscale.">
   
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="shortcut icon" href="assets/app-icon.ico">
@@ -792,18 +792,18 @@
     <section class="hero">
       <div class="hero-pill">
         <div class="pill-dot"></div>
-        <span data-i18n="h.pill">v1.1.0 · Native WinUI 3 Control Center</span>
+        <span data-i18n="h.pill">v0.3.62 · Native WinUI 3 Control Center</span>
       </div>
 
       <h1 class="hero-h1" data-i18n="h.title">All-in-One Control Center for Codex</h1>
       <p class="hero-desc" data-i18n="h.desc">
-        Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional Codex Relay and Tailscale.
+        Unified management for ChatGPT Desktop & Codex CLI, with dependency repair, effective route detection, and egress risk detection. Supports optional Tailscale.
       </p>
 
       <div class="hero-actions">
         <a href="#install" class="btn-primary" data-i18n="h.btnDownload">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Download Portable (.zip)</span>
+          <span>Download Portable (.exe)</span>
         </a>
         <a href="https://github.com/hurmuri/codex-beacon" target="_blank" rel="noopener" class="btn-ghost">
           <span>GitHub Repository</span>
@@ -838,7 +838,6 @@
             <button class="side-icon-btn" id="sbtn-deps" onclick="setAppPage('deps')" title="Dependencies / 依赖管理">📥</button>
             <button class="side-icon-btn" id="sbtn-processes" onclick="setAppPage('processes')" title="Processes / 进程管控">📊</button>
             <button class="side-icon-btn" id="sbtn-network" onclick="setAppPage('network')" title="Network & Egress / 网络与代理">🌐</button>
-            <button class="side-icon-btn" id="sbtn-relay" onclick="setAppPage('relay')" title="Codex Relay (Optional / 可选)">📡</button>
             <button class="side-icon-btn" id="sbtn-tailscale" onclick="setAppPage('tailscale')" title="Tailscale (Optional / 可选)">🔗</button>
             <button class="side-icon-btn sidebar-bottom" id="sbtn-settings" onclick="setAppPage('settings')" title="Settings / 设置">⚙️</button>
           </div>
@@ -871,7 +870,7 @@
           <span>⚡</span> <span data-i18n="f2.t">Decoupled Dual Pipeline</span>
         </div>
         <p class="f-desc" data-i18n="f2.d">
-          Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, the system proxy, or Tailscale.
+          Reports the effective transport route from evidence: Windows system proxy, TUN adapter, custom HTTP proxy, environment proxy, or a direct connection.
         </p>
       </div>
 
@@ -889,7 +888,7 @@
           <span>🛡️</span> <span data-i18n="f4.t">Safe Process Whitelist</span>
         </div>
         <p class="f-desc" data-i18n="f4.d">
-          Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.
+          Strict path allowlist stops hung Codex CLI processes without killing Codex Beacon, ChatGPT Desktop, or unrelated Node.js workflows.
         </p>
       </div>
     </div>
@@ -906,11 +905,11 @@
 
       <div class="download-options">
         <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
-          <h4>📦 CodexBeacon-portable.exe</h4>
+          <h4>📦 CodexBeacon-&lt;version&gt;.exe</h4>
           <span data-i18n="i.p1">Single-file portable binary · Embedded runtimes (Recommended)</span>
         </a>
         <a href="https://github.com/hurmuri/codex-beacon/releases" target="_blank" rel="noopener" class="dl-item">
-          <h4>⚡ CodexBeacon-slim.exe</h4>
+          <h4>⚡ CodexBeacon-&lt;version&gt;-slim.exe</h4>
           <span data-i18n="i.p2">Slim build · For environments with pre-installed runtimes</span>
         </a>
       </div>
@@ -969,7 +968,7 @@
           <div class="view-header">
             <div>
               <h2 class="view-h2">${isEn ? 'Codex Dashboard' : 'Codex 总览'}</h2>
-              <div class="view-sub">${isEn ? 'Codex client management ready; optional extensions available.' : 'Codex 客户端管理已就绪；扩展模块为可选项。'}</div>
+              <div class="view-sub">${isEn ? 'ChatGPT desktop and Codex CLI status, versions, and next actions.' : 'Codex 客户端管理已就绪；扩展模块为可选项。'}</div>
             </div>
             <div class="view-actions">
               <span>${isEn ? 'Sampled 23:06:51' : '采样 23:06:51'}</span>
@@ -1007,12 +1006,11 @@
                 <div class="card-status-line">● ${isEn ? 'Running' : '运行中'}</div>
               </div>
               <div class="card-btn-group">
-                <button class="card-btn">${isEn ? 'Install' : '安装'}</button>
-                <button class="card-btn">${isEn ? 'Login' : '登录'}</button>
+                <button class="card-btn">${isEn ? 'Check update' : '检查更新'}</button>
                 <button class="card-btn">${isEn ? 'Start' : '启动'}</button>
                 <button class="card-btn enabled" onclick="alert('${isEn ? 'Triggered Stop' : '已触发停止指令'}')">${isEn ? 'Stop' : '停止'}</button>
                 <button class="card-btn enabled" onclick="alert('${isEn ? 'Triggered Restart' : '已触发重启指令'}')">${isEn ? 'Restart' : '重启'}</button>
-                <button class="card-btn">${isEn ? 'Upgrade' : '升级'}</button>
+                <button class="card-btn">${isEn ? 'Store install / upgrade' : '商店安装/升级'}</button>
               </div>
             </div>
 
@@ -1031,12 +1029,10 @@
                 <div class="card-status-line">● ${isEn ? 'Running' : '运行中'}</div>
               </div>
               <div class="card-btn-group">
-                <button class="card-btn">${isEn ? 'Install' : '安装'}</button>
                 <button class="card-btn">${isEn ? 'Login' : '登录'}</button>
-                <button class="card-btn">${isEn ? 'Start' : '启动'}</button>
-                <button class="card-btn">${isEn ? 'Stop' : '停止'}</button>
-                <button class="card-btn">${isEn ? 'Restart' : '重启'}</button>
+                <button class="card-btn">${isEn ? 'Check update' : '检查更新'}</button>
                 <button class="card-btn primary" onclick="alert('${isEn ? 'Triggered Upgrade' : '已触发升级到 0.154.0'}')">${isEn ? 'Upgrade' : '升级'}</button>
+                <button class="card-btn">${isEn ? 'Dependency settings' : '依赖设置'}</button>
               </div>
             </div>
           </div>
@@ -1046,7 +1042,7 @@
           <div class="view-header">
             <div>
               <h2 class="view-h2">${isEn ? 'Network & Egress' : '网络与代理'}</h2>
-              <div class="view-sub">${isEn ? 'Decoupled dual pipeline and true residential egress detection.' : '双层管线实时观测，探查真实外网出口 IP 与家庭宽带归属。'}</div>
+              <div class="view-sub">${isEn ? 'Effective route detection and true residential egress detection.' : '生效代理路径实时观测，探查真实外网出口 IP 与家庭宽带归属。'}</div>
             </div>
           </div>
 
@@ -1065,10 +1061,20 @@
             </div>
           </div>
 
-          <div class="section-label">${isEn ? 'Real-time Dual-Layer Topology' : '双层链路实时拓扑'}</div>
-          <div style="background:var(--app-card-bg); border:1px solid var(--app-card-border); border-radius:8px; padding:18px; font-family:'JetBrains Mono',monospace; font-size:0.8rem; line-height:1.7;">
-            <div><span style="color:#0284c7; font-weight:700;">[Model Plane]</span> Codex CLI (:4096) ➔ OpenAI Responses API</div>
-            <div style="margin-top:8px;"><span style="color:#15803d; font-weight:700;">[Transport Plane]</span> Local Socket ➔ Direct System Proxy ➔ Tokyo Edge (38ms · Zero Leak)</div>
+          <div class="section-label">${isEn ? 'Effective route' : '生效路径'}</div>
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Effective route' : '当前生效路径'}</span>
+              <span class="summary-val" style="color:#0284c7">${isEn ? 'System proxy' : '系统代理'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Windows system proxy' : 'Windows 系统代理'}</span>
+              <span class="summary-val" style="color:#15803d">${isEn ? 'Enabled' : '已启用'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'TUN / automatic proxy' : 'TUN / 自动代理'}</span>
+              <span class="summary-val">${isEn ? 'Not detected' : '未检测到'}</span>
+            </div>
           </div>
         `;
       } else if (pageKey === 'processes') {
@@ -1091,10 +1097,10 @@
               <span>14280</span><span>OpenAI.Codex.exe</span><span>:4096</span><span style="color:#15803d">${isEn ? 'Protected' : '核心受保护'}</span>
             </div>
             <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px; border-bottom:1px solid var(--app-card-border);">
-              <span>21904</span><span>node.exe (codex-relay)</span><span>:8787</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
+              <span>21904</span><span>node.exe (nvm-managed)</span><span>:4096</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
             </div>
             <div style="display:grid; grid-template-columns:100px 1.5fr 1fr 100px; padding:10px 16px;">
-              <span>31088</span><span>node.exe (nvm-managed)</span><span>:4096</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
+              <span>31088</span><span>node.exe (codex cli)</span><span>:4096</span><span style="color:#0284c7">${isEn ? 'Managed' : '托管重置'}</span>
             </div>
           </div>
         `;
@@ -1114,32 +1120,31 @@
             </div>
             <div class="summary-col">
               <span class="summary-label">${isEn ? 'Active Node.js' : '当前活跃 Node.js'}</span>
-              <span class="summary-val" style="color:#0284c7">v22.15.0 (${isEn ? 'Meets Relay >= 22.14.0' : '满足 Relay >= 22.14.0 规则'})</span>
+              <span class="summary-val" style="color:#0284c7">v22.15.0 (${isEn ? 'Meets Codex CLI >= 22.14.0' : '满足 Codex CLI >= 22.14.0 规则'})</span>
             </div>
           </div>
 
-          <div class="section-label">${isEn ? 'Installed Node.js Versions' : '本地已安装 Node.js 版本 (点击切换)'}</div>
-          <div style="display:flex; gap:12px;">
-            <button class="card-btn enabled" style="padding:8px 16px; font-weight:700;">✓ v22.15.0 (${isEn ? 'Active' : '活跃中'})</button>
-            <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v20.18.0' : '已切换到 v20.18.0'}')">v20.18.0</button>
-            <button class="card-btn" style="padding:8px 16px;" onclick="alert('${isEn ? 'Switched to v18.20.4' : '已切换到 v18.20.4'}')">v18.20.4</button>
+          <div class="section-label">${isEn ? 'Target Node.js version' : '选择目标版本'}</div>
+          <div style="display:flex; gap:12px; align-items:center;">
+            <select class="card-btn" style="padding:8px 16px; font-weight:600;">
+              <option>v22.15.0 (${isEn ? 'Active' : '活跃中'})</option>
+              <option>v20.18.0</option>
+              <option>v18.20.4</option>
+            </select>
+            <button class="card-btn enabled" onclick="alert('${isEn ? 'Version applied' : '已应用所选版本'}')">${isEn ? 'Select version' : '选择版本'}</button>
           </div>
-        `;
-      } else if (pageKey === 'relay') {
-        main.innerHTML = `
-          <div class="view-header">
-            <div>
-              <h2 class="view-h2">${isEn ? 'Codex Relay (Optional Extension)' : 'Codex Relay (可选扩展模块)'}</h2>
-              <div class="view-sub">${isEn ? 'Optional remote SSE stream tunnel on port 8787 for mobile work.' : '配置与启动 Codex Relay 专属后台服务（默认端口 8787，按需开启）。'}</div>
+          <div class="section-label" style="margin-top:18px;">${isEn ? 'Download sources' : '下载源'}</div>
+          <div class="summary-card">
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'Node.js mirror' : 'Node.js 下载镜像'}</span>
+              <span class="summary-val">${isEn ? 'Alibaba Cloud · https://mirrors.aliyun.com/nodejs-release' : '阿里云 · https://mirrors.aliyun.com/nodejs-release'}</span>
+            </div>
+            <div class="summary-col">
+              <span class="summary-label">${isEn ? 'npm Registry' : 'npm Registry（nrm 预设）'}</span>
+              <span class="summary-val">${isEn ? 'npm official · https://registry.npmjs.org' : 'npm 官方 · https://registry.npmjs.org'}</span>
             </div>
           </div>
-          <div class="summary-card">
-            <div class="summary-col"><span class="summary-label">Port</span><span class="summary-val">http://127.0.0.1:8787</span></div>
-            <div class="summary-col"><span class="summary-label">Status</span><span class="summary-val" style="color:#15803d">Running (PID 31088)</span></div>
-            <div class="summary-col"><span class="summary-label">Protocol</span><span class="summary-val" style="color:#0284c7">Low-Jitter SSE Stream</span></div>
-          </div>
         `;
-      } else if (pageKey === 'tailscale') {
         main.innerHTML = `
           <div class="view-header">
             <div>
@@ -1162,8 +1167,9 @@
             </div>
           </div>
           <div class="summary-card">
-            <div class="summary-col"><span class="summary-label">Version</span><span class="summary-val">v1.1.0 (win-x64 portable)</span></div>
+            <div class="summary-col"><span class="summary-label">Version</span><span class="summary-val">v0.3.62 (win-x64 portable)</span></div>
             <div class="summary-col"><span class="summary-label">UI Engine</span><span class="summary-val">Windows App SDK 1.8 · WinUI 3</span></div>
+            <div class="summary-col"><span class="summary-label">${isEn ? 'Start with Windows' : '开机自启'}</span><span class="summary-val" style="color:#15803d">${isEn ? 'Enabled · tray only' : '已启用 · 仅托盘'}</span></div>
           </div>
         `;
       }
@@ -1190,19 +1196,19 @@
     const dict = {
       'en-US': {
         'nav.download': 'Download',
-        'h.pill': 'v1.1.0 · Native WinUI 3 Control Center',
+        'h.pill': 'v0.3.62 · Native WinUI 3 Control Center',
         'h.title': 'All-in-One Control Center for Codex',
-        'h.desc': 'Unified management for ChatGPT Desktop & Codex CLI. Sub-millisecond launch, dual pipeline, and egress risk detection. Supports optional Codex Relay and Tailscale.',
-        'h.btnDownload': 'Download Portable (.zip)',
+        'h.desc': 'Unified management for ChatGPT Desktop & Codex CLI, with dependency repair, effective route detection, and egress risk detection. Supports optional Tailscale.',
+        'h.btnDownload': 'Download Portable (.exe)',
         'app.hint': '💡 Click the sidebar icons to interactively explore each screen right here',
         'f1.t': 'Dual-Core Transparency',
         'f1.d': 'Independently inspects Microsoft Store ChatGPT and npm Codex CLI. Compares local installed builds against npm registry metadata.',
         'f2.t': 'Decoupled Dual Pipeline',
-        'f2.d': 'Decouples model logical routing from physical transport. Clearly shows whether requests flow to official OpenAI, the system proxy, or Tailscale.',
+        'f2.d': 'Reports the effective transport route from evidence: Windows system proxy, TUN adapter, custom HTTP proxy, environment proxy, or a direct connection.',
         'f3.t': 'Egress Residential Radar',
         'f3.d': 'Probes the real origin IP seen by upstream AI servers. Automatically flags Residential broadband vs Datacenter IP blocks to avoid 403 bans.',
         'f4.t': 'Safe Process Whitelist',
-        'f4.d': 'Strict termination whitelist resets hung proxy daemons without killing ChatGPT Desktop or unrelated Node.js workflows.',
+        'f4.d': 'Strict path allowlist stops hung Codex CLI processes without killing Codex Beacon, ChatGPT Desktop, or unrelated Node.js workflows.',
         'i.title': 'Single-File Portable · Zero Prerequisites',
         'i.desc': 'Runs under standard user privileges. Embedded Windows App SDK and .NET 10. Extract and run.',
         'i.copy': 'Copy Command',
@@ -1211,19 +1217,19 @@
       },
       'zh-CN': {
         'nav.download': '下载',
-        'h.pill': 'v1.1.0 · WinUI 3 原生 Windows 控制台',
+        'h.pill': 'v0.3.62 · WinUI 3 原生 Windows 控制台',
         'h.title': 'Codex 一站式管理中心',
-        'h.desc': '统一调度 ChatGPT 桌面端与 Codex CLI。毫秒启动，双层管线，公网检测；支持 Codex Relay 与 Tailscale（可选功能，按需开启）。',
+        'h.desc': '统一调度 ChatGPT 桌面端与 Codex CLI，覆盖依赖修复、生效路径检测与公网出口检测；支持 Tailscale（可选功能，按需开启）。',
         'h.btnDownload': '下载便携版 (Portable)',
         'app.hint': '💡 点击左侧侧边栏图标可直接在网页中体验实际界面与功能',
         'f1.t': '双核心分离观测',
         'f1.d': '独立读取官方 Store 客户端与 npm 全局 Codex CLI。实时比对官方 npm registry 最新版本，提供状态驱动的启停与平滑升级。',
         'f2.t': '双层链路解耦',
-        'f2.d': '将模型逻辑分流与底层物理网络完全拆开。一眼看清请求是直连官方 OpenAI、走系统代理，还是经过 Tailscale 转发（可选）。',
+        'f2.d': '根据实际证据报告生效的传输路径：Windows 系统代理、TUN 虚拟网卡、自定义 HTTP 代理、环境变量代理或直连。',
         'f3.t': '公网出口防封雷达',
         'f3.d': '以 OpenAI 接收端视角探测真实公网出口 IP。智能识别原生家庭宽带（Residential）与机房（IDC），避开高风控 IP 导致的 403 阻断。',
         'f4.t': '安全进程白名单',
-        'f4.d': '仅清理异常卡死的代理后台，绝不误杀 ChatGPT 桌面端与日常 Node 进程。Provider Key 严格保存在用户专属隐藏文件，禁止进入日志。',
+        'f4.d': '仅按路径白名单清理异常卡死的 Codex CLI 进程，绝不误杀 Codex Beacon、ChatGPT 桌面端与日常 Node 进程。',
         'i.title': '开箱即用 · 免安装单文件运行',
         'i.desc': '无需管理员提权，内嵌 Windows App SDK 与 .NET 10，下载解压即可双击启动。',
         'i.copy': '复制命令',

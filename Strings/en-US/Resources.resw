@@ -158,7 +158,6 @@
   <data name="RefreshIntervalCard.Description" xml:space="preserve"><value>5–300 seconds</value></data>
   <data name="MirrorCard.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="MirrorCard.Description" xml:space="preserve"><value>Distribution mirror used by nvm install</value></data>
-  <data name="RelayTaskCard.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
   <data name="SaveChangesCard.Header" xml:space="preserve"><value>Save changes</value></data>
   <data name="SaveChangesCard.Description" xml:space="preserve"><value>Applies immediately and stores locally</value></data>
   <data name="SaveButton.Content" xml:space="preserve"><value>Save settings</value></data>
@@ -182,15 +181,13 @@
   <data name="CompDesktopKind" xml:space="preserve"><value>Official OpenAI Windows app</value></data>
   <data name="CompCodexName" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="CompCodexKind" xml:space="preserve"><value>Command-line client</value></data>
-  <data name="CompRelayName" xml:space="preserve"><value>Codex Relay</value></data>
-  <data name="CompRelayKind" xml:space="preserve"><value>Optional extension · npm package</value></data>
   <data name="CompTailscaleName" xml:space="preserve"><value>Tailscale</value></data>
   <data name="CompTailscaleKind" xml:space="preserve"><value>Windows network service</value></data>
 
   <!-- Component details -->
   <data name="DetailNvmReady" xml:space="preserve"><value>{0} installed Node.js version(s)</value></data>
   <data name="DetailNvmMissing" xml:space="preserve"><value>nvm.exe was not found on PATH</value></data>
-  <data name="DetailNodeReady" xml:space="preserve"><value>Meets the Codex Relay minimum requirement ≥ {0}</value></data>
+  <data name="DetailNodeReady" xml:space="preserve"><value>Meets the Codex CLI minimum requirement ≥ {0}</value></data>
   <data name="DetailNodeOld" xml:space="preserve"><value>Too old; upgrade to {0} or newer</value></data>
   <data name="DetailNodeMissing" xml:space="preserve"><value>node.exe was not found on PATH</value></data>
   <data name="DetailNpmReady" xml:space="preserve"><value>Package manager available</value></data>
@@ -203,10 +200,6 @@
   <data name="DetailCodexNpm" xml:space="preserve"><value>Global npm install · {0}</value></data>
   <data name="DetailCodexOnPath" xml:space="preserve"><value>codex command on PATH · {0}</value></data>
   <data name="DetailCodexBundled" xml:space="preserve"><value>Bundled with the desktop app · {0}</value></data>
-  <data name="DetailRelayListening" xml:space="preserve"><value>127.0.0.1:8787 is listening · scheduled task: {0}</value></data>
-  <data name="DetailRelayMissing" xml:space="preserve"><value>No Relay installation was detected</value></data>
-  <data name="DetailRelayNoTask" xml:space="preserve"><value>Package installed; select Start to use the official background mode ({0})</value></data>
-  <data name="DetailRelayStopped" xml:space="preserve"><value>Port 8787 is not listening · scheduled task: {0}</value></data>
   <data name="DetailTailscaleMissing" xml:space="preserve"><value>Tailscale was not detected</value></data>
   <data name="DetailTailscaleSignedOut" xml:space="preserve"><value>Installed, but signed out of the Tailnet</value></data>
   <data name="DetailTailscaleReady" xml:space="preserve"><value>{0} · {1}</value></data>
@@ -236,7 +229,6 @@
   <data name="RoleDesktopApp" xml:space="preserve"><value>Codex desktop app</value></data>
   <data name="RoleCliAppBundled" xml:space="preserve"><value>Codex CLI · bundled with desktop app</value></data>
   <data name="RoleCliVsCode" xml:space="preserve"><value>Codex CLI · VS Code extension</value></data>
-  <data name="RoleCliRelay" xml:space="preserve"><value>Codex CLI · bundled with Relay</value></data>
   <data name="RoleCliOther" xml:space="preserve"><value>Codex CLI</value></data>
   <data name="RoleSupportHost" xml:space="preserve"><value>Codex code mode host</value></data>
   <data name="RoleUnknown" xml:space="preserve"><value>Codex-related process</value></data>
@@ -347,17 +339,6 @@
   <data name="ActionCodexMissing" xml:space="preserve"><value>Codex CLI is not installed. Complete installation first.</value></data>
   <data name="ActionCodexNotAService" xml:space="preserve"><value>Codex CLI is not a persistent service. Manage running processes from the Processes page.</value></data>
   <data name="ActionPackageInstalled" xml:space="preserve"><value>{0} installed at the latest version</value></data>
-  <data name="ActionHintRelayStart" xml:space="preserve"><value>Select Start to run Relay in its official background mode.</value></data>
-  <data name="ActionServicesRestarted" xml:space="preserve"><value>Optional services restarted (cleared {0} process(es); started: {1})</value></data>
-  <data name="ActionServicesTerminated" xml:space="preserve"><value>Terminated {0} optional service process(es); the desktop app and Codex Beacon were not affected</value></data>
-  <data name="ActionRelayStarted" xml:space="preserve"><value>Codex Relay started</value></data>
-  <data name="ActionRelayStopped" xml:space="preserve"><value>Codex Relay stopped</value></data>
-  <data name="ActionRelayRestarted" xml:space="preserve"><value>Codex Relay restarted</value></data>
-  <data name="ActionRelayMissing" xml:space="preserve"><value>Codex Relay is not installed. Complete installation first.</value></data>
-  <data name="ActionTaskStarted" xml:space="preserve"><value>Scheduled task [{0}] started</value></data>
-  <data name="ActionTaskStopped" xml:space="preserve"><value>Scheduled task [{0}] stopped</value></data>
-  <data name="ActionTaskRestarted" xml:space="preserve"><value>Scheduled task [{0}] restarted</value></data>
-  <data name="ActionTaskMissing" xml:space="preserve"><value>Scheduled task [{0}] was not found. Install the corresponding service first.</value></data>
   <data name="ActionNvmMissing" xml:space="preserve"><value>NVM for Windows was not detected. Install NVM and reopen Codex Beacon.</value></data>
   <data name="ActionNvmVersionInvalid" xml:space="preserve"><value>Enter a complete Node.js version, for example 24.15.0.</value></data>
   <data name="ActionNvmUnsupported" xml:space="preserve"><value>NVM does not support that action.</value></data>
@@ -464,10 +445,7 @@
   <data name="NpmRegistryFieldLabel.Text" xml:space="preserve"><value>npm Registry (nrm presets)</value></data>
   <data name="NodeMirrorBox.Header" xml:space="preserve"><value>Node.js download mirror</value></data>
   <data name="SaveDependenciesButton.Content" xml:space="preserve"><value>Save dependency settings</value></data>
-  <data name="RelayDescription.Text" xml:space="preserve"><value>Optional mobile bridge extension; manage installation, version, service, and scheduled task here.</value></data>
   <data name="ServiceControlHeading.Text" xml:space="preserve"><value>Service control</value></data>
-  <data name="RelayTaskNameBox.Header" xml:space="preserve"><value>Codex Relay scheduled task</value></data>
-  <data name="SaveRelayButton.Content" xml:space="preserve"><value>Save Relay settings</value></data>
 
   <!-- QA fix round: wired previously hardcoded UI strings -->
   <data name="OverviewStoreChannelLabel.Text" xml:space="preserve"><value>Microsoft Store channel</value></data>
@@ -493,8 +471,6 @@
   <data name="TailscaleCardTitle.Text" xml:space="preserve"><value>Tailscale local network service</value></data>
   <data name="TailscaleCardSubtitle.Text" xml:space="preserve"><value>A Windows background service drives the VPN (start, stop and restart require administrator)</value></data>
   <data name="TailscaleWingetUpgrade.Content" xml:space="preserve"><value>Upgrade via WinGet</value></data>
-  <data name="RelayCardTitle.Text" xml:space="preserve"><value>Codex Relay bridge service</value></data>
-  <data name="RelayCardSubtitle.Text" xml:space="preserve"><value>Two-way communication extension between mobile devices and desktop Codex (default port 8787)</value></data>
   <data name="TaskScheduleHeading.Text" xml:space="preserve"><value>Scheduled task configuration</value></data>
   <data name="LanguageZh.Content" xml:space="preserve"><value>Simplified Chinese</value></data>
   <data name="AboutOpenSourceHeading.Text" xml:space="preserve"><value>About Codex Beacon and open-source info</value></data>
@@ -506,7 +482,6 @@
   <data name="ProjectLicenseCard.Header" xml:space="preserve"><value>Open-source license</value></data>
   <data name="ProjectLicenseCard.Description" xml:space="preserve"><value>Permissive free-software license</value></data>
   <data name="ReferenceAppManager.Description" xml:space="preserve"><value>Reference for Codex desktop version management</value></data>
-  <data name="ReferenceRelay.Description" xml:space="preserve"><value>Optional mobile bridge extension</value></data>
   <data name="ReferenceIpCoffee.Description" xml:space="preserve"><value>ChatGPT / Codex egress IP and risk-check data source</value></data>
   <data name="DesktopStorePathFallback" xml:space="preserve"><value>Official OpenAI Store package</value></data>
   <data name="CodexPathFallback" xml:space="preserve"><value>PATH / npm global install</value></data>
@@ -519,7 +494,7 @@
   <data name="ComponentUpdateFailed" xml:space="preserve"><value>Query failed: {0}</value></data>
   <data name="DesktopAppName" xml:space="preserve"><value>ChatGPT desktop app</value></data>
   <!-- QA fix round addendum -->
-  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>Applied via --registry when installing or upgrading Codex CLI and Relay; separate from the system-wide npm config.</value></data>
+  <data name="NpmRegistryHint.Text" xml:space="preserve"><value>Applied via --registry when installing or upgrading Codex CLI. Saving the settings also writes it to the system-wide npm config.</value></data>
   <data name="OpenLogsLabel.Text" xml:space="preserve"><value>Logs</value></data>
   <data name="LogWindowTitle" xml:space="preserve"><value>Codex Beacon logs</value></data>
   <data name="LogWindowHeading.Text" xml:space="preserve"><value>Application logs</value></data>

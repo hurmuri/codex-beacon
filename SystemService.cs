@@ -224,21 +224,6 @@ public sealed class SystemService
             catch { }
         }, cancellationToken);
 
-        var relayTask = Task.Run(async () =>
-        {
-            try
-            {
-                var json = await client.GetStringAsync(NpmLatestUrl("codex-relay"), cancellationToken).ConfigureAwait(false);
-                using var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("version", out var ver))
-                {
-                    var v = ver.GetString();
-                    if (!string.IsNullOrEmpty(v)) lock (results) results["relay"] = v;
-                }
-            }
-            catch { }
-        }, cancellationToken);
-
         var tailscaleTask = Task.Run(async () =>
         {
             try
@@ -308,7 +293,7 @@ public sealed class SystemService
             }
         }, cancellationToken);
 
-        await Task.WhenAll(desktopTask, codexTask, relayTask, tailscaleTask, nvmTask, nodeTask, npmTask, windowsDependenciesTask).ConfigureAwait(false);
+        await Task.WhenAll(desktopTask, codexTask, tailscaleTask, nvmTask, nodeTask, npmTask, windowsDependenciesTask).ConfigureAwait(false);
         return results;
     }
 

@@ -2,7 +2,7 @@
 
 ## North star
 
-Codex Beacon should feel like a focused Windows 11 Settings page for local Codex management: native, bright, compact, predictable, and evidence-led. Codex desktop and Codex CLI are the independent product core. Codex Relay is an optional extension; its absence is not a system failure.
+Codex Beacon should feel like a focused Windows 11 Settings page for local Codex management: native, bright, compact, predictable, and evidence-led. Codex desktop and Codex CLI are the independent product core. Tailscale is an optional extension; its absence is not a system failure.
 
 ## Information architecture
 
@@ -11,20 +11,19 @@ Codex Beacon should feel like a focused Windows 11 Settings page for local Codex
 - **Codex processes** — Codex-related processes, executable versions, paths, ownership, and guarded recovery controls.
 - **Network** — ChatGPT and CLI reachability, system/TUN/HTTP proxy state, evidence-backed active routes, and machine public egress.
 - **Tailscale** — independent service, sign-in, local-node, and Tailnet inventory.
-- **Codex Relay** — independent optional install, service, listener, login, and pairing state.
 - **Settings / About & updates** — application-wide preferences plus the preserved Codex Beacon version, release notes, update check, download, verification, and restart surface.
 
 This order is canonical in `NavigationView`. Network is a dedicated page. The overview is not a generic dashboard and contains only the two core products. Dense inventories remain native list rows rather than nested cards. See [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md) for the functional contract.
 
-Component settings stay with their owner: runtime mirrors and Registry under Dependencies, proxy options under Network, and scheduled-task/service names under Codex Relay. The global Settings page does not duplicate those controls.
+Component settings stay with their owner: runtime mirrors and Registry under Dependencies, and proxy options under Network. The global Settings page does not duplicate those controls.
 
 ## Native component policy
 
 - `NavigationView` owns primary navigation.
 - `SettingsCard` and `SettingsExpander` own settings and service surfaces.
 - `InfoBar` owns persistent context, warnings, and source disclosures.
-- `CommandBar` and `AppBarButton` own grouped service actions.
-- `ListView`, `ComboBox`, `TextBox`, `NumberBox`, `ContentDialog`, `ProgressRing`, and `ProgressBar` retain platform behavior and focus visuals.
+- `Button` inside a `SettingsCard` owns service actions, grouped in a horizontal stack that stays right-aligned.
+- `ListView`, `ItemsControl`, `ComboBox`, `TextBox`, `NumberBox`, `ContentDialog`, `ProgressRing`, and `ProgressBar` retain platform behavior and focus visuals.
 - Custom borders are limited to status pills and table containment. Do not build a parallel card component library.
 
 ## State-driven workflow
@@ -43,7 +42,6 @@ Actions stay disabled until prerequisites are proven. Detection distinguishes pa
 - Tailscale requires the Windows package, service, and a signed-in Tailnet state.
 - Codex CLI login is verified by its status command; login opens a visible official CLI flow.
 - ChatGPT desktop health is independent of Codex CLI authentication state.
-- Codex Relay may be installed without a configured scheduled task.
 - Codex desktop installation and update always open the official Microsoft Store product page.
 
 ## Network route evidence

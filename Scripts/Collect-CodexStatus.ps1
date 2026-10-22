@@ -105,21 +105,6 @@ function Get-RegistryVersion([string]$PackageName) {
     return $null
 }
 
-function Get-TaskStateKey([string]$Name) {
-    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
-    if (-not $task) { return 'TaskStateNotInstalled' }
-    switch ([string]$task.State) {
-        'Running' { return 'TaskStateRunning' }
-        'Ready' { return 'TaskStateReady' }
-        'Disabled' { return 'TaskStateDisabled' }
-        default { return 'TaskStateUnknown' }
-    }
-}
-
-function Test-Port([int]$Port) {
-    return [bool](Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue)
-}
-
 function Test-WebEndpoint([string]$Id, [string]$Name, [string]$Address, [string]$ProxyAddress = '') {
     $watch = [Diagnostics.Stopwatch]::StartNew()
     $state = 'Unreachable'
@@ -182,7 +167,6 @@ function New-Component {
 # --- settings -------------------------------------------------------------
 
 $settings = @{
-    RelayTaskName = 'Codex Relay'
     NodeMirror    = $DefaultNodeMirror
     NpmRegistry   = $DefaultNpmRegistry
     NetworkMode   = 'auto'
@@ -191,7 +175,7 @@ $settings = @{
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     try {
         $saved = Get-Content -Raw -LiteralPath $SettingsPath -Encoding UTF8 | ConvertFrom-Json
-        foreach ($name in @('RelayTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
+        foreach ($name in @('NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
             if ($saved.$name) { $settings[$name] = $saved.$name }
         }
     } catch { }
@@ -411,22 +395,6 @@ if ($codexVersion) {
     if ($codexAccount -ne 'SignedIn' -and $sawSignedOut) { $codexAccount = 'SignedOut' }
 }
 
-# --- optional npm modules -------------------------------------------------
-
-$relayVersion = $null
-$relayPackageJson = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\package.json'
-if (Test-Path -LiteralPath $relayPackageJson) {
-    try { $relayVersion = [string]((Get-Content -Raw -LiteralPath $relayPackageJson | ConvertFrom-Json).version) } catch { }
-}
-if (-not $relayVersion) {
-    foreach ($npm in $script:NpmExecutables) {
-        $found = Get-PackageVersion $npm 'codex-relay'
-        if ($found) { $relayVersion = $found; break }
-    }
-}
-$relayListening = Test-Port 8787
-$relayTaskKey = Get-TaskStateKey $settings.RelayTaskName
-
 # --- tailscale ------------------------------------------------------------
 
 $tailService = Get-Service -Name 'Tailscale' -ErrorAction SilentlyContinue
@@ -530,21 +498,6 @@ $components += New-Component -Id 'codex' -NameKey 'CompCodexName' -KindKey 'Comp
     -Manage $false -Running ([bool]$codexVersion) -Account $codexAccount -PrereqReady ($nodeOk -and $npmOk)
 
 
-$relayState = if ($relayListening) { 'Healthy' }
-    elseif (-not $relayVersion) { 'Unavailable' }
-    elseif ($relayTaskKey -eq 'TaskStateRunning') { 'Warning' }
-    else { 'Stopped' }
-$relayDetailKey = if ($relayListening) { 'DetailRelayListening' }
-    elseif (-not $relayVersion) { 'DetailRelayMissing' }
-    elseif ($relayTaskKey -eq 'TaskStateNotInstalled') { 'DetailRelayNoTask' }
-    else { 'DetailRelayStopped' }
-$relayDetailArgs = @(('@' + $relayTaskKey))
-$components += New-Component -Id 'relay' -NameKey 'CompRelayName' -KindKey 'CompRelayKind' `
-    -State $relayState -DetailKey $relayDetailKey -DetailArgs $relayDetailArgs `
-    -Installed $(if ($relayVersion) { $relayVersion } else { $script:Unknown }) `
-    -Latest $(if ($relayVersion) { $v = Get-RegistryVersion 'codex-relay'; if ($v) { $v } else { $script:Unknown } } else { $script:Unknown }) `
-    -Manage $true -Running $relayListening -PrereqReady ($nodeOk -and $npmOk)
-
 $tailState = if (-not $tailVersion) { 'Unavailable' }
     elseif ($tailAccount -eq 'SignedOut') { 'Warning' }
     elseif ($tailJson -and $tailJson.Self.Online) { 'Healthy' }
@@ -573,7 +526,6 @@ function Get-ProcessRole([string]$Path, [string]$Name) {
     if ($Name -eq 'codex-code-mode-host.exe') { return @{ Key = 'RoleSupportHost'; Args = @() } }
     if ($Path -match '(?i)WindowsApps[\\/]OpenAI\.Codex_') { return @{ Key = 'RoleDesktopApp'; Args = @() } }
     if ($Path -match '(?i)\.vscode[\\/]extensions[\\/]') { return @{ Key = 'RoleCliVsCode'; Args = @() } }
-    if ($Path -match '(?i)\.codex-relay[\\/]') { return @{ Key = 'RoleCliRelay'; Args = @() } }
     if ($Path -match '(?i)AppData[\\/]Local[\\/]OpenAI[\\/]Codex[\\/]bin[\\/]') { return @{ Key = 'RoleCliAppBundled'; Args = @() } }
     if ($Name -eq 'codex.exe') { return @{ Key = 'RoleCliOther'; Args = @() } }
     return @{ Key = 'RoleUnknown'; Args = @() }

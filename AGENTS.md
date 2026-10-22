@@ -34,9 +34,10 @@ Codex Beacon is a Windows-only WinUI 3 application. Keep platform integration in
 ## Diagnostics and safety
 
 - PowerShell scripts must remain compatible with Windows PowerShell 5.1 and be saved as UTF-8 with BOM.
-- Provider API keys may be saved in the current user's configuration directory when explicitly entered by the user. Key inputs must use a password control and remain hidden by default. Keys must never be uploaded, logged, included in diagnostics, command-line arguments, error messages, or user-visible status text. Configuration files containing keys must be restricted to the current user.
-- A proxy path is valid only when supported by the selected provider, its configured endpoint, listener ownership, and observed TCP connections. Configured-but-inactive endpoints belong in the candidate list.
-- Distinguish the machine's public egress IP from remote IPs contacted by Codex-related processes.
+- Codex Beacon stores no credentials. Do not add an API-key, token, or password input, and do not write to the Codex configuration file, without an explicit product decision.
+- Secrets must never be uploaded, logged, included in diagnostics, command-line arguments, error messages, or user-visible status text. The application log redacts key-shaped values before writing a line.
+- A proxy path is valid only when the configured mode, the observed Windows system proxy state, the detected TUN adapter, and the environment proxy agree with the reported endpoint. A configured-but-inactive endpoint is reported as inactive, not as the active path.
+- Never present the machine's public egress IP as a remote service IP.
 - Process termination must use an explicit allowlist and must exclude Codex Beacon, the Codex desktop app, and unrelated Node.js processes.
 - External installers and login flows must use their official channel and remain visible to the user.
 

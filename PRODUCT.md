@@ -12,7 +12,7 @@ Windows desktop application using C#, .NET, and Windows App SDK (WinUI 3). The u
 
 ## Users
 
-Windows users who run Codex CLI and Codex Relay locally and need one reliable place to inspect and recover the toolchain.
+Windows users who run Codex CLI locally and need one reliable place to inspect and recover the toolchain.
 
 ## Product Purpose
 
@@ -20,28 +20,27 @@ Show whether the Codex toolchain is healthy, explain how traffic is routed, iden
 
 ## Positioning
 
-The product combines package installation state, Windows process and scheduled-task state, proxy-chain discovery, upstream version checks, and recovery actions in one local-native control surface.
+The product combines package installation state, Windows process state, effective network route discovery, upstream version checks, and recovery actions in one local-native control surface.
 
 ## Operating Context
 
 - Runs locally on Windows alongside Codex desktop and CLI processes.
-- Detects npm-installed `@openai/codex` and `codex-relay`.
-- Recognizes the existing `Codex Relay` scheduled task when present.
+- Detects npm-installed `@openai/codex`.
 - Reads non-secret routing values from Codex configuration and environment variables.
 - Administrative or destructive operations require explicit confirmation and report partial failures.
 
 ## Capabilities and Constraints
 
-- Chinese interface with a permanently bright theme.
-- Dashboard health summary for Codex CLI, Codex Relay, and proxy endpoints.
-- Proxy-chain visualization derived from process, environment, configuration, and listening-port evidence.
+- Bilingual English and Simplified Chinese interface that follows the Windows display language by default, with a permanently bright theme.
+- Dashboard health summary for Codex CLI, the ChatGPT desktop app, and proxy endpoints.
+- Effective network route evidence derived from the configured proxy mode, the Windows system proxy state, the automatic/PAC configuration, the detected TUN adapter, and the user environment proxy.
 - Related-process inventory including PID, executable, command line, start time, architecture, and best-effort version.
 - Installed-versus-latest comparison using official npm registry metadata.
-- Install, upgrade, reinstall, start, stop, restart, and safe bulk termination workflows.
+- Install, upgrade, reinstall, start, stop, restart, and safe bulk termination workflows. Termination uses an explicit path allowlist and always excludes Codex Beacon itself.
 - Tailscale Windows service and local Tailnet device visibility, including node addresses and online state.
 - NVM for Windows detection plus installed Node.js version inventory, installation, and active-version switching.
-- Commands and task names are configurable so the app is not tied to one machine.
 - Never displays or logs tokens, API keys, passwords, or authorization headers.
+- A single append-only application log collects action output, installer progress, and application errors, with secrets redacted before a line is written.
 
 ## Brand Commitments
 
@@ -50,7 +49,6 @@ Working product name: Codex Beacon. The interface is bright, calm, technical, an
 ## Evidence on Hand
 
 - Local Codex CLI 0.147.0 from `@openai/codex`.
-- Local Codex Relay 1.5.2 with a `Codex Relay` scheduled task.
 - No logo or external brand asset was supplied; the product must not fabricate endorsements or affiliation.
 
 ## Product Principles
@@ -63,7 +61,7 @@ Working product name: Codex Beacon. The interface is bright, calm, technical, an
 
 ## vNext product direction
 
-The approved vNext structure is defined in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Its canonical navigation is Codex overview, Dependencies, Codex processes, Network, Tailscale, Codex Relay, and Settings / About & updates.
+The approved vNext structure is defined in [PRODUCT-REQUIREMENTS.md](PRODUCT-REQUIREMENTS.md). Its canonical navigation is Codex overview, Dependencies, Codex processes, Network, Tailscale, and Settings / About & updates.
 
 The overview narrows to ChatGPT desktop and the user-managed Codex CLI. Dependency repair, network transport, and each optional module move to dedicated pages.
 

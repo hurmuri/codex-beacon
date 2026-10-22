@@ -50,7 +50,6 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         _settings = _systemService.LoadSettings();
         RefreshSecondsBox.Value = _settings.RefreshSeconds;
-        RelayTaskNameBox.Text = _settings.RelayTaskName;
         NodeMirrorPicker.SelectedValue = _settings.NodeMirror;
         if (NodeMirrorPicker.SelectedIndex < 0)
         {
@@ -307,7 +306,7 @@ public sealed partial class MainWindow : Window
             component.PrerequisitesReady = component.Id switch
             {
                 "desktop" => storeReady,
-                "codex" or "relay" => nodeReady && npmReady,
+                "codex" => nodeReady && npmReady,
                 "winget" => appInstallerReady,
                 "msstore" or "nvm" => wingetReady,
                 "node" => nvm?.State == "Healthy",
@@ -319,7 +318,7 @@ public sealed partial class MainWindow : Window
         Replace(InstallableComponents, snapshot.Components.Where(x => x.Id is "appinstaller" or "winget" or "msstore"));
         Replace(RuntimeComponents, snapshot.Components.Where(x => x.Id is "nvm" or "node" or "npm"));
 
-        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "tailscale" or "relay"));
+        Replace(CoreComponents, snapshot.Components.Where(x => x.Id is "desktop" or "codex" or "tailscale"));
         Replace(Processes, snapshot.Processes.OrderBy(x => x.RoleKey).ThenBy(x => x.Pid));
         Replace(TailnetDevices, snapshot.TailscaleDevices.OrderByDescending(x => x.IsSelf).ThenByDescending(x => x.Online).ThenBy(x => x.Name));
         _installedNodeVersions.Clear();
@@ -527,17 +526,6 @@ public sealed partial class MainWindow : Window
             TailscaleRestartButton.IsEnabled = tailscale.CanRestart;
         }
 
-        var relay = CoreComponents.Concat(InstallableComponents).FirstOrDefault(x => x.Id == "relay");
-        if (relay is not null)
-        {
-            RelayStatusBadgeText.Text = relay.StatusLabel;
-            RelayCurrentVersionText.Text = relay.InstalledVersionLabel;
-            RelayLatestVersionText.Text = relay.LatestVersionLabel;
-            RelayInstallButton.IsEnabled = relay.CanInstall;
-            RelayUpgradeButton.IsEnabled = relay.CanUpgrade;
-            RelayStartButton.IsEnabled = relay.CanStart;
-            RelayStopButton.IsEnabled = relay.CanStop;
-        }
     }
 
     private async void DesktopAction_Click(object sender, RoutedEventArgs e)
@@ -677,7 +665,6 @@ public sealed partial class MainWindow : Window
         NetworkPage.Visibility = tag == "network" ? Visibility.Visible : Visibility.Collapsed;
         TailscalePage.Visibility = tag == "tailscale" ? Visibility.Visible : Visibility.Collapsed;
         InstallationsPage.Visibility = tag == "installations" ? Visibility.Visible : Visibility.Collapsed;
-        RelayPage.Visibility = tag == "relay" ? Visibility.Visible : Visibility.Collapsed;
         SettingsPage.Visibility = tag == "settings" ? Visibility.Visible : Visibility.Collapsed;
     }
 
@@ -819,12 +806,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void RelayAction_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not Button { Tag: string action }) return;
-        await ExecuteActionAsync("relay", action, null, Localization.Format("RunningAction", ActionName(action), "Codex Relay"));
-    }
-
     private async Task<bool> ConfirmAsync(string title, string body, string confirmText)
     {
         var dialog = new ContentDialog
@@ -891,7 +872,6 @@ public sealed partial class MainWindow : Window
         var next = new AppSettings
         {
             RefreshSeconds = Math.Clamp(seconds, 5, 300),
-            RelayTaskName = string.IsNullOrWhiteSpace(RelayTaskNameBox.Text) ? "Codex Relay" : RelayTaskNameBox.Text.Trim(),
             NodeMirror = NormalizeHttpEndpoint(NodeMirrorPicker.SelectedValue as string ?? "", defaults.NodeMirror),
             NpmRegistry = NormalizeHttpEndpoint(NpmRegistryPicker.SelectedValue as string ?? "", defaults.NpmRegistry),
             NetworkMode = NetworkModePicker.SelectedValue as string ?? "system",

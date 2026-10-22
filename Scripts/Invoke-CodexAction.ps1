@@ -1,5 +1,5 @@
 ﻿param(
-    [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','relay','tailscale','all')][string]$Component,
+    [Parameter(Mandatory=$true)][ValidateSet('appinstaller','winget','msstore','nvm','desktop','codex','tailscale')][string]$Component,
     [Parameter(Mandatory=$true)][ValidateSet('install','upgrade','login','start','stop','restart','kill','install-node','use-node','use','store')][string]$Action,
     [string]$Version = '',
     [string]$SettingsPath = ''
@@ -30,8 +30,6 @@ $script:Separator = [char]0x1F
 $script:ActionStarted = Get-Date
 
 $settings = @{
-    RelayTaskName = 'Codex Relay'
-
     NodeMirror    = 'https://mirrors.aliyun.com/nodejs-release'
     NpmRegistry   = 'https://registry.npmjs.org'
     NetworkMode   = 'auto'
@@ -40,7 +38,7 @@ $settings = @{
 if ($SettingsPath -and (Test-Path -LiteralPath $SettingsPath)) {
     try {
         $saved = Get-Content -Raw -LiteralPath $SettingsPath -Encoding UTF8 | ConvertFrom-Json
-        foreach ($name in @('RelayTaskName', 'NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
+        foreach ($name in @('NodeMirror', 'NpmRegistry', 'NetworkMode', 'CustomHttpProxy')) {
             if ($saved.$name) { $settings[$name] = $saved.$name }
         }
     } catch { }
@@ -159,27 +157,19 @@ function Assert-Prerequisites {
     }
 }
 
-function Invoke-NpmInstall([string]$PackageName, [bool]$RelayLocal) {
+function Invoke-NpmInstall([string]$PackageName) {
     Assert-Prerequisites
     $registryArgs = @()
     if ($settings.NpmRegistry) { $registryArgs = @('--registry', [string]$settings.NpmRegistry) }
     Write-Progress-Event -Stage 'Downloading' -Source ([string]$settings.NpmRegistry) -Message $PackageName
-    if ($RelayLocal) {
-        $relayApp = Join-Path $env:USERPROFILE '.codex-relay\app'
-        New-Item -ItemType Directory -Path $relayApp -Force | Out-Null
-        Write-Progress-Line "npm install $PackageName@latest --prefix $relayApp"
-        $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','--prefix',$relayApp,"$PackageName@latest",'--save-exact') + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
-    } else {
-        Write-Progress-Line "npm install -g $PackageName@latest"
-        $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','-g',"$PackageName@latest") + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
-    }
+    Write-Progress-Line "npm install -g $PackageName@latest"
+    $run = Invoke-TrackedCommand $script:NpmExecutable (@('install','-g',"$PackageName@latest") + $registryArgs) 'Downloading' ([string]$settings.NpmRegistry)
     $output = $run.Output
     if ($run.ExitCode -ne 0) {
-        $prefixArgs = if ($RelayLocal) { @('--prefix', $relayApp) } else { @('-g') }
         $installedVersion = ''
         $latestVersion = ''
         try {
-            $listArgs = @('list') + $prefixArgs + @($PackageName, '--depth=0', '--json')
+            $listArgs = @('list', '-g', $PackageName, '--depth=0', '--json')
             $installedJson = & $script:NpmExecutable @listArgs 2>$null | Out-String | ConvertFrom-Json
             $dependency = $installedJson.dependencies.PSObject.Properties[$PackageName]
             if ($dependency) { $installedVersion = [string]$dependency.Value.version }
@@ -195,24 +185,6 @@ function Invoke-NpmInstall([string]$PackageName, [bool]$RelayLocal) {
     Write-Progress-Line "Verified $PackageName installation."
     Write-Progress-Event -Stage 'Completed' -Source ([string]$settings.NpmRegistry) -Message $PackageName -Percent 100
     return $output.Trim()
-}
-
-function Get-RelayCli {
-    $path = Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js'
-    if (-not (Test-Path -LiteralPath $path)) { throw 'Codex Relay is not installed.' }
-    return $path
-}
-
-function Invoke-Relay([string[]]$Arguments) {
-    Assert-Prerequisites
-    $relayHome = Join-Path $env:USERPROFILE '.codex-relay'
-    New-Item -ItemType Directory -Path $relayHome -Force | Out-Null
-    Push-Location $relayHome
-    try {
-        $output = & $script:NodeExecutable (Get-RelayCli) @Arguments 2>&1 | Out-String
-        if ($LASTEXITCODE -ne 0) { throw $output.Trim() }
-        return $output.Trim()
-    } finally { Pop-Location }
 }
 
 # nvm-windows downloads from nodejs.org by default, which is unreachable on
@@ -247,7 +219,7 @@ function Invoke-Nvm {
 function Stop-CodexDesktop {
     # Path-anchored allowlist only: never match by process name alone, so a
     # same-named binary outside the Codex install locations is left alone.
-    $codexPathPattern = '(?i)(WindowsApps[\\/]OpenAI\.Codex_[^\\/]+|[\\/]OpenAI[\\/]Codex[\\/]|[\\/]\.vscode[\\/]extensions[\\/]openai\.chatgpt-|[\\/]\.codex-relay[\\/]|[\\/]@openai[\\/]codex)'
+    $codexPathPattern = '(?i)(WindowsApps[\\/]OpenAI\.Codex_[^\\/]+|[\\/]OpenAI[\\/]Codex[\\/]|[\\/]\.vscode[\\/]extensions[\\/]openai\.chatgpt-|[\\/]@openai[\\/]codex)'
     $count = 0
     foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
         $_.ExecutablePath -match $codexPathPattern
@@ -257,36 +229,6 @@ function Stop-CodexDesktop {
         $count++
     }
     return $count
-}
-
-function Stop-ServiceProcesses([string]$Target = 'all') {
-    $patterns = @('codex-relay-service\.cmd','codex-relay-service-launcher\.vbs','node_modules[\\/]codex-relay[\\/]dist[\\/]cli\.js')
-    $count = 0
-    foreach ($p in (Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)) {
-        $identity = "$($p.Name) $($p.ExecutablePath) $($p.CommandLine)"
-        if ($identity -match 'CodexBeacon|CodexServiceManager|OpenAI\.Codex') { continue }
-        if ($Target -eq 'relay' -and $identity -notmatch 'codex-relay') { continue }
-        if ($patterns | Where-Object { $identity -match $_ }) {
-            Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
-            $count++
-        }
-    }
-    return $count
-}
-
-function Set-Task([string]$Name, [string]$Mode) {
-    $task = Get-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue
-    if (-not $task) { throw "TASK_MISSING::$Name" }
-    if ($Mode -eq 'start') { Start-ScheduledTask -TaskName $Name }
-    else { Stop-ScheduledTask -TaskName $Name -ErrorAction SilentlyContinue }
-}
-
-function Test-LocalPort([int]$Port) {
-    $client = New-Object System.Net.Sockets.TcpClient
-    try {
-        $wait = $client.BeginConnect('127.0.0.1', $Port, $null, $null)
-        return ($wait.AsyncWaitHandle.WaitOne(500) -and $client.Connected)
-    } catch { return $false } finally { $client.Close() }
 }
 
 function Start-CodexDesktop {
@@ -418,63 +360,21 @@ try {
     if ($Action -in @('install', 'upgrade')) {
         $package = switch ($Component) {
             'codex' { '@openai/codex' }
-            'relay' { 'codex-relay' }
             default { throw 'BULK_INSTALL_UNSUPPORTED' }
         }
-        $details = Invoke-NpmInstall $package ($Component -eq 'relay')
-        $hintKey = switch ($Component) {
-            'relay' { 'ActionHintRelayStart' }
-            default { '' }
-        }
-        Write-Result -Success $true -MessageKey 'ActionPackageInstalled' -MessageArgs @($package) -HintKey $hintKey -Details $details
+        $details = Invoke-NpmInstall $package
+        Write-Result -Success $true -MessageKey 'ActionPackageInstalled' -MessageArgs @($package) -Details $details
     }
 
-    # --- bulk recovery -----------------------------------------------------
-    if ($Component -eq 'all') {
-        $relayTask = Get-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue
-        if ($relayTask) { Stop-ScheduledTask -TaskName $settings.RelayTaskName -ErrorAction SilentlyContinue }
-        elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { try { Invoke-Relay @('stop') | Out-Null } catch { } }
-
-        $count = Stop-ServiceProcesses
-        if ($Action -eq 'restart') {
-            $started = @()
-            if ($relayTask) { Start-ScheduledTask -TaskName $settings.RelayTaskName; $started += 'Relay' }
-            elseif (Test-Path -LiteralPath (Join-Path $env:USERPROFILE '.codex-relay\app\node_modules\codex-relay\dist\cli.js')) { Invoke-Relay @('--bg') | Out-Null; $started += 'Relay' }
-            $startedLabel = if ($started.Count -gt 0) { $started -join ', ' } else { 'none' }
-            Write-Result -Success $true -MessageKey 'ActionServicesRestarted' -MessageArgs @($count, $startedLabel)
-        }
-        Write-Result -Success $true -MessageKey 'ActionServicesTerminated' -MessageArgs @($count)
-    }
-
-    # --- relay service control ---------------------------------------------
-    $taskName = $settings.RelayTaskName
-    $task = Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue
-
-    if ($Component -eq 'relay' -and -not $task) {
-        if ($Action -eq 'start') { $details = Invoke-Relay @('--bg'); Write-Result -Success $true -MessageKey 'ActionRelayStarted' -Details $details }
-        elseif ($Action -eq 'stop') { $details = Invoke-Relay @('stop'); Write-Result -Success $true -MessageKey 'ActionRelayStopped' -Details $details }
-        elseif ($Action -eq 'restart') { Invoke-Relay @('stop') | Out-Null; Start-Sleep -Milliseconds 500; $details = Invoke-Relay @('--bg'); Write-Result -Success $true -MessageKey 'ActionRelayRestarted' -Details $details }
-        else { throw 'RELAY_UNSUPPORTED' }
-    }
-    if ($Action -eq 'start') { Set-Task $taskName 'start'; Write-Result -Success $true -MessageKey 'ActionTaskStarted' -MessageArgs @($taskName) }
-    elseif ($Action -eq 'stop') { Set-Task $taskName 'stop'; Stop-ServiceProcesses $Component | Out-Null; Write-Result -Success $true -MessageKey 'ActionTaskStopped' -MessageArgs @($taskName) }
-    elseif ($Action -eq 'restart') {
-        Set-Task $taskName 'stop'
-        Stop-ServiceProcesses $Component | Out-Null
-        Start-Sleep -Milliseconds 800
-        Set-Task $taskName 'start'
-        Write-Result -Success $true -MessageKey 'ActionTaskRestarted' -MessageArgs @($taskName)
-    } else { throw 'ACTION_UNSUPPORTED' }
+    throw 'ACTION_UNSUPPORTED'
 }
 catch {
     $reason = $_.Exception.Message
     # Known sentinels map to localized sentences; anything else is raw tool
     # output and is only shown in the details pane.
     switch -Regex ($reason) {
-        '^TASK_MISSING::(.+)$' { Write-Result -Success $false -MessageKey 'ActionTaskMissing' -MessageArgs @($matches[1]) -Details $reason }
         '^Node\.js or npm is missing' { Write-Result -Success $false -MessageKey 'ActionNeedRuntime' -Details $reason }
         '^Node\.js (.+) is too old' { Write-Result -Success $false -MessageKey 'ActionRuntimeTooOld' -MessageArgs @($matches[1]) -Details $reason }
-        '^Codex Relay is not installed' { Write-Result -Success $false -MessageKey 'ActionRelayMissing' -Details $reason }
         '^NVM_MISSING$' { Write-Result -Success $false -MessageKey 'ActionNvmMissing' -Details $reason }
         '^NVM_VERSION_INVALID$' { Write-Result -Success $false -MessageKey 'ActionNvmVersionInvalid' -Details $reason }
         '^NVM_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionNvmUnsupported' -Details $reason }
@@ -483,7 +383,6 @@ catch {
         '^CODEX_MISSING$' { Write-Result -Success $false -MessageKey 'ActionCodexMissing' -Details $reason }
         '^CODEX_NOT_A_SERVICE$' { Write-Result -Success $false -MessageKey 'ActionCodexNotAService' -Details $reason }
         '^BULK_INSTALL_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionBulkInstallUnsupported' -Details $reason }
-        '^RELAY_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
         '^TAILSCALE_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
         '^DESKTOP_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
         '^ACTION_UNSUPPORTED$' { Write-Result -Success $false -MessageKey 'ActionUnsupported' -Details $reason }
